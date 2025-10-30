@@ -1,5 +1,10 @@
+import { TabsProvider } from './components/tabs/TabsProvider';
 import { Layout } from './Layout';
 
 export function App() {
-	return <Layout />;
+	return (
+		<TabsProvider>
+			<Layout />
+		</TabsProvider>
+	);
 }
