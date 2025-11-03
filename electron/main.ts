@@ -1,10 +1,20 @@
+import fs from 'node:fs';
 import path from 'node:path';
-import { app, BrowserWindow, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu } from 'electron';
+import { appendServiceMenuItem } from './appendServiceMenuItem';
+
+const studentFilePath = path.join(app.getPath('userData'), 'student_data.json');
 
 app.whenReady().then(() => {
+	const appPath = app.getAppPath();
 	const win = new BrowserWindow({
-		title: 'Main window'
+		title: 'Main window',
+		webPreferences: {
+			preload: path.resolve(appPath, 'dist-electron', 'preload.mjs')
+		}
 	});
+
+	appendServiceMenuItem(studentFilePath);
 
 	if (process.env.VITE_DEV_SERVER_URL) {
 		win.loadURL(process.env.VITE_DEV_SERVER_URL);
@@ -12,13 +22,26 @@ app.whenReady().then(() => {
 
 		win.autoHideMenuBar = false;
 	} else {
-		const appPath = app.getAppPath();
 		const indexPath = path.resolve(appPath, 'dist', 'index.html');
 		win.loadFile(indexPath);
 
 		Menu.setApplicationMenu(null);
 		win.autoHideMenuBar = true;
 	}
+});
+
+// Обработчики чтения/записи данных студента через IPC
+ipcMain.handle('save-student', async (_, data) => {
+	fs.writeFileSync(studentFilePath, JSON.stringify(data, null, 2), 'utf-8');
+	return true;
+});
+
+ipcMain.handle('load-student', async () => {
+	if (fs.existsSync(studentFilePath)) {
+		const content = fs.readFileSync(studentFilePath, 'utf-8');
+		return JSON.parse(content);
+	}
+	return null;
 });
 
 // Hot reload

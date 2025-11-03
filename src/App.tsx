@@ -1,10 +1,15 @@
-import { TabsProvider } from './components/tabs/TabsProvider';
+import {
+	RegistrationForm,
+	useRegistration
+} from './components/registration-form';
 import { Layout } from './Layout';
 
 export function App() {
-	return (
-		<TabsProvider>
-			<Layout />
-		</TabsProvider>
-	);
+	const { isRegistered } = useRegistration();
+
+	if (!isRegistered) {
+		return <RegistrationForm />;
+	}
+
+	return <Layout />;
 }

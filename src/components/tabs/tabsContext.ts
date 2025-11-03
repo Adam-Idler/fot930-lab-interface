@@ -1,10 +1,15 @@
-import { createContext, type Dispatch, useContext } from 'react';
+import {
+	createContext,
+	type Dispatch,
+	type SetStateAction,
+	useContext
+} from 'react';
 import { noop } from '../../lib/utils';
 import type { Section } from '../../types';
 
 type TabsContextProps = {
 	activeTab: Section;
-	setActiveTab: Dispatch<Section>;
+	setActiveTab: Dispatch<SetStateAction<Section>>;
 };
 
 export const TabsContext = createContext<TabsContextProps>({

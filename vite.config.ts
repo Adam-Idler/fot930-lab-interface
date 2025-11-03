@@ -9,9 +9,17 @@ export default defineConfig({
 	plugins: [
 		react(),
 		tailwindcss(),
-		electron({
-			entry: 'electron/main.ts'
-		})
+		electron([
+			{
+				entry: 'electron/main.ts'
+			},
+			{
+				entry: 'electron/preload.ts',
+				onstart(options) {
+					options.reload();
+				}
+			}
+		])
 	],
 	server: {
 		host: '0.0.0.0',
