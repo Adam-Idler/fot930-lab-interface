@@ -9,6 +9,8 @@ app.whenReady().then(() => {
 	const appPath = app.getAppPath();
 	const win = new BrowserWindow({
 		title: 'Main window',
+		width: 960,
+		height: 700,
 		webPreferences: {
 			preload: path.resolve(appPath, 'dist-electron', 'preload.mjs')
 		}
