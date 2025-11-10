@@ -1,0 +1,1 @@
+export { Theory } from './Theory';

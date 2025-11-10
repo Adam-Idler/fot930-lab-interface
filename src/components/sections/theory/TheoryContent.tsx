@@ -6,7 +6,7 @@ const paragraphListClassNames = 'before:content-["•"] before:mr-1';
 const markedListClassNames = 'ml-8 mb-4 list-disc [&_li]:py-1';
 const orderedListClassNames = 'ml-8 mb-4 list-decimal [&_li]:py-1';
 
-export function Theory() {
+export function TheoryContent() {
 	return (
 		<div>
 			<h1 className="text-xl font-bold mb-6">Теоретический раздел</h1>
