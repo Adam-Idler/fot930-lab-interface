@@ -1,10 +1,11 @@
 import clsx from 'clsx';
-
-const headingClassNames = 'mb-5 text-sibguti-main font-semibold';
-const paragraphClassNames = 'mb-4';
-const paragraphListClassNames = 'before:content-["•"] before:mr-1';
-const markedListClassNames = 'ml-8 mb-4 list-disc [&_li]:py-1';
-const orderedListClassNames = 'ml-8 mb-4 list-decimal [&_li]:py-1';
+import {
+	headingClassNames,
+	markedListClassNames,
+	orderedListClassNames,
+	paragraphClassNames,
+	paragraphListClassNames
+} from './classnames';
 
 export function TheoryContent() {
 	return (
