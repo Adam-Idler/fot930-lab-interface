@@ -1,0 +1,1 @@
+export { AdmissionTest } from './AdmissionTest';
