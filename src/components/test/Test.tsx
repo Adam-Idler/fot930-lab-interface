@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
+import { useRegistration } from '../registration-form';
 import { Progress } from './Progress';
 import { Question } from './Question';
 import type { AnswerMap, TestQuestion, TextQuestion } from './types';
 
 type TestProps = {
 	questions: TestQuestion[];
-	onFinish?: (results: Record<string, boolean>) => void;
+	testID: 'admissionTest' | 'finalTest';
 };
 
 function isTextQuestion(q: TestQuestion): q is TextQuestion {
@@ -16,11 +17,31 @@ function normalizeText(s: string) {
 	return s.trim();
 }
 
-export function Test({ questions, onFinish }: TestProps) {
+function calculateGrade(correctCount: number, total: number) {
+	const percent = (correctCount / total) * 100;
+	if (percent > 95) return 5;
+	if (percent > 80) return 4;
+	if (percent > 60) return 3;
+	return 2;
+}
+
+export function Test({ questions, testID }: TestProps) {
 	const total = questions.length;
 
+	const { student, setStudent } = useRegistration();
+
+	console.log(student, testID);
+
+	const studentTestResultKey: 'admissionTestResult' | 'finalTestResult' =
+		`${testID}Result`;
+	const studentTestResult = student[studentTestResultKey];
+
+	const [grade, setGrade] = useState<number | undefined>(
+		studentTestResult?.grade
+	);
+	const [isEnd, setIsEnd] = useState(studentTestResult !== undefined);
+
 	const [index, setIndex] = useState(0);
-	const [isEnd, setIsEnd] = useState(false);
 	const [answers, setAnswers] = useState<AnswerMap>({});
 	const [evaluations, setEvaluations] = useState<
 		Record<TestQuestion['id'], boolean | 'unknown'>
@@ -81,13 +102,27 @@ export function Test({ questions, onFinish }: TestProps) {
 
 		if (index + 1 === total) {
 			setIsEnd(true);
-			onFinish?.(
-				Object.fromEntries(
-					Object.entries({ ...evaluations, [current.id]: evalValue }).map(
-						([k, v]) => [k, v === true]
-					)
-				)
-			);
+
+			const testResult = Object.values({
+				...evaluations,
+				[current.id]: evalValue
+			}).filter((v) => v === true).length;
+			const testGrade = calculateGrade(testResult, total);
+
+			setGrade(testGrade);
+
+			const updatedStudent = {
+				...student,
+				[studentTestResultKey]: {
+					correctAnswers: testResult,
+					totalQuestions: total,
+					grade: testGrade
+				}
+			};
+
+			setStudent(updatedStudent);
+			window.electronAPI.saveStudent(updatedStudent);
+
 			return;
 		}
 
@@ -96,13 +131,15 @@ export function Test({ questions, onFinish }: TestProps) {
 
 	if (isEnd) {
 		return (
-			<section className="mx-auto h-full text-center">
-				<h2 className="text-2xl font-bold mb-4">Тест завершён</h2>
-				<p className="text-lg mb-6">
+			<section className="mx-auto text-center">
+				<h2 className="text-2xl font-bold mb-6">Тест завершён</h2>
+				<p className="text-lg mb-4">
 					Ваш результат:{' '}
-					{Object.values(evaluations).filter((v) => v === true).length} из{' '}
-					{total}
+					{student.admissionTestResult?.correctAnswers ??
+						Object.values(evaluations).filter((v) => v === true).length}{' '}
+					из {total}
 				</p>
+				<p className="text-md">Оценка: {grade}</p>
 			</section>
 		);
 	}
@@ -139,7 +176,7 @@ export function Test({ questions, onFinish }: TestProps) {
 			<div className="mt-4 flex justify-end gap-3">
 				<button
 					type="button"
-					className="px-4 py-2 rounded bg-slate-200 text-slate-800 disabled:opacity-40"
+					className="px-4 py-2 rounded bg-slate-200 text-slate-800 disabled:opacity-40 not-disabled:hover:cursor-pointer"
 					onClick={() => setIndex((i) => Math.max(0, i - 1))}
 					disabled={index === 0}
 				>
@@ -147,7 +184,7 @@ export function Test({ questions, onFinish }: TestProps) {
 				</button>
 				<button
 					type="button"
-					className="px-4 py-2 rounded bg-slate-800 text-white disabled:opacity-40"
+					className="px-4 py-2 rounded bg-slate-800 text-white disabled:opacity-40 not-disabled:hover:cursor-pointer"
 					onClick={commitCurrentAndNext}
 					disabled={!isAnswerReady}
 				>

@@ -82,8 +82,9 @@ export function Question({
 	return (
 		<div className="space-y-2">
 			<input
-				className="w-full min-h-10 p-2 border rounded bg-white"
+				className="w-full min-h-10 p-2 border rounded bg-white disabled:bg-slate-100 disabled:text-gray-500"
 				value={typeof currentAnswer === 'string' ? currentAnswer : ''}
+				disabled={isAnswered}
 				onChange={(e) => {
 					setAnswer(e.target.value);
 				}}
