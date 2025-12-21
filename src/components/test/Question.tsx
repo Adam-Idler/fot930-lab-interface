@@ -25,7 +25,7 @@ export function Question({
 	if (current.type === 'single') {
 		return (
 			<div className="space-y-3">
-				{(current.answers ?? []).map((a) => (
+				{current.answers.map((a) => (
 					<label
 						key={a.text}
 						className="flex items-start hover:cursor-pointer gap-2 p-2 border rounded bg-white"
@@ -47,10 +47,12 @@ export function Question({
 
 	if (current.type === 'multiple') {
 		const selected = new Set<number>((answers[current.id] as number[]) ?? []);
+
 		return (
 			<div className="space-y-3">
-				{(current.answers ?? []).map((a, idx) => {
+				{current.answers.map((a, idx) => {
 					const checked = selected.has(idx);
+
 					return (
 						<label
 							key={a.text}

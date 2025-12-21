@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRegistration } from '../registration-form';
 import { Progress } from './Progress';
 import { Question } from './Question';
@@ -29,8 +29,6 @@ export function Test({ questions, testID }: TestProps) {
 	const total = questions.length;
 
 	const { student, setStudent } = useRegistration();
-
-	console.log(student, testID);
 
 	const studentTestResultKey: 'admissionTestResult' | 'finalTestResult' =
 		`${testID}Result`;
@@ -71,30 +69,32 @@ export function Test({ questions, testID }: TestProps) {
 	}, [answers, current]);
 
 	// Оценка правильности (для прогресс-бара)
-	const computeEvaluation = (
-		q: TestQuestion,
-		ans: unknown
-	): boolean | 'unknown' => {
-		if (q.type === 'text') {
-			return !!q.validator?.(typeof ans === 'string' ? normalizeText(ans) : '');
-		}
+	const computeEvaluation = useCallback(
+		(q: TestQuestion, ans: unknown): boolean | 'unknown' => {
+			if (q.type === 'text') {
+				return !!q.validator?.(
+					typeof ans === 'string' ? normalizeText(ans) : ''
+				);
+			}
 
-		const correctAnswers = q.answers.filter((ans) => ans.isCorrect);
+			const correctAnswers = q.answers.filter((ans) => ans.isCorrect);
 
-		if (q.type === 'multiple') {
-			return (
-				Array.isArray(ans) &&
-				correctAnswers.length === ans.length &&
-				ans.every((idx) => {
-					return q.answers[idx].isCorrect;
-				})
-			);
-		}
+			if (q.type === 'multiple') {
+				return (
+					Array.isArray(ans) &&
+					correctAnswers.length === ans.length &&
+					ans.every((idx) => {
+						return q.answers[idx].isCorrect;
+					})
+				);
+			}
 
-		return typeof ans === 'string' && correctAnswers[0].text === ans;
-	};
+			return typeof ans === 'string' && correctAnswers[0].text === ans;
+		},
+		[]
+	);
 
-	function commitCurrentAndNext() {
+	const commitCurrentAndNext = useCallback(() => {
 		const nextAnswers: AnswerMap = { ...answers };
 
 		const evalValue = computeEvaluation(current, nextAnswers[current.id]);
@@ -127,11 +127,38 @@ export function Test({ questions, testID }: TestProps) {
 		}
 
 		setIndex((i) => i + 1);
-	}
+	}, [
+		computeEvaluation,
+		answers,
+		current,
+		evaluations,
+		index,
+		total,
+		student,
+		studentTestResultKey,
+		setStudent
+	]);
+
+	const handleKeyDown = useCallback(
+		(event: KeyboardEvent) => {
+			if (event.key === 'Enter' && isAnswerReady) {
+				commitCurrentAndNext();
+			}
+		},
+		[isAnswerReady, commitCurrentAndNext]
+	);
+
+	useEffect(() => {
+		window.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [handleKeyDown]);
 
 	if (isEnd) {
 		return (
-			<section className="mx-auto text-center">
+			<section className="text-center h-full flex flex-col justify-center">
 				<h2 className="text-2xl font-bold mb-6">Тест завершён</h2>
 				<p className="text-lg mb-4">
 					Ваш результат:{' '}
@@ -139,7 +166,9 @@ export function Test({ questions, testID }: TestProps) {
 						Object.values(evaluations).filter((v) => v === true).length}{' '}
 					из {total}
 				</p>
-				<p className="text-md">Оценка: {grade}</p>
+				<p className="text-md">
+					Оценка: <b>{grade}</b>
+				</p>
 			</section>
 		);
 	}

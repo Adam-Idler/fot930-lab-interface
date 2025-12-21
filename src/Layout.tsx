@@ -1,9 +1,10 @@
+import clsx from 'clsx';
+import type { ReactNode } from 'react';
 import { Header } from './components/header';
 import { AdmissionTest, Theory } from './components/sections';
 import { Tabs, useTabs } from './components/tabs';
-import { Show } from './lib/components';
 
-export const Layout = () => {
+export function Layout() {
 	const { activeTab } = useTabs();
 
 	return (
@@ -17,16 +18,25 @@ export const Layout = () => {
 			</div>
 
 			<main className="flex-1 overflow-auto">
-				<div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-					<Show when={activeTab === 'theory'}>
+				<div className="h-full max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+					<TabContent active={activeTab === 'theory'}>
 						<Theory />
-					</Show>
+					</TabContent>
 
-					<Show when={activeTab === 'admission'}>
+					<TabContent active={activeTab === 'admission'}>
 						<AdmissionTest />
-					</Show>
+					</TabContent>
 				</div>
 			</main>
 		</div>
 	);
-};
+}
+
+interface TabContentProps {
+	children: ReactNode;
+	active: boolean;
+}
+
+function TabContent({ children, active }: TabContentProps) {
+	return <div className={clsx('h-full', { hidden: !active })}>{children}</div>;
+}
