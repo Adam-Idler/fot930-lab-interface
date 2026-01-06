@@ -1,8 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import { appendServiceMenuItem } from './appendServiceMenuItem';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const studentFilePath = path.join(app.getPath('userData'), 'student_data.json');
 
 app.whenReady().then(() => {
@@ -12,7 +14,7 @@ app.whenReady().then(() => {
 		width: 960,
 		height: 700,
 		webPreferences: {
-			preload: path.resolve(appPath, 'dist-electron', 'preload.mjs')
+			preload: path.join(__dirname, 'preload.js')
 		}
 	});
 
