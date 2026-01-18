@@ -1,4 +1,4 @@
-export type Section = 'theory' | 'admission';
+export type Section = 'theory' | 'admission' | 'lab-work';
 
 type TestResult<T = number> = {
 	totalQuestions: T;

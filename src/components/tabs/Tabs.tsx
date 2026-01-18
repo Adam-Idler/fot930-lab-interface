@@ -8,6 +8,10 @@ const tabs: TabProps[] = [
 	{
 		id: 'admission',
 		label: 'Тест-допуск'
+	},
+	{
+		id: 'lab-work',
+		label: 'Выполнение ЛР'
 	}
 ];
 

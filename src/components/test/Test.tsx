@@ -19,9 +19,9 @@ function normalizeText(s: string) {
 
 function calculateGrade(correctCount: number, total: number) {
 	const percent = (correctCount / total) * 100;
-	if (percent > 95) return 5;
-	if (percent > 80) return 4;
-	if (percent > 60) return 3;
+	if (percent === 100) return 5;
+	if (percent >= 85) return 4;
+	if (percent >= 70) return 3;
 	return 2;
 }
 
