@@ -149,8 +149,10 @@ export function generateComplexSchemeMeasurement(
 		if (element.type === 'COMPONENT') {
 			const component = components.find((c) => c.id === element.id);
 			if (component) {
-				const componentLoss = COMPONENT_LOSS_DB[component.type]?.[wavelength] ?? 1.0;
-				const variation = gaussianRandom() * MEASUREMENT_CONFIG.MEASUREMENT_STD_DEV;
+				const componentLoss =
+					COMPONENT_LOSS_DB[component.type]?.[wavelength] ?? 1.0;
+				const variation =
+					gaussianRandom() * MEASUREMENT_CONFIG.MEASUREMENT_STD_DEV;
 				totalLoss += componentLoss + variation;
 			}
 		} else if (element.type === 'CONNECTOR') {

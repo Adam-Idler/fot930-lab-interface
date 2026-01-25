@@ -13,7 +13,6 @@ import {
 	initialDeviceState
 } from '../../lib/fot930/deviceReducer';
 import { DeviceScreen } from './DeviceScreen';
-import clsx from 'clsx';
 import { noop } from '../../lib/utils';
 
 interface DeviceProps {
@@ -101,10 +100,28 @@ export function Device({ onMeasure }: DeviceProps) {
 					<div className="relative border-2 border-t-0 p-4 pt-0 rounded-b-md border-gray-700">
 						{/* Верхний ряд функциональных кнопок */}
 						<div className="grid grid-cols-4 gap-2 pb-4">
-							<DeviceButton icon={<img src="/images/icons/arrow-left.svg" width={20} alt="Arrow left" />} onClick={noop} />
+							<DeviceButton
+								icon={
+									<img
+										src="/images/icons/arrow-left.svg"
+										width={20}
+										alt="Arrow left"
+									/>
+								}
+								onClick={noop}
+							/>
 							<DeviceButton label="F1" onClick={noop} />
 							<DeviceButton label="F2" onClick={noop} />
-							<DeviceButton icon={<img src="/images/icons/arrow-right.svg" width={20} alt="Arrow Right" />} onClick={noop} />
+							<DeviceButton
+								icon={
+									<img
+										src="/images/icons/arrow-right.svg"
+										width={20}
+										alt="Arrow Right"
+									/>
+								}
+								onClick={noop}
+							/>
 						</div>
 
 						<div className="flex justify-between border-t-2 border-gray-700 pt-4 pb-2">
@@ -127,7 +144,11 @@ export function Device({ onMeasure }: DeviceProps) {
 									onClick={() => handleButtonPress('UP')}
 									className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-6 hover:cursor-pointer bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-full flex items-center justify-center text-white text-xl transition shadow-md"
 								>
-									<img src="/images/icons/triangle-filled-up.svg" width={20} alt="Triangle up" />
+									<img
+										src="/images/icons/triangle-filled-up.svg"
+										width={20}
+										alt="Triangle up"
+									/>
 								</button>
 
 								{/* RIGHT */}
@@ -136,7 +157,11 @@ export function Device({ onMeasure }: DeviceProps) {
 									onClick={noop}
 									className="absolute top-1/2 right-2 -translate-y-1/2 w-6 h-12 hover:cursor-pointer bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-full flex items-center justify-center text-white text-xl transition shadow-md"
 								>
-									<img src="/images/icons/triangle-filled-right.svg" width={20} alt="Triangle up" />
+									<img
+										src="/images/icons/triangle-filled-right.svg"
+										width={20}
+										alt="Triangle up"
+									/>
 								</button>
 
 								{/* DOWN */}
@@ -145,7 +170,11 @@ export function Device({ onMeasure }: DeviceProps) {
 									onClick={() => handleButtonPress('DOWN')}
 									className="absolute bottom-2 left-1/2 -translate-x-1/2 w-12 h-6 hover:cursor-pointer bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-full flex items-center justify-center text-white text-xl transition shadow-md"
 								>
-									<img src="/images/icons/triangle-filled-down.svg" width={20} alt="Triangle down" />
+									<img
+										src="/images/icons/triangle-filled-down.svg"
+										width={20}
+										alt="Triangle down"
+									/>
 								</button>
 
 								{/* LEFT */}
@@ -154,7 +183,11 @@ export function Device({ onMeasure }: DeviceProps) {
 									onClick={noop}
 									className="absolute top-1/2 left-2 -translate-y-1/2 w-6 h-12 hover:cursor-pointer bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-full flex items-center justify-center text-white text-xl transition shadow-md"
 								>
-									<img src="/images/icons/triangle-filled-left.svg" width={20} alt="Triangle up" />
+									<img
+										src="/images/icons/triangle-filled-left.svg"
+										width={20}
+										alt="Triangle up"
+									/>
 								</button>
 
 								{/* CENTER (ENTER) */}
@@ -173,13 +206,33 @@ export function Device({ onMeasure }: DeviceProps) {
 						</div>
 
 						<div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 bg-gray-900">
-							<DeviceButton icon={<img src="/images/icons/sun.svg" width={20} alt="Sun" />} color='beige' onClick={noop} />
 							<DeviceButton
-								icon={<img src="/images/icons/power-button.svg" width={20} alt="Power Button" />}
-								color='light-blue'
+								icon={<img src="/images/icons/sun.svg" width={20} alt="Sun" />}
+								color="beige"
+								onClick={noop}
+							/>
+							<DeviceButton
+								icon={
+									<img
+										src="/images/icons/power-button.svg"
+										width={20}
+										alt="Power Button"
+									/>
+								}
+								color="light-blue"
 								onClick={() => handleButtonPress('POWER')}
 							/>
-							<DeviceButton icon={<img src="/images/icons/question.svg" width={20} alt="Question" />} color='beige' onClick={noop} />
+							<DeviceButton
+								icon={
+									<img
+										src="/images/icons/question.svg"
+										width={20}
+										alt="Question"
+									/>
+								}
+								color="beige"
+								onClick={noop}
+							/>
 						</div>
 
 						{/* Индикатор питания на корпусе */}
@@ -195,19 +248,25 @@ export function Device({ onMeasure }: DeviceProps) {
 						</div>
 					</div>
 
-					<div className='bg-[#3B7AB5] -mx-4 -mb-4'>
+					<div className="bg-[#3B7AB5] -mx-4 -mb-4">
 						<div className="mx-auto w-4/5 rounded-b-md mt-8  border-12 border-t-0 border-gray-900">
-								<div className='flex justify-between items-center p-2 bg-[#dfdcdd] text-[#3B7AB5]'>
-									<div> 
-										<div className="text-2xl font-extrabold tracking-wider">EXFO</div>
-										<div className="text-sm italic font-semibold">Multifunction Loss Tester</div>
+							<div className="flex justify-between items-center p-2 bg-[#dfdcdd] text-[#3B7AB5]">
+								<div>
+									<div className="text-2xl font-extrabold tracking-wider">
+										EXFO
 									</div>
-
-									<div>
-										<div className="text-md font-bold">FOT-930</div>
-										<div className="text-sm italic font-semibold">MaxTester II</div>
+									<div className="text-sm italic font-semibold">
+										Multifunction Loss Tester
 									</div>
 								</div>
+
+								<div>
+									<div className="text-md font-bold">FOT-930</div>
+									<div className="text-sm italic font-semibold">
+										MaxTester II
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -220,25 +279,28 @@ interface DeviceButtonProps {
 	onClick: () => void;
 	label?: string;
 	icon?: ReactNode;
-	color?: 'blue' | 'beige' | 'light-blue'
+	color?: 'blue' | 'beige' | 'light-blue';
 }
 
-function DeviceButton({ label, onClick, color = 'blue', icon }: DeviceButtonProps) {
+function DeviceButton({
+	label,
+	onClick,
+	color = 'blue',
+	icon
+}: DeviceButtonProps) {
 	const colors = {
 		blue: 'bg-[#3B7AB5] hover:bg-[#31628f] active:bg-[#22496d]',
 		'light-blue': 'bg-[#7d9ebe] hover:bg-[#31628f] active:bg-[#22496d]',
 		beige: 'bg-[#a9aeb3] hover:bg-[#999da1] active:bg-[#8e9197]'
-	}
+	};
 
 	return (
 		<button
 			type="button"
 			onClick={onClick}
-			className={
-				`px-3 py-2 rounded-md text-white text-sm font-semibold transition hover:cursor-pointer ${colors[color]}`
-			}
+			className={`px-3 py-2 rounded-md text-white text-sm font-semibold transition hover:cursor-pointer ${colors[color]}`}
 		>
-			{!!icon && <div className='inline-block align-middle'>{icon}</div>}
+			{!!icon && <div className="inline-block align-middle">{icon}</div>}
 
 			{label}
 		</button>

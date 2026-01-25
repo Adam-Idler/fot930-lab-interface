@@ -5,7 +5,7 @@
 	"type": "commonjs",
 	"main": "dist-electron/main.js",
 	"build": {
-		"appId": "com.myapp.diplom",
+		"appId": "com.diplom",
 		"win": {
 			"target": "nsis",
 			"icon": "icon.png"

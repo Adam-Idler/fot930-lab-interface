@@ -15,13 +15,14 @@ import type {
 import { Device, ConnectionBuilder, MeasurementTable } from '../../fot930';
 import {
 	generateSingleComponentMeasurement,
-	generateComplexSchemeMeasurement,
 	COMPONENT_LOSS_DB
 } from '../../../lib/fot930/measurementEngine';
+import clsx from 'clsx';
 
 export function LabWork() {
 	const [currentStage, setCurrentStage] = useState<LabStage>('PREPARATION');
-	const [selectedComponent, setSelectedComponent] = useState<PassiveComponent | null>(null);
+	const [selectedComponent, setSelectedComponent] =
+		useState<PassiveComponent | null>(null);
 	const [currentSide, setCurrentSide] = useState<'A' | 'B'>('A');
 	const [attemptCount, setAttemptCount] = useState(1);
 	const [measurements, setMeasurements] = useState<CompletedMeasurement[]>([]);
@@ -38,7 +39,9 @@ export function LabWork() {
 
 	// Текущие настройки прибора (из Device component)
 	const [currentMode, setCurrentMode] = useState<MeasurementMode | null>(null);
-	const [currentWavelength, setCurrentWavelength] = useState<Wavelength | null>(null);
+	const [currentWavelength, setCurrentWavelength] = useState<Wavelength | null>(
+		null
+	);
 
 	// Доступные компоненты для измерений
 	const availableComponents: PassiveComponent[] = [
@@ -130,7 +133,13 @@ export function LabWork() {
 		}
 
 		return result;
-	}, [selectedComponent, currentMode, currentWavelength, currentSide, attemptCount]);
+	}, [
+		selectedComponent,
+		currentMode,
+		currentWavelength,
+		currentSide,
+		attemptCount
+	]);
 
 	// Переключение между этапами
 	const handleStageChange = (stage: LabStage) => {
@@ -183,25 +192,13 @@ export function LabWork() {
 				{/* Содержимое этапа */}
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					{/* Левая колонка: Прибор */}
-					<div className="space-y-6">
+					<div>
 						<Device onMeasure={handleMeasure} />
-
-						{/* Инструкции по текущему этапу */}
-						<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-							<h3 className="font-semibold text-blue-900 mb-2">
-								{getStageTitle(currentStage)}
-							</h3>
-							<p className="text-sm text-blue-800">
-								{getStageInstructions(currentStage)}
-							</p>
-						</div>
 					</div>
 
 					{/* Правая колонка: Контент этапа */}
 					<div className="space-y-6">
-						{currentStage === 'PREPARATION' && (
-							<PreparationStage />
-						)}
+						{currentStage === 'PREPARATION' && <PreparationStage />}
 
 						{currentStage === 'SINGLE_MEASUREMENTS' && (
 							<SingleMeasurementsStage
@@ -228,6 +225,16 @@ export function LabWork() {
 								components={availableComponents}
 							/>
 						)}
+
+						{/* Инструкции по текущему этапу */}
+						<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+							<h3 className="font-semibold text-blue-900 mb-2">
+								{getStageTitle(currentStage)}
+							</h3>
+							<p className="text-sm text-blue-800">
+								{getStageInstructions(currentStage)}
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -251,7 +258,7 @@ function StageButton({ label, active, onClick }: StageButtonProps) {
 		<button
 			type="button"
 			onClick={onClick}
-			className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition ${
+			className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition hover:cursor-pointer ${
 				active
 					? 'bg-blue-600 text-white shadow-lg'
 					: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -262,50 +269,149 @@ function StageButton({ label, active, onClick }: StageButtonProps) {
 	);
 }
 
+type PortStatus = 'clean' | 'cleaning' | 'dirty';
+
 function PreparationStage() {
+	const [portStatus, setPortStatus] = useState<PortStatus>('dirty');
+
+	const isPortClean = portStatus === 'clean';
+
+	function handlePortCleaning() {
+		setPortStatus('cleaning');
+		setTimeout(() => {
+			setPortStatus('clean');
+		}, 3000);
+	}
+
 	return (
-		<div className="bg-white rounded-lg shadow-md p-6 space-y-4">
-			<h2 className="text-xl font-semibold">Этап 1. Подготовка прибора</h2>
+		<div className="flex flex-col gap-6">
+			<div className="bg-white rounded-lg shadow-md p-6 space-y-4">
+				<h2 className="text-xl font-semibold">Этап 1. Подготовка прибора</h2>
 
-			<div className="space-y-3 text-sm">
-				<div className="flex items-start gap-2">
-					<span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
-						1
-					</span>
-					<p>Нажмите кнопку <strong>POWER</strong> для включения прибора</p>
+				<div className="space-y-3 text-sm">
+					<div className="flex items-start gap-2">
+						<span className="shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
+							1
+						</span>
+						<p>Убедитесь, что оптический порт прибора чист</p>
+					</div>
+
+					<div className="flex items-start gap-2">
+						<span className="shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
+							2
+						</span>
+						<p>
+							Нажмите кнопку <strong>POWER</strong> для включения прибора
+						</p>
+					</div>
+
+					<div className="flex items-start gap-2">
+						<span className="shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
+							3
+						</span>
+						<p>
+							После загрузки нажмите <strong>MENU</strong> для входа в меню
+						</p>
+					</div>
+
+					<div className="flex items-start gap-2">
+						<span className="shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
+							4
+						</span>
+						<p>
+							Используйте кнопки <strong>UP/DOWN</strong> для выбора режима
+							измерения (POWER или LOSS)
+						</p>
+					</div>
+
+					<div className="flex items-start gap-2">
+						<span className="shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
+							5
+						</span>
+						<p>
+							Нажмите <strong>ENTER</strong> для подтверждения
+						</p>
+					</div>
+
+					<div className="flex items-start gap-2">
+						<span className="shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
+							6
+						</span>
+						<p>
+							Выберите длину волны (850, 1300, 1310 или 1550 нм) и подтвердите
+							выбор
+						</p>
+					</div>
 				</div>
+			</div>
 
-				<div className="flex items-start gap-2">
-					<span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
-						2
-					</span>
-					<p>После загрузки нажмите <strong>MENU</strong> для входа в меню</p>
-				</div>
+			{/* Статус чистоты порта */}
+			<div className="bg-gray-50 border rounded-lg p-4">
+				<h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+					<span className="text-lg">🔌</span>
+					Статус оптического порта
+				</h3>
 
-				<div className="flex items-start gap-2">
-					<span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
-						3
-					</span>
-					<p>
-						Используйте кнопки <strong>UP/DOWN</strong> для выбора режима измерения
-						(POWER или LOSS)
-					</p>
-				</div>
+				<div className="space-y-3">
+					<div className="flex items-center justify-between">
+						<span className="text-sm font-medium">Состояние:</span>
+						<div className="flex items-center gap-2">
+							<div
+								className={clsx('w-3 h-3 rounded-full', {
+									'bg-yellow-500': portStatus === 'cleaning',
+									'bg-green-500': isPortClean,
+									'bg-red-500': !isPortClean && portStatus !== 'cleaning'
+								})}
+							/>
+							<span
+								className={clsx('text-sm font-semibold', {
+									'text-yellow-600': portStatus === 'cleaning',
+									'text-green-600': isPortClean,
+									'text-red-600': !isPortClean && portStatus !== 'cleaning'
+								})}
+							>
+								{portStatus === 'cleaning'
+									? 'Идёт очистка...'
+									: isPortClean
+										? 'Чистый'
+										: 'Грязный'}
+							</span>
+						</div>
+					</div>
 
-				<div className="flex items-start gap-2">
-					<span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
-						4
-					</span>
-					<p>Нажмите <strong>ENTER</strong> для подтверждения</p>
-				</div>
+					{!isPortClean && (
+						<div className="pt-2">
+							<button
+								type="button"
+								onClick={handlePortCleaning}
+								disabled={portStatus === 'cleaning'}
+								className={clsx(
+									'w-full font-semibold py-2 px-4 rounded-lg transition-colors',
+									portStatus === 'cleaning'
+										? 'bg-yellow-400 text-yellow-900 cursor-not-allowed opacity-70'
+										: 'bg-blue-600 hover:bg-blue-700 text-white hover:cursor-pointer'
+								)}
+							>
+								{portStatus === 'cleaning'
+									? '⏳ Очистка...'
+									: '🧹 Очистить порт'}
+							</button>
 
-				<div className="flex items-start gap-2">
-					<span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
-						5
-					</span>
-					<p>
-						Выберите длину волны (850, 1300, 1310 или 1550 нм) и подтвердите выбор
-					</p>
+							{portStatus !== 'cleaning' && (
+								<p className="text-xs text-gray-500 mt-1 text-center">
+									Нажмите для запуска процедуры очистки оптического порта
+								</p>
+							)}
+						</div>
+					)}
+
+					{isPortClean && (
+						<div className="bg-green-50 border border-green-200 rounded p-2">
+							<p className="text-xs text-green-700 text-center">
+								✅ Порт готов к работе
+							</p>
+						</div>
+					)}
 				</div>
 			</div>
 		</div>
@@ -340,9 +446,9 @@ function SingleMeasurementsStage({
 
 				<div className="space-y-4">
 					<div>
-						<label className="block text-sm font-medium mb-2">
+						<div className="text-sm font-medium mb-2">
 							Выберите компонент для измерения:
-						</label>
+						</div>
 						<div className="grid grid-cols-1 gap-2">
 							{components.map((component) => (
 								<button
@@ -352,11 +458,12 @@ function SingleMeasurementsStage({
 										onSelectComponent(component);
 										onResetAttempts();
 									}}
-									className={`p-3 rounded-lg border-2 text-left transition ${
+									className={clsx(
+										'p-3 rounded-lg border-2 text-left transition',
 										selectedComponent?.id === component.id
 											? 'border-blue-600 bg-blue-50'
-											: 'border-gray-200 hover:border-gray-300'
-									}`}
+											: 'border-gray-200 hover:border-gray-300 hover:cursor-pointer'
+									)}
 								>
 									<div className="font-medium">{component.label}</div>
 									<div className="text-xs text-gray-500 mt-1">
@@ -368,9 +475,7 @@ function SingleMeasurementsStage({
 					</div>
 
 					<div>
-						<label className="block text-sm font-medium mb-2">
-							Сторона измерения:
-						</label>
+						<div className="text-sm font-medium mb-2">Сторона измерения:</div>
 						<div className="flex gap-2">
 							<button
 								type="button"
@@ -378,11 +483,12 @@ function SingleMeasurementsStage({
 									onChangeSide('A');
 									onResetAttempts();
 								}}
-								className={`flex-1 py-2 rounded-lg border-2 font-medium transition ${
+								className={clsx(
+									'flex-1 py-2 rounded-lg border-2 font-medium transition',
 									currentSide === 'A'
 										? 'border-blue-600 bg-blue-50 text-blue-900'
-										: 'border-gray-200 hover:border-gray-300'
-								}`}
+										: 'border-gray-200 hover:border-gray-300 hover:cursor-pointer'
+								)}
 							>
 								Сторона A
 							</button>
@@ -392,11 +498,12 @@ function SingleMeasurementsStage({
 									onChangeSide('B');
 									onResetAttempts();
 								}}
-								className={`flex-1 py-2 rounded-lg border-2 font-medium transition ${
+								className={clsx(
+									'flex-1 py-2 rounded-lg border-2 font-medium transition',
 									currentSide === 'B'
 										? 'border-blue-600 bg-blue-50 text-blue-900'
-										: 'border-gray-200 hover:border-gray-300'
-								}`}
+										: 'border-gray-200 hover:border-gray-300 hover:cursor-pointer'
+								)}
 							>
 								Сторона B
 							</button>
@@ -405,11 +512,13 @@ function SingleMeasurementsStage({
 
 					<div className="bg-gray-50 p-3 rounded">
 						<div className="text-sm">
-							<span className="font-medium">Текущая попытка:</span> {attemptCount} из 3
+							<span className="font-medium">Текущая попытка:</span>{' '}
+							{attemptCount} из 3
 						</div>
 						{attemptCount === 3 && (
 							<div className="mt-2 text-xs text-gray-600">
-								Выполнены все 3 измерения. Выберите другую сторону или компонент.
+								Выполнены все 3 измерения. Выберите другую сторону или
+								компонент.
 							</div>
 						)}
 					</div>
@@ -424,7 +533,10 @@ interface ConnectionSchemeStageProps {
 	onSchemeChange: (scheme: ConnectionScheme) => void;
 }
 
-function ConnectionSchemeStage({ scheme, onSchemeChange }: ConnectionSchemeStageProps) {
+function ConnectionSchemeStage({
+	scheme,
+	onSchemeChange
+}: ConnectionSchemeStageProps) {
 	const availableElements = [
 		{ type: 'TESTER' as const, id: 'tester', label: 'Тестер FOT-930' },
 		{
@@ -445,7 +557,9 @@ function ConnectionSchemeStage({ scheme, onSchemeChange }: ConnectionSchemeStage
 
 	return (
 		<div className="bg-white rounded-lg shadow-md p-6">
-			<h2 className="text-xl font-semibold mb-4">Этап 3. Сборка схемы подключения</h2>
+			<h2 className="text-xl font-semibold mb-4">
+				Этап 3. Сборка схемы подключения
+			</h2>
 
 			<ConnectionBuilder
 				scheme={scheme}
@@ -487,8 +601,8 @@ function ResultsStage({ measurements, components }: ResultsStageProps) {
 			{measurements.length === 0 && (
 				<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
 					<p className="text-yellow-800">
-						Нет выполненных измерений. Перейдите к этапу "Измерения" для выполнения
-						измерений.
+						Нет выполненных измерений. Перейдите к этапу "Измерения" для
+						выполнения измерений.
 					</p>
 				</div>
 			)}
@@ -514,7 +628,7 @@ function getStageTitle(stage: LabStage): string {
 function getStageInstructions(stage: LabStage): string {
 	const instructions: Record<LabStage, string> = {
 		PREPARATION:
-			'Включите прибор, выберите режим измерения и длину волны. После настройки прибор будет готов к работе.',
+			'Включите прибор, очистите порты прибора, выберите режим измерения и длину волны. После настройки прибор будет готов к работе.',
 		SINGLE_MEASUREMENTS:
 			'Выберите компонент для измерения, укажите сторону (A или B) и нажмите MEASURE на приборе. Выполните 3 измерения для каждой комбинации.',
 		CONNECTION_SCHEME:

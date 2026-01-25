@@ -3,7 +3,12 @@
  * Управляет состоянием прибора и переходами между экранами
  */
 
-import type { DeviceState, DeviceAction, MeasurementMode, Wavelength } from '../../types/fot930';
+import type {
+	DeviceState,
+	DeviceAction,
+	MeasurementMode,
+	Wavelength
+} from '../../types/fot930';
 
 /** Начальное состояние прибора */
 export const initialDeviceState: DeviceState = {
@@ -26,7 +31,10 @@ const WAVELENGTHS: Wavelength[] = [850, 1300, 1310, 1550];
 /**
  * Reducer для управления состоянием прибора
  */
-export function deviceReducer(state: DeviceState, action: DeviceAction): DeviceState {
+export function deviceReducer(
+	state: DeviceState,
+	action: DeviceAction
+): DeviceState {
 	switch (action.type) {
 		case 'PRESS_POWER':
 			return handlePowerButton(state);
@@ -109,7 +117,8 @@ function handleUpButton(state: DeviceState): DeviceState {
 			// Перемещаемся вверх по меню режимов
 			return {
 				...state,
-				modeMenuIndex: state.modeMenuIndex > 0 ? state.modeMenuIndex - 1 : MODES.length - 1
+				modeMenuIndex:
+					state.modeMenuIndex > 0 ? state.modeMenuIndex - 1 : MODES.length - 1
 			};
 
 		case 'WAVELENGTH_SELECT':
@@ -133,7 +142,8 @@ function handleDownButton(state: DeviceState): DeviceState {
 			// Перемещаемся вниз по меню режимов
 			return {
 				...state,
-				modeMenuIndex: state.modeMenuIndex < MODES.length - 1 ? state.modeMenuIndex + 1 : 0
+				modeMenuIndex:
+					state.modeMenuIndex < MODES.length - 1 ? state.modeMenuIndex + 1 : 0
 			};
 
 		case 'WAVELENGTH_SELECT':
@@ -159,7 +169,9 @@ function handleEnterButton(state: DeviceState): DeviceState {
 				...state,
 				mode: MODES[state.modeMenuIndex],
 				screen: 'WAVELENGTH_SELECT',
-				wavelengthMenuIndex: state.wavelength ? WAVELENGTHS.indexOf(state.wavelength) : 0
+				wavelengthMenuIndex: state.wavelength
+					? WAVELENGTHS.indexOf(state.wavelength)
+					: 0
 			};
 
 		case 'WAVELENGTH_SELECT':

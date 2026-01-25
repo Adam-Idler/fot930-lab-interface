@@ -16,7 +16,9 @@ export function MeasurementTable({
 	componentLabel
 }: MeasurementTableProps) {
 	// Фильтруем измерения для конкретного компонента
-	const componentMeasurements = measurements.filter((m) => m.componentId === componentId);
+	const componentMeasurements = measurements.filter(
+		(m) => m.componentId === componentId
+	);
 
 	if (componentMeasurements.length === 0) {
 		return null;
@@ -35,17 +37,30 @@ export function MeasurementTable({
 				<table className="w-full text-sm">
 					<thead className="bg-gray-50">
 						<tr>
-							<th className="px-4 py-3 text-left font-semibold">Длина волны (нм)</th>
+							<th className="px-4 py-3 text-left font-semibold">
+								Длина волны (нм)
+							</th>
 							<th className="px-4 py-3 text-left font-semibold">Сторона</th>
-							<th className="px-4 py-3 text-center font-semibold">Измерение 1</th>
-							<th className="px-4 py-3 text-center font-semibold">Измерение 2</th>
-							<th className="px-4 py-3 text-center font-semibold">Измерение 3</th>
-							<th className="px-4 py-3 text-center font-semibold bg-blue-50">Среднее</th>
+							<th className="px-4 py-3 text-center font-semibold">
+								Измерение 1
+							</th>
+							<th className="px-4 py-3 text-center font-semibold">
+								Измерение 2
+							</th>
+							<th className="px-4 py-3 text-center font-semibold">
+								Измерение 3
+							</th>
+							<th className="px-4 py-3 text-center font-semibold bg-blue-50">
+								Среднее
+							</th>
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-gray-200">
 						{Object.entries(grouped).map(([key, data]) => {
-							const [wavelength, side] = key.split('-') as [string, MeasurementSide];
+							const [wavelength, side] = key.split('-') as [
+								string,
+								MeasurementSide
+							];
 							const average = calculateAverage(data.measurements);
 
 							return (
@@ -62,7 +77,9 @@ export function MeasurementTable({
 										{formatValue(data.measurements[2])}
 									</td>
 									<td className="px-4 py-3 text-center font-mono font-semibold bg-blue-50">
-										{average !== null ? `${average.toFixed(2)} ${data.unit}` : '—'}
+										{average !== null
+											? `${average.toFixed(2)} ${data.unit}`
+											: '—'}
 									</td>
 								</tr>
 							);
@@ -116,7 +133,9 @@ function formatValue(measurement: CompletedMeasurement | null): string {
 /**
  * Вычисляет среднее значение
  */
-function calculateAverage(measurements: (CompletedMeasurement | null)[]): number | null {
+function calculateAverage(
+	measurements: (CompletedMeasurement | null)[]
+): number | null {
 	const values = measurements
 		.filter((m): m is CompletedMeasurement => m !== null)
 		.map((m) => m.result.value);

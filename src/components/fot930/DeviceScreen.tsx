@@ -103,7 +103,9 @@ function ScreenModeSelect({ state }: { state: DeviceState }) {
 
 	return (
 		<div className="flex flex-col w-full h-full">
-			<div className="text-sm font-bold border-b border-[#1a2a1e] pb-2 mb-3">SELECT MODE</div>
+			<div className="text-sm font-bold border-b border-[#1a2a1e] pb-2 mb-3">
+				SELECT MODE
+			</div>
 
 			<div className="flex-1 space-y-2">
 				{modes.map((mode) => (
@@ -173,7 +175,9 @@ function ScreenReady({ state }: { state: DeviceState }) {
 				</div>
 			</div>
 
-			<div className="mt-6 text-xs opacity-70 animate-pulse">Press MEASURE to start</div>
+			<div className="mt-6 text-xs opacity-70 animate-pulse">
+				Press MEASURE to start
+			</div>
 		</div>
 	);
 }

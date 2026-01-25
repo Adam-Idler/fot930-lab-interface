@@ -21,7 +21,8 @@ export function ConnectionBuilder({
 	onChange,
 	availableElements
 }: ConnectionBuilderProps) {
-	const [draggedElement, setDraggedElement] = useState<ConnectionElement | null>(null);
+	const [draggedElement, setDraggedElement] =
+		useState<ConnectionElement | null>(null);
 
 	const validation = validateConnectionScheme(scheme);
 
@@ -39,7 +40,9 @@ export function ConnectionBuilder({
 		const newSequence = [...scheme.sequence];
 
 		// Находим, был ли элемент уже в схеме
-		const existingIndex = newSequence.findIndex((el) => el.id === draggedElement.id);
+		const existingIndex = newSequence.findIndex(
+			(el) => el.id === draggedElement.id
+		);
 
 		if (existingIndex !== -1) {
 			// Перемещаем существующий элемент
@@ -73,7 +76,9 @@ export function ConnectionBuilder({
 		<div className="space-y-6">
 			{/* Область сборки схемы */}
 			<div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-300">
-				<h3 className="text-lg font-semibold mb-4">Соберите схему подключения</h3>
+				<h3 className="text-lg font-semibold mb-4">
+					Соберите схему подключения
+				</h3>
 
 				{scheme.sequence.length === 0 ? (
 					<EmptyDropZone onDrop={() => handleDrop(0)} />
@@ -81,7 +86,10 @@ export function ConnectionBuilder({
 					<div className="min-h-32 bg-white rounded-lg border-2 border-dashed border-gray-400 p-4">
 						<div className="flex items-center gap-2 flex-wrap">
 							{scheme.sequence.map((element, index) => (
-								<div key={`${element.id}-${index}`} className="flex items-center gap-2">
+								<div
+									key={`${element.id}-${index}`}
+									className="flex items-center gap-2"
+								>
 									<ElementCard
 										element={element}
 										onRemove={() => handleRemove(index)}
@@ -163,7 +171,11 @@ interface DraggableElementProps {
 	onDragEnd: () => void;
 }
 
-function DraggableElement({ element, onDragStart, onDragEnd }: DraggableElementProps) {
+function DraggableElement({
+	element,
+	onDragStart,
+	onDragEnd
+}: DraggableElementProps) {
 	return (
 		<div
 			draggable
@@ -300,7 +312,9 @@ function EmptyDropZone({ onDrop }: DropZoneProps) {
 		>
 			<div className="flex items-center justify-center h-24 text-gray-400">
 				{isDragOver ? (
-					<span className="text-blue-600 font-medium">Отпустите для добавления</span>
+					<span className="text-blue-600 font-medium">
+						Отпустите для добавления
+					</span>
 				) : (
 					<span>Перетащите элементы сюда для сборки схемы</span>
 				)}

@@ -10,7 +10,10 @@ interface DeviceKeyboardProps {
 	disabled?: boolean;
 }
 
-export function DeviceKeyboard({ onButtonPress, disabled = false }: DeviceKeyboardProps) {
+export function DeviceKeyboard({
+	onButtonPress,
+	disabled = false
+}: DeviceKeyboardProps) {
 	return (
 		<div className="grid grid-cols-3 gap-3 p-4 bg-gray-800 rounded-lg">
 			{/* Верхний ряд: Power, Menu, Measure */}
@@ -76,7 +79,13 @@ interface ButtonProps {
 	disabled?: boolean;
 }
 
-function Button({ label, icon, onClick, className = '', disabled = false }: ButtonProps) {
+function Button({
+	label,
+	icon,
+	onClick,
+	className = '',
+	disabled = false
+}: ButtonProps) {
 	return (
 		<button
 			onClick={onClick}
