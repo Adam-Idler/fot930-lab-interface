@@ -4,8 +4,8 @@
  */
 
 import type {
-	DeviceState,
 	DeviceAction,
+	DeviceState,
 	MeasurementMode,
 	Wavelength
 } from '../../types/fot930';

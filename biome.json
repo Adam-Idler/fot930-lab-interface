@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.2/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.3.12/schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -16,6 +16,9 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"a11y": {
+				"noStaticElementInteractions": "off"
+			},
 			"suspicious": {
 				"noUnknownAtRules": {
 					"level": "error",

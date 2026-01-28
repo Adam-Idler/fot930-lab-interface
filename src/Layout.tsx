@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import type { ReactNode } from 'react';
 import { Header } from './components/header';
-import { AdmissionTest, Theory, LabWork } from './components/sections';
+import { AdmissionTest, LabWork, Theory } from './components/sections';
 import { Tabs, useTabs } from './components/tabs';
 
 export function Layout() {

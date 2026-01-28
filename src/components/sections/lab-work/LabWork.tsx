@@ -3,21 +3,27 @@
  * Координирует работу всех этапов лабораторной работы
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import {
+	COMPONENT_LOSS_DB,
+	generateSingleComponentMeasurement
+} from '../../../lib/fot930/measurementEngine';
 import type {
-	LabStage,
-	PassiveComponent,
 	CompletedMeasurement,
 	ConnectionScheme,
+	LabStage,
 	MeasurementMode,
+	PassiveComponent,
 	Wavelength
 } from '../../../types/fot930';
-import { Device, ConnectionBuilder, MeasurementTable } from '../../fot930';
+import { Device } from '../../fot930';
 import {
-	generateSingleComponentMeasurement,
-	COMPONENT_LOSS_DB
-} from '../../../lib/fot930/measurementEngine';
-import clsx from 'clsx';
+	ConnectionSchemeStage,
+	PreparationStage,
+	ResultsStage,
+	SingleMeasurementsStage,
+	StageButton
+} from './components';
 
 export function LabWork() {
 	const [currentStage, setCurrentStage] = useState<LabStage>('PREPARATION');
@@ -38,10 +44,9 @@ export function LabWork() {
 	});
 
 	// Текущие настройки прибора (из Device component)
-	const [currentMode, setCurrentMode] = useState<MeasurementMode | null>(null);
-	const [currentWavelength, setCurrentWavelength] = useState<Wavelength | null>(
-		null
-	);
+	const [currentMode, _setCurrentMode] = useState<MeasurementMode | null>(null);
+	const [currentWavelength, _setCurrentWavelength] =
+		useState<Wavelength | null>(null);
 
 	// Доступные компоненты для измерений
 	const availableComponents: PassiveComponent[] = [
@@ -238,374 +243,6 @@ export function LabWork() {
 					</div>
 				</div>
 			</div>
-		</div>
-	);
-}
-
-// ============================================================
-// ВСПОМОГАТЕЛЬНЫЕ КОМПОНЕНТЫ
-// ============================================================
-
-interface StageButtonProps {
-	stage: LabStage;
-	label: string;
-	active: boolean;
-	onClick: () => void;
-}
-
-function StageButton({ label, active, onClick }: StageButtonProps) {
-	return (
-		<button
-			type="button"
-			onClick={onClick}
-			className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition hover:cursor-pointer ${
-				active
-					? 'bg-blue-600 text-white shadow-lg'
-					: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-			}`}
-		>
-			{label}
-		</button>
-	);
-}
-
-type PortStatus = 'clean' | 'cleaning' | 'dirty';
-
-function PreparationStage() {
-	const [portStatus, setPortStatus] = useState<PortStatus>('dirty');
-
-	const isPortClean = portStatus === 'clean';
-
-	function handlePortCleaning() {
-		setPortStatus('cleaning');
-		setTimeout(() => {
-			setPortStatus('clean');
-		}, 3000);
-	}
-
-	return (
-		<div className="flex flex-col gap-6">
-			<div className="bg-white rounded-lg shadow-md p-6 space-y-4">
-				<h2 className="text-xl font-semibold">Этап 1. Подготовка прибора</h2>
-
-				<div className="space-y-3 text-sm">
-					<div className="flex items-start gap-2">
-						<span className="shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
-							1
-						</span>
-						<p>Убедитесь, что оптический порт прибора чист</p>
-					</div>
-
-					<div className="flex items-start gap-2">
-						<span className="shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
-							2
-						</span>
-						<p>
-							Нажмите кнопку <strong>POWER</strong> для включения прибора
-						</p>
-					</div>
-
-					<div className="flex items-start gap-2">
-						<span className="shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
-							3
-						</span>
-						<p>
-							После загрузки нажмите <strong>MENU</strong> для входа в меню
-						</p>
-					</div>
-
-					<div className="flex items-start gap-2">
-						<span className="shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
-							4
-						</span>
-						<p>
-							Используйте кнопки <strong>UP/DOWN</strong> для выбора режима
-							измерения (POWER или LOSS)
-						</p>
-					</div>
-
-					<div className="flex items-start gap-2">
-						<span className="shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
-							5
-						</span>
-						<p>
-							Нажмите <strong>ENTER</strong> для подтверждения
-						</p>
-					</div>
-
-					<div className="flex items-start gap-2">
-						<span className="shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs">
-							6
-						</span>
-						<p>
-							Выберите длину волны (850, 1300, 1310 или 1550 нм) и подтвердите
-							выбор
-						</p>
-					</div>
-				</div>
-			</div>
-
-			{/* Статус чистоты порта */}
-			<div className="bg-gray-50 border rounded-lg p-4">
-				<h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-					<span className="text-lg">🔌</span>
-					Статус оптического порта
-				</h3>
-
-				<div className="space-y-3">
-					<div className="flex items-center justify-between">
-						<span className="text-sm font-medium">Состояние:</span>
-						<div className="flex items-center gap-2">
-							<div
-								className={clsx('w-3 h-3 rounded-full', {
-									'bg-yellow-500': portStatus === 'cleaning',
-									'bg-green-500': isPortClean,
-									'bg-red-500': !isPortClean && portStatus !== 'cleaning'
-								})}
-							/>
-							<span
-								className={clsx('text-sm font-semibold', {
-									'text-yellow-600': portStatus === 'cleaning',
-									'text-green-600': isPortClean,
-									'text-red-600': !isPortClean && portStatus !== 'cleaning'
-								})}
-							>
-								{portStatus === 'cleaning'
-									? 'Идёт очистка...'
-									: isPortClean
-										? 'Чистый'
-										: 'Грязный'}
-							</span>
-						</div>
-					</div>
-
-					{!isPortClean && (
-						<div className="pt-2">
-							<button
-								type="button"
-								onClick={handlePortCleaning}
-								disabled={portStatus === 'cleaning'}
-								className={clsx(
-									'w-full font-semibold py-2 px-4 rounded-lg transition-colors',
-									portStatus === 'cleaning'
-										? 'bg-yellow-400 text-yellow-900 cursor-not-allowed opacity-70'
-										: 'bg-blue-600 hover:bg-blue-700 text-white hover:cursor-pointer'
-								)}
-							>
-								{portStatus === 'cleaning'
-									? '⏳ Очистка...'
-									: '🧹 Очистить порт'}
-							</button>
-
-							{portStatus !== 'cleaning' && (
-								<p className="text-xs text-gray-500 mt-1 text-center">
-									Нажмите для запуска процедуры очистки оптического порта
-								</p>
-							)}
-						</div>
-					)}
-
-					{isPortClean && (
-						<div className="bg-green-50 border border-green-200 rounded p-2">
-							<p className="text-xs text-green-700 text-center">
-								✅ Порт готов к работе
-							</p>
-						</div>
-					)}
-				</div>
-			</div>
-		</div>
-	);
-}
-
-interface SingleMeasurementsStageProps {
-	components: PassiveComponent[];
-	selectedComponent: PassiveComponent | null;
-	onSelectComponent: (component: PassiveComponent) => void;
-	currentSide: 'A' | 'B';
-	onChangeSide: (side: 'A' | 'B') => void;
-	attemptCount: number;
-	onResetAttempts: () => void;
-}
-
-function SingleMeasurementsStage({
-	components,
-	selectedComponent,
-	onSelectComponent,
-	currentSide,
-	onChangeSide,
-	attemptCount,
-	onResetAttempts
-}: SingleMeasurementsStageProps) {
-	return (
-		<div className="space-y-6">
-			<div className="bg-white rounded-lg shadow-md p-6">
-				<h2 className="text-xl font-semibold mb-4">
-					Этап 2. Измерение одиночных компонентов
-				</h2>
-
-				<div className="space-y-4">
-					<div>
-						<div className="text-sm font-medium mb-2">
-							Выберите компонент для измерения:
-						</div>
-						<div className="grid grid-cols-1 gap-2">
-							{components.map((component) => (
-								<button
-									type="button"
-									key={component.id}
-									onClick={() => {
-										onSelectComponent(component);
-										onResetAttempts();
-									}}
-									className={clsx(
-										'p-3 rounded-lg border-2 text-left transition',
-										selectedComponent?.id === component.id
-											? 'border-blue-600 bg-blue-50'
-											: 'border-gray-200 hover:border-gray-300 hover:cursor-pointer'
-									)}
-								>
-									<div className="font-medium">{component.label}</div>
-									<div className="text-xs text-gray-500 mt-1">
-										Тип: {component.type.replace(/_/g, ' ')}
-									</div>
-								</button>
-							))}
-						</div>
-					</div>
-
-					<div>
-						<div className="text-sm font-medium mb-2">Сторона измерения:</div>
-						<div className="flex gap-2">
-							<button
-								type="button"
-								onClick={() => {
-									onChangeSide('A');
-									onResetAttempts();
-								}}
-								className={clsx(
-									'flex-1 py-2 rounded-lg border-2 font-medium transition',
-									currentSide === 'A'
-										? 'border-blue-600 bg-blue-50 text-blue-900'
-										: 'border-gray-200 hover:border-gray-300 hover:cursor-pointer'
-								)}
-							>
-								Сторона A
-							</button>
-							<button
-								type="button"
-								onClick={() => {
-									onChangeSide('B');
-									onResetAttempts();
-								}}
-								className={clsx(
-									'flex-1 py-2 rounded-lg border-2 font-medium transition',
-									currentSide === 'B'
-										? 'border-blue-600 bg-blue-50 text-blue-900'
-										: 'border-gray-200 hover:border-gray-300 hover:cursor-pointer'
-								)}
-							>
-								Сторона B
-							</button>
-						</div>
-					</div>
-
-					<div className="bg-gray-50 p-3 rounded">
-						<div className="text-sm">
-							<span className="font-medium">Текущая попытка:</span>{' '}
-							{attemptCount} из 3
-						</div>
-						{attemptCount === 3 && (
-							<div className="mt-2 text-xs text-gray-600">
-								Выполнены все 3 измерения. Выберите другую сторону или
-								компонент.
-							</div>
-						)}
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-interface ConnectionSchemeStageProps {
-	scheme: ConnectionScheme;
-	onSchemeChange: (scheme: ConnectionScheme) => void;
-}
-
-function ConnectionSchemeStage({
-	scheme,
-	onSchemeChange
-}: ConnectionSchemeStageProps) {
-	const availableElements = [
-		{ type: 'TESTER' as const, id: 'tester', label: 'Тестер FOT-930' },
-		{
-			type: 'CONNECTOR' as const,
-			id: 'connector_apc_1',
-			label: 'SC/APC 1',
-			connectorType: 'SC_APC' as const
-		},
-		{
-			type: 'CONNECTOR' as const,
-			id: 'connector_apc_2',
-			label: 'SC/APC 2',
-			connectorType: 'SC_APC' as const
-		},
-		{ type: 'COMPONENT' as const, id: 'splitter_1_4', label: 'Сплиттер 1:4' },
-		{ type: 'TESTER' as const, id: 'tester_2', label: 'Тестер FOT-930 2' }
-	];
-
-	return (
-		<div className="bg-white rounded-lg shadow-md p-6">
-			<h2 className="text-xl font-semibold mb-4">
-				Этап 3. Сборка схемы подключения
-			</h2>
-
-			<ConnectionBuilder
-				scheme={scheme}
-				onChange={onSchemeChange}
-				availableElements={availableElements}
-			/>
-		</div>
-	);
-}
-
-interface ResultsStageProps {
-	measurements: CompletedMeasurement[];
-	components: PassiveComponent[];
-}
-
-function ResultsStage({ measurements, components }: ResultsStageProps) {
-	return (
-		<div className="space-y-6">
-			<div className="bg-white rounded-lg shadow-md p-6">
-				<h2 className="text-xl font-semibold mb-4">
-					Этап 5. Анализ результатов измерений
-				</h2>
-
-				<p className="text-sm text-gray-600 mb-4">
-					Всего выполнено измерений: <strong>{measurements.length}</strong>
-				</p>
-			</div>
-
-			{/* Таблицы результатов для каждого компонента */}
-			{components.map((component) => (
-				<MeasurementTable
-					key={component.id}
-					measurements={measurements}
-					componentId={component.id}
-					componentLabel={component.label}
-				/>
-			))}
-
-			{measurements.length === 0 && (
-				<div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-					<p className="text-yellow-800">
-						Нет выполненных измерений. Перейдите к этапу "Измерения" для
-						выполнения измерений.
-					</p>
-				</div>
-			)}
 		</div>
 	);
 }

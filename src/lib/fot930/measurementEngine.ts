@@ -4,11 +4,10 @@
  */
 
 import type {
-	PassiveComponent,
+	ConnectionScheme,
 	MeasurementMode,
-	Wavelength,
-	MeasurementResult,
-	ConnectionScheme
+	PassiveComponent,
+	Wavelength
 } from '../../types/fot930';
 
 /**

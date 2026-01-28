@@ -4,8 +4,14 @@
  */
 
 import { useState } from 'react';
-import type { ConnectionElement, ConnectionScheme } from '../../types/fot930';
 import { validateConnectionScheme } from '../../lib/fot930/measurementEngine';
+import type { ConnectionElement, ConnectionScheme } from '../../types/fot930';
+import {
+	DraggableElement,
+	DropZone,
+	ElementCard,
+	EmptyDropZone
+} from './connection-builder';
 
 interface ConnectionBuilderProps {
 	/** Схема подключения */
@@ -156,168 +162,6 @@ export function ConnectionBuilder({
 						/>
 					))}
 				</div>
-			</div>
-		</div>
-	);
-}
-
-// ============================================================
-// ВСПОМОГАТЕЛЬНЫЕ КОМПОНЕНТЫ
-// ============================================================
-
-interface DraggableElementProps {
-	element: ConnectionElement;
-	onDragStart: () => void;
-	onDragEnd: () => void;
-}
-
-function DraggableElement({
-	element,
-	onDragStart,
-	onDragEnd
-}: DraggableElementProps) {
-	return (
-		<div
-			draggable
-			onDragStart={(e) => {
-				e.dataTransfer.effectAllowed = 'move';
-				onDragStart();
-			}}
-			onDragEnd={onDragEnd}
-			className="bg-white p-4 rounded-lg border-2 border-gray-300 cursor-move hover:border-blue-500 hover:shadow-lg transition select-none"
-		>
-			<ElementContent element={element} />
-		</div>
-	);
-}
-
-interface ElementCardProps {
-	element: ConnectionElement;
-	onRemove: () => void;
-	onDrop: () => void;
-}
-
-function ElementCard({ element, onRemove, onDrop }: ElementCardProps) {
-	const [isDragOver, setIsDragOver] = useState(false);
-
-	return (
-		<div
-			onDragOver={(e) => {
-				e.preventDefault();
-				setIsDragOver(true);
-			}}
-			onDragLeave={() => setIsDragOver(false)}
-			onDrop={(e) => {
-				e.preventDefault();
-				setIsDragOver(false);
-				onDrop();
-			}}
-			className={`relative bg-white p-3 rounded-lg border-2 ${
-				isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-			} transition group`}
-		>
-			<ElementContent element={element} />
-
-			<button
-				onClick={onRemove}
-				className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
-			>
-				×
-			</button>
-		</div>
-	);
-}
-
-function ElementContent({ element }: { element: ConnectionElement }) {
-	const getIcon = () => {
-		switch (element.type) {
-			case 'TESTER':
-				return '📟';
-			case 'CONNECTOR':
-				return element.connectorType === 'SC_APC' ? '🟢' : '🔵';
-			case 'COMPONENT':
-				return '📦';
-			default:
-				return '❓';
-		}
-	};
-
-	const getLabel = () => {
-		if (element.label) return element.label;
-		if (element.type === 'CONNECTOR') {
-			return element.connectorType === 'SC_APC' ? 'SC/APC' : 'SC/UPC';
-		}
-		return element.type;
-	};
-
-	return (
-		<div className="flex flex-col items-center gap-1 text-center">
-			<span className="text-2xl">{getIcon()}</span>
-			<span className="text-xs font-medium">{getLabel()}</span>
-		</div>
-	);
-}
-
-interface DropZoneProps {
-	onDrop: () => void;
-}
-
-function DropZone({ onDrop }: DropZoneProps) {
-	const [isDragOver, setIsDragOver] = useState(false);
-
-	return (
-		<div
-			onDragOver={(e) => {
-				e.preventDefault();
-				setIsDragOver(true);
-			}}
-			onDragLeave={() => setIsDragOver(false)}
-			onDrop={(e) => {
-				e.preventDefault();
-				setIsDragOver(false);
-				onDrop();
-			}}
-			className={`w-20 h-20 border-2 border-dashed rounded-lg flex items-center justify-center transition ${
-				isDragOver
-					? 'border-blue-500 bg-blue-50'
-					: 'border-gray-300 bg-gray-50 hover:border-gray-400'
-			}`}
-		>
-			<span className="text-2xl text-gray-400">+</span>
-		</div>
-	);
-}
-
-function EmptyDropZone({ onDrop }: DropZoneProps) {
-	const [isDragOver, setIsDragOver] = useState(false);
-
-	return (
-		<div
-			onDragOver={(e) => {
-				e.preventDefault();
-				e.dataTransfer.dropEffect = 'move';
-				setIsDragOver(true);
-			}}
-			onDragLeave={() => setIsDragOver(false)}
-			onDrop={(e) => {
-				e.preventDefault();
-				setIsDragOver(false);
-				onDrop();
-			}}
-			className={`min-h-32 bg-white rounded-lg border-2 border-dashed p-4 transition ${
-				isDragOver
-					? 'border-blue-500 bg-blue-50'
-					: 'border-gray-400 hover:border-gray-500'
-			}`}
-		>
-			<div className="flex items-center justify-center h-24 text-gray-400">
-				{isDragOver ? (
-					<span className="text-blue-600 font-medium">
-						Отпустите для добавления
-					</span>
-				) : (
-					<span>Перетащите элементы сюда для сборки схемы</span>
-				)}
 			</div>
 		</div>
 	);
