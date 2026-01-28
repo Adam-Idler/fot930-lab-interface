@@ -22,6 +22,10 @@ interface ConnectionBuilderProps {
 	availableElements: ConnectionElement[];
 }
 
+// TODO: Заменить смайлики на иконки для элементов схемы
+// Не показывать ошибку, если все элементы еще не были добавлены
+// Добавленные элементы должны пропадать из пулла
+// Добавить очистку портов элементов
 export function ConnectionBuilder({
 	scheme,
 	onChange,

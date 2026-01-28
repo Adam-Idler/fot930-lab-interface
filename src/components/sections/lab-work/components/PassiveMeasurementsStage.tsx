@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import type { PassiveComponent } from '../../../../types/fot930';
 
-interface SingleMeasurementsStageProps {
+interface PassiveMeasurementsStageProps {
 	components: PassiveComponent[];
 	selectedComponent: PassiveComponent | null;
 	onSelectComponent: (component: PassiveComponent) => void;
@@ -11,7 +11,8 @@ interface SingleMeasurementsStageProps {
 	onResetAttempts: () => void;
 }
 
-export function SingleMeasurementsStage({
+// TODO: Поменять вывод типа компонента на что-то другое, либо убрать
+export function PassiveMeasurementsStage({
 	components,
 	selectedComponent,
 	onSelectComponent,
@@ -19,12 +20,12 @@ export function SingleMeasurementsStage({
 	onChangeSide,
 	attemptCount,
 	onResetAttempts
-}: SingleMeasurementsStageProps) {
+}: PassiveMeasurementsStageProps) {
 	return (
 		<div className="space-y-6">
 			<div className="bg-white rounded-lg shadow-md p-6">
 				<h2 className="text-xl font-semibold mb-4">
-					Этап 2. Измерение одиночных компонентов
+					Этап 2. Измерение пассивных компонентов
 				</h2>
 
 				<div className="space-y-4">

@@ -9,6 +9,8 @@ interface ResultsStageProps {
 	components: PassiveComponent[];
 }
 
+// TODO: Вывод результатов должен быть в приборе
+// Пофиксить сохранение результатов в таблицу
 export function ResultsStage({ measurements, components }: ResultsStageProps) {
 	return (
 		<div className="space-y-6">

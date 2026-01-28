@@ -1,13 +1,19 @@
-import type { ConnectionScheme } from '../../../../types/fot930';
+import type {
+	ConnectionScheme,
+	PassiveComponent
+} from '../../../../types/fot930';
 import { ConnectionBuilder } from '../../../fot930';
 
 interface ConnectionSchemeStageProps {
 	scheme: ConnectionScheme;
+	currentComponent: PassiveComponent | null;
 	onSchemeChange: (scheme: ConnectionScheme) => void;
 }
 
+// TODO: Перемешивать доступные элементы
 export function ConnectionSchemeStage({
 	scheme,
+	currentComponent,
 	onSchemeChange
 }: ConnectionSchemeStageProps) {
 	const availableElements = [
@@ -24,7 +30,11 @@ export function ConnectionSchemeStage({
 			label: 'SC/APC 2',
 			connectorType: 'SC_APC' as const
 		},
-		{ type: 'COMPONENT' as const, id: 'splitter_1_4', label: 'Сплиттер 1:4' },
+		{
+			type: 'COMPONENT' as const,
+			id: currentComponent?.id || 'optical_cable_1',
+			label: currentComponent?.label || 'Optical Cable'
+		},
 		{ type: 'TESTER' as const, id: 'tester_2', label: 'Тестер FOT-930 2' }
 	];
 

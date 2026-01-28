@@ -19,12 +19,13 @@ import type {
 import { Device } from '../../fot930';
 import {
 	ConnectionSchemeStage,
+	PassiveMeasurementsStage,
 	PreparationStage,
 	ResultsStage,
-	SingleMeasurementsStage,
 	StageButton
 } from './components';
 
+// Добавить завершение лабораторной работы после всех измерений
 export function LabWork() {
 	const [currentStage, setCurrentStage] = useState<LabStage>('PREPARATION');
 	const [selectedComponent, setSelectedComponent] =
@@ -37,7 +38,7 @@ export function LabWork() {
 		correctSequence: [
 			'tester',
 			'connector_apc_1',
-			'splitter_1_4',
+			selectedComponent?.id || 'optical_cable_1',
 			'connector_apc_2',
 			'tester_2'
 		]
@@ -211,7 +212,7 @@ export function LabWork() {
 						{currentStage === 'PREPARATION' && <PreparationStage />}
 
 						{currentStage === 'SINGLE_MEASUREMENTS' && (
-							<SingleMeasurementsStage
+							<PassiveMeasurementsStage
 								components={availableComponents}
 								selectedComponent={selectedComponent}
 								onSelectComponent={setSelectedComponent}
@@ -225,6 +226,7 @@ export function LabWork() {
 						{currentStage === 'CONNECTION_SCHEME' && (
 							<ConnectionSchemeStage
 								scheme={connectionScheme}
+								currentComponent={selectedComponent}
 								onSchemeChange={setConnectionScheme}
 							/>
 						)}
