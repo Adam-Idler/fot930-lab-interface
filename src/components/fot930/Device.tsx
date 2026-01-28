@@ -9,7 +9,11 @@ import {
 	initialDeviceState
 } from '../../lib/fot930/deviceReducer';
 import { noop } from '../../lib/utils';
-import type { DeviceButton as DeviceButtonType } from '../../types/fot930';
+import type {
+	DeviceButton as DeviceButtonType,
+	MeasurementMode,
+	Wavelength
+} from '../../types/fot930';
 import { DeviceScreen } from './DeviceScreen';
 import { DeviceButton } from './device/DeviceButton';
 
@@ -18,9 +22,17 @@ interface DeviceProps {
 	onMeasure?: () => Promise<
 		{ value: number; unit: 'dBm' | 'dB' } | { error: string }
 	>;
+	/** Callback для передачи текущего режима измерения */
+	onModeChange?: (mode: MeasurementMode | null) => void;
+	/** Callback для передачи текущей длины волны */
+	onWavelengthChange?: (wavelength: Wavelength | null) => void;
 }
 
-export function Device({ onMeasure }: DeviceProps) {
+export function Device({
+	onMeasure,
+	onModeChange,
+	onWavelengthChange
+}: DeviceProps) {
 	const [state, dispatch] = useReducer(deviceReducer, initialDeviceState);
 
 	// Автоматическое завершение загрузки
@@ -32,6 +44,15 @@ export function Device({ onMeasure }: DeviceProps) {
 			return () => clearTimeout(timer);
 		}
 	}, [state.screen]);
+
+	// Передача изменений режима и длины волны
+	useEffect(() => {
+		onModeChange?.(state.mode);
+	}, [state.mode, onModeChange]);
+
+	useEffect(() => {
+		onWavelengthChange?.(state.wavelength);
+	}, [state.wavelength, onWavelengthChange]);
 
 	// Обработка измерения
 	useEffect(() => {
@@ -201,7 +222,10 @@ export function Device({ onMeasure }: DeviceProps) {
 						</div>
 
 						<div className="rotate-90 absolute top-2/3 left-0">
-							<DeviceButton label="FasTest" onClick={noop} />
+							<DeviceButton
+								label="FasTest"
+								onClick={() => handleButtonPress('MEASURE')}
+							/>
 						</div>
 
 						<div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 bg-gray-900">

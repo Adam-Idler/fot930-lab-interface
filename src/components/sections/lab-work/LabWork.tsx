@@ -44,9 +44,10 @@ export function LabWork() {
 	});
 
 	// Текущие настройки прибора (из Device component)
-	const [currentMode, _setCurrentMode] = useState<MeasurementMode | null>(null);
-	const [currentWavelength, _setCurrentWavelength] =
-		useState<Wavelength | null>(null);
+	const [currentMode, setCurrentMode] = useState<MeasurementMode | null>(null);
+	const [currentWavelength, setCurrentWavelength] = useState<Wavelength | null>(
+		null
+	);
 
 	// Доступные компоненты для измерений
 	const availableComponents: PassiveComponent[] = [
@@ -198,7 +199,11 @@ export function LabWork() {
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					{/* Левая колонка: Прибор */}
 					<div>
-						<Device onMeasure={handleMeasure} />
+						<Device
+							onMeasure={handleMeasure}
+							onModeChange={setCurrentMode}
+							onWavelengthChange={setCurrentWavelength}
+						/>
 					</div>
 
 					{/* Правая колонка: Контент этапа */}
