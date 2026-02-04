@@ -7,9 +7,9 @@ interface ScreenErrorProps {
 export function ScreenError({ state }: ScreenErrorProps) {
 	return (
 		<div className="flex flex-col items-center justify-center gap-4 text-center h-full px-4">
-			<div className="text-lg font-bold">ERROR</div>
+			<div className="text-lg font-bold text-red-600">ERROR</div>
 
-			<div className="text-sm border border-[#1a2a1e] p-3 rounded max-w-full">
+			<div className="text-sm border border-fot930-blue p-3 rounded max-w-full">
 				{state.lastError || 'Measurement failed'}
 			</div>
 

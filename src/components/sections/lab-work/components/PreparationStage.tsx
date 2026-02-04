@@ -78,7 +78,7 @@ export function PreparationStage() {
 			</div>
 
 			{/* Статус чистоты порта */}
-			<div className="bg-gray-50 border rounded-lg p-4">
+		<div className="bg-gray-50 shadow-md border border-gray-300 rounded-lg p-4">
 				<h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
 					<span className="text-lg">🔌</span>
 					Статус оптического порта

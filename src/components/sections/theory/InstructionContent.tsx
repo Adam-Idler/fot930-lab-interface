@@ -825,7 +825,7 @@ export function InstructionContent() {
 						<img
 							src="/images/instruction/fot-930-measuring-reference-value-3.png"
 							alt="Установка длины волны"
-							className="w-1/3 object-contain"
+							className="w-1/3 object-contain ml-auto"
 						/>
 					</div>
 				</li>

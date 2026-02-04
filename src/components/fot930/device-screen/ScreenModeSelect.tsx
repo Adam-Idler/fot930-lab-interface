@@ -14,7 +14,7 @@ export function ScreenModeSelect({ state }: ScreenModeSelectProps) {
 
 	return (
 		<div className="flex flex-col w-full h-full">
-			<div className="text-sm font-bold border-b border-[#1a2a1e] pb-2 mb-3">
+			<div className="text-sm font-bold border-b border-fot930-blue pb-2 mb-3 text-fot930-blue">
 				SELECT MODE
 			</div>
 
@@ -23,7 +23,7 @@ export function ScreenModeSelect({ state }: ScreenModeSelectProps) {
 					<div
 						key={mode}
 						className={`px-2 py-1 text-sm ${
-							mode === currentMode ? 'bg-[#1a2a1e] text-[#7a9c7e]' : ''
+							mode === currentMode ? 'bg-fot930-blue text-white' : ''
 						}`}
 					>
 						{mode === currentMode ? '► ' : '  '}
@@ -32,7 +32,7 @@ export function ScreenModeSelect({ state }: ScreenModeSelectProps) {
 				))}
 			</div>
 
-			<div className="text-xs opacity-60 text-center border-t border-[#1a2a1e] pt-2 mt-2">
+			<div className="text-xs opacity-60 text-center border-t border-fot930-blue pt-2 mt-2">
 				↑↓ Navigate | ENTER Confirm
 			</div>
 		</div>

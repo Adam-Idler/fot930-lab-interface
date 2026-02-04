@@ -108,7 +108,7 @@ export function Device({
 
 	return (
 		<div className="flex flex-col gap-4 max-w-2xl mx-auto">
-			<div className="bg-[#3B7AB5] p-8 rounded-3xl">
+			<div className="bg-fot930-blue p-8 rounded-3xl">
 				{/* Основная область */}
 				<div className="bg-gray-900 rounded-2xl p-4 shadow-inner">
 					{/* LCD Экран */}
@@ -214,7 +214,7 @@ export function Device({
 								<button
 									type="button"
 									onClick={() => handleButtonPress('ENTER')}
-									className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-6 hover:cursor-pointer bg-[#3B7AB5] hover:bg-[#31628f] active:bg-[#22496d] rounded-full flex items-center justify-center text-white font-bold text-sm transition shadow-lg"
+									className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-6 hover:cursor-pointer bg-fot930-blue hover:bg-fot930-blue-hover active:bg-fot930-blue-active rounded-full flex items-center justify-center text-white font-bold text-sm transition shadow-lg"
 								>
 									Enter
 								</button>
@@ -242,7 +242,6 @@ export function Device({
 										alt="Power Button"
 									/>
 								}
-								color="light-blue"
 								onClick={() => handleButtonPress('POWER')}
 							/>
 							<DeviceButton
@@ -271,9 +270,9 @@ export function Device({
 						</div>
 					</div>
 
-					<div className="bg-[#3B7AB5] -mx-4 -mb-4">
+					<div className="bg-fot930-blue -mx-4 -mb-4">
 						<div className="mx-auto w-4/5 rounded-b-md mt-8  border-12 border-t-0 border-gray-900">
-							<div className="flex justify-between items-center p-2 bg-[#dfdcdd] text-[#3B7AB5]">
+							<div className="flex justify-between items-center p-2 bg-[#dfdcdd] text-fot930-blue">
 								<div>
 									<div className="text-2xl font-extrabold tracking-wider">
 										EXFO

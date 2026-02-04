@@ -14,8 +14,8 @@ export function DeviceButton({
 	icon
 }: DeviceButtonProps) {
 	const colors = {
-		blue: 'bg-[#3B7AB5] hover:bg-[#31628f] active:bg-[#22496d]',
-		'light-blue': 'bg-[#7d9ebe] hover:bg-[#31628f] active:bg-[#22496d]',
+		blue: 'bg-fot930-blue hover:bg-fot930-blue-hover active:bg-fot930-blue-active',
+		'light-blue': 'bg-[#7d9ebe] hover:bg-fot930-blue-hover active:bg-fot930-blue-active',
 		beige: 'bg-[#a9aeb3] hover:bg-[#999da1] active:bg-[#8e9197]'
 	};
 

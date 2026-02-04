@@ -1,6 +1,6 @@
 /**
- * Компонент LCD экрана прибора FOT-930
- * Эмулирует монохромный ЖК-дисплей с ограниченным разрешением
+ * Компонент цветного экрана прибора FOT-930
+ * Белый фон с синими акцентами в цвет корпуса прибора
  */
 
 import type { DeviceState } from '../../types/fot930';
@@ -21,12 +21,14 @@ interface DeviceScreenProps {
 }
 
 export function DeviceScreen({ state }: DeviceScreenProps) {
+	const isOff = state.screen === 'OFF';
+
 	return (
-		<div className="w-full h-full bg-[#9cb89f] p-2 rounded-lg border-6 border-gray-700 shadow-inner">
-			<div className="w-full h-full bg-[#7a9c7e] rounded border-2 border-[#5a7c5e] flex items-center justify-center font-mono text-[#1a2a1e] p-4">
+			<div className={`w-full h-full rounded border-2 border-gray-800 flex items-center justify-center font-mono p-4 ${
+				isOff ? 'bg-gray-700' : 'bg-white'
+			}`}>
 				{renderScreen(state)}
 			</div>
-		</div>
 	);
 }
 

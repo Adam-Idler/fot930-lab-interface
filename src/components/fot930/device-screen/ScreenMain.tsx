@@ -7,7 +7,7 @@ interface ScreenMainProps {
 export function ScreenMain({ state }: ScreenMainProps) {
 	return (
 		<div className="flex flex-col items-center justify-center gap-6 text-center w-full">
-			<div className="text-2xl font-bold tracking-wider border-b-2 border-[#1a2a1e] pb-2">
+			<div className="text-2xl font-bold tracking-wider border-b-2 border-fot930-blue pb-2 text-fot930-blue">
 				FOT-930
 			</div>
 			<div className="text-xs">Optical Power Meter</div>
