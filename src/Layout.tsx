@@ -12,13 +12,13 @@ export function Layout() {
 			<Header />
 
 			<div className="bg-white shadow-sm">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div className="max-w-400 mx-auto px-4 sm:px-6 lg:px-8">
 					<Tabs />
 				</div>
 			</div>
 
 			<main className="flex-1 overflow-auto">
-				<div className="h-full max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+				<div className="h-full max-w-400 mx-auto py-6 sm:px-6 lg:px-8">
 					<TabContent active={activeTab === 'theory'}>
 						<Theory />
 					</TabContent>

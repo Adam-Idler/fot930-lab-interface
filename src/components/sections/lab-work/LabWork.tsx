@@ -30,7 +30,6 @@ export function LabWork() {
 	const [currentStage, setCurrentStage] = useState<LabStage>('PREPARATION');
 	const [selectedComponent, setSelectedComponent] =
 		useState<PassiveComponent | null>(null);
-	const [currentSide, setCurrentSide] = useState<'A' | 'B'>('A');
 	const [attemptCount, setAttemptCount] = useState(1);
 	const [measurements, setMeasurements] = useState<CompletedMeasurement[]>([]);
 	const [connectionScheme, setConnectionScheme] = useState<ConnectionScheme>({
@@ -121,7 +120,6 @@ export function LabWork() {
 			componentId: selectedComponent.id,
 			componentLabel: selectedComponent.label,
 			wavelength: currentWavelength,
-			side: currentSide,
 			attemptNumber: attemptCount,
 			result: {
 				value: result.value,
@@ -144,7 +142,6 @@ export function LabWork() {
 		selectedComponent,
 		currentMode,
 		currentWavelength,
-		currentSide,
 		attemptCount
 	]);
 
@@ -155,7 +152,7 @@ export function LabWork() {
 
 	return (
 		<div className="h-full overflow-auto bg-gray-50">
-			<div className="max-w-7xl mx-auto p-6 space-y-6">
+			<div className="mx-auto py-6 space-y-6">
 				{/* Заголовок */}
 				<div className="bg-white rounded-lg shadow-md p-6">
 					<h1 className="text-3xl font-bold text-gray-900">
@@ -174,12 +171,6 @@ export function LabWork() {
 							label="Подготовка"
 							active={currentStage === 'PREPARATION'}
 							onClick={() => handleStageChange('PREPARATION')}
-						/>
-						<StageButton
-							stage="SINGLE_MEASUREMENTS"
-							label="Измерения"
-							active={currentStage === 'SINGLE_MEASUREMENTS'}
-							onClick={() => handleStageChange('SINGLE_MEASUREMENTS')}
 						/>
 						<StageButton
 							stage="CONNECTION_SCHEME"
@@ -211,24 +202,24 @@ export function LabWork() {
 					<div className="space-y-6">
 						{currentStage === 'PREPARATION' && <PreparationStage />}
 
-						{currentStage === 'SINGLE_MEASUREMENTS' && (
-							<PassiveMeasurementsStage
-								components={availableComponents}
-								selectedComponent={selectedComponent}
-								onSelectComponent={setSelectedComponent}
-								currentSide={currentSide}
-								onChangeSide={setCurrentSide}
-								attemptCount={attemptCount}
-								onResetAttempts={() => setAttemptCount(1)}
-							/>
-						)}
-
 						{currentStage === 'CONNECTION_SCHEME' && (
-							<ConnectionSchemeStage
-								scheme={connectionScheme}
-								currentComponent={selectedComponent}
-								onSchemeChange={setConnectionScheme}
-							/>
+							<>
+								<PassiveMeasurementsStage
+									components={availableComponents}
+									selectedComponent={selectedComponent}
+									measurements={measurements}
+									onSelectComponent={setSelectedComponent}
+									onResetAttempts={() => setAttemptCount(1)}
+								/>
+
+								<ConnectionSchemeStage
+									scheme={connectionScheme}
+									currentComponent={selectedComponent}
+									onSchemeChange={setConnectionScheme}
+									attemptCount={attemptCount}
+								/>
+							</>
+
 						)}
 
 						{currentStage === 'RESULTS_ANALYSIS' && (
@@ -261,7 +252,6 @@ export function LabWork() {
 function getStageTitle(stage: LabStage): string {
 	const titles: Record<LabStage, string> = {
 		PREPARATION: 'Подготовка прибора к работе',
-		SINGLE_MEASUREMENTS: 'Выполнение измерений',
 		CONNECTION_SCHEME: 'Сборка измерительной схемы',
 		COMPLEX_SCHEMES: 'Сложные измерительные схемы',
 		RESULTS_ANALYSIS: 'Анализ результатов'
@@ -273,10 +263,8 @@ function getStageInstructions(stage: LabStage): string {
 	const instructions: Record<LabStage, string> = {
 		PREPARATION:
 			'Включите прибор, очистите порты прибора, выберите режим измерения и длину волны. После настройки прибор будет готов к работе.',
-		SINGLE_MEASUREMENTS:
-			'Выберите компонент для измерения, укажите сторону (A или B) и нажмите MEASURE на приборе. Выполните 3 измерения для каждой комбинации.',
 		CONNECTION_SCHEME:
-			'Соберите правильную схему подключения, перетаскивая элементы мышью. Проверьте корректность последовательности перед измерениями.',
+			'Выберите компонент для измерения и соберите правильную схему подключения, перетаскивая элементы мышью. Проверьте корректность последовательности перед измерениями. Выполните 3 измерения для каждого компонента.',
 		COMPLEX_SCHEMES:
 			'Выполните измерения для сложных схем с последовательным соединением нескольких компонентов.',
 		RESULTS_ANALYSIS:

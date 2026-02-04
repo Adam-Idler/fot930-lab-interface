@@ -8,13 +8,15 @@ interface ConnectionSchemeStageProps {
 	scheme: ConnectionScheme;
 	currentComponent: PassiveComponent | null;
 	onSchemeChange: (scheme: ConnectionScheme) => void;
+	attemptCount: number;
 }
 
 // TODO: Перемешивать доступные элементы
 export function ConnectionSchemeStage({
 	scheme,
 	currentComponent,
-	onSchemeChange
+	onSchemeChange,
+	attemptCount
 }: ConnectionSchemeStageProps) {
 	const availableElements = [
 		{ type: 'TESTER' as const, id: 'tester', label: 'Тестер FOT-930' },
@@ -43,6 +45,20 @@ export function ConnectionSchemeStage({
 			<h2 className="text-xl font-semibold mb-4">
 				Этап 3. Сборка схемы подключения
 			</h2>
+
+			<div className="bg-gray-50 p-3 rounded mb-4">
+				<div className="text-sm">
+					<span className="font-medium">Номер измерения:</span>{' '}
+					{attemptCount} из 3
+				</div>
+				 
+				{attemptCount === 3 && (
+					<div className="mt-2 text-xs text-gray-600">
+						Выполнены все 3 измерения. Выберите другую сторону или
+						компонент.
+					</div>
+				)}
+			</div>
 
 			<ConnectionBuilder
 				scheme={scheme}

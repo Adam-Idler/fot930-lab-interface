@@ -2,7 +2,7 @@
  * Компонент для отображения таблицы результатов измерений
  */
 
-import type { CompletedMeasurement, MeasurementSide } from '../../types/fot930';
+import type { CompletedMeasurement } from '../../types/fot930';
 
 interface MeasurementTableProps {
 	measurements: CompletedMeasurement[];
@@ -40,7 +40,6 @@ export function MeasurementTable({
 							<th className="px-4 py-3 text-left font-semibold">
 								Длина волны (нм)
 							</th>
-							<th className="px-4 py-3 text-left font-semibold">Сторона</th>
 							<th className="px-4 py-3 text-center font-semibold">
 								Измерение 1
 							</th>
@@ -56,17 +55,12 @@ export function MeasurementTable({
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-gray-200">
-						{Object.entries(grouped).map(([key, data]) => {
-							const [wavelength, side] = key.split('-') as [
-								string,
-								MeasurementSide
-							];
+						{Object.entries(grouped).map(([wavelength, data]) => {
 							const average = calculateAverage(data.measurements);
 
 							return (
-								<tr key={key} className="hover:bg-gray-50">
+								<tr key={wavelength} className="hover:bg-gray-50">
 									<td className="px-4 py-3">{wavelength}</td>
-									<td className="px-4 py-3">{side}</td>
 									<td className="px-4 py-3 text-center font-mono">
 										{formatValue(data.measurements[0])}
 									</td>
@@ -104,7 +98,7 @@ function groupMeasurements(measurements: CompletedMeasurement[]) {
 	> = {};
 
 	for (const measurement of measurements) {
-		const key = `${measurement.wavelength}-${measurement.side}`;
+		const key = measurement.wavelength;
 
 		if (!grouped[key]) {
 			grouped[key] = {

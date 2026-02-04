@@ -121,9 +121,6 @@ export type ConnectorType =
 	| 'SC_APC' // SC/APC (зелёный)
 	| 'SC_UPC'; // SC/UPC (синий)
 
-/** Сторона измерения */
-export type MeasurementSide = 'A' | 'B';
-
 /** Пассивный компонент */
 export interface PassiveComponent {
 	/** Уникальный идентификатор */
@@ -172,7 +169,6 @@ export interface ConnectionElement {
 /** Этапы выполнения лабораторной работы */
 export type LabStage =
 	| 'PREPARATION' // Подготовка прибора
-	| 'SINGLE_MEASUREMENTS' // Измерения одиночных компонентов
 	| 'CONNECTION_SCHEME' // Сборка схемы подключения
 	| 'COMPLEX_SCHEMES' // Сложные схемы
 	| 'RESULTS_ANALYSIS'; // Анализ результатов
@@ -208,9 +204,6 @@ export interface CompletedMeasurement {
 
 	/** Длина волны */
 	wavelength: Wavelength;
-
-	/** Сторона измерения */
-	side: MeasurementSide;
 
 	/** Номер попытки (1-3) */
 	attemptNumber: number;

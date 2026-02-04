@@ -22,7 +22,7 @@ interface DeviceScreenProps {
 
 export function DeviceScreen({ state }: DeviceScreenProps) {
 	return (
-		<div className="w-full h-full bg-[#9cb89f] p-4 rounded-lg border-6 border-gray-700 shadow-inner">
+		<div className="w-full h-full bg-[#9cb89f] p-2 rounded-lg border-6 border-gray-700 shadow-inner">
 			<div className="w-full h-full bg-[#7a9c7e] rounded border-2 border-[#5a7c5e] flex items-center justify-center font-mono text-[#1a2a1e] p-4">
 				{renderScreen(state)}
 			</div>
