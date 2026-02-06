@@ -135,10 +135,7 @@ export interface PassiveComponent {
 	/** Типичное затухание на разных длинах волн (dB) */
 	typicalLoss: Record<Wavelength, number>;
 
-	/** Коннектор на стороне A */
-	connectorA: ConnectorType;
-
-	/** Коннектор на стороне B */
+	/** Тип коннектора */
 	connectorType: ConnectorType;
 }
 

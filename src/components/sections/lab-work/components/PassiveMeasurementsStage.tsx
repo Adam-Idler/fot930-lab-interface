@@ -20,16 +20,15 @@ export function PassiveMeasurementsStage({
 	onResetAttempts
 }: PassiveMeasurementsStageProps) {
 	// Проверяем, было ли выполнено хотя бы одно измерение для компонента
-	const hasMeasurement = (componentId: string): boolean => {
-		return measurements.some((m) => m.componentId === componentId);
+	const getMeasurementsForComponent = (componentId: string) => {
+		return measurements.filter((m) => m.componentId === componentId);
 	};
 
- 
 	return (
 		<div className="space-y-6">
 			<div className="bg-white rounded-lg shadow-md p-6">
 				<h2 className="text-xl font-semibold mb-4">
-					Этап 2. Измерение пассивных компонентов
+					Этап 2. Выбор пассивного компонента
 				</h2>
 
 				<div className="space-y-4">
@@ -39,7 +38,10 @@ export function PassiveMeasurementsStage({
 						</div>
 						<div className="grid grid-cols-1 gap-2">
 							{components.map((component) => {
-								const isMeasured = hasMeasurement(component.id);
+								const measurements = getMeasurementsForComponent(component.id)
+								const measurementCount = measurements.length;
+								const isMeasured = measurementCount === 3;
+
 								return (
 									<button
 										type="button"
@@ -66,7 +68,7 @@ export function PassiveMeasurementsStage({
 										>
 											{isMeasured
 												? 'Измерение выполнено'
-												: 'Измерение не выполнено'}
+												: measurementCount === 0 ? 'Измерение не выполнено' : `Выполнено ${measurementCount} из 3 измерений`}
 										</div>
 									</button>
 								);

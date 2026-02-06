@@ -56,7 +56,6 @@ export function LabWork() {
 			type: 'OPTICAL_CABLE',
 			label: 'Оптический шнур 1',
 			typicalLoss: COMPONENT_LOSS_DB.OPTICAL_CABLE,
-			connectorA: 'SC_APC',
 			connectorType: 'SC_APC'
 		},
 		{
@@ -64,7 +63,6 @@ export function LabWork() {
 			type: 'FIBER_COIL',
 			label: 'Катушка ОВ (500м)',
 			typicalLoss: COMPONENT_LOSS_DB.FIBER_COIL,
-			connectorA: 'SC_UPC',
 			connectorType: 'SC_UPC'
 		},
 		{
@@ -72,7 +70,6 @@ export function LabWork() {
 			type: 'SPLITTER_1_2',
 			label: 'Сплиттер 1:2',
 			typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_2,
-			connectorA: 'SC_APC',
 			connectorType: 'SC_APC'
 		},
 		{
@@ -80,7 +77,6 @@ export function LabWork() {
 			type: 'SPLITTER_1_4',
 			label: 'Сплиттер 1:4',
 			typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_4,
-			connectorA: 'SC_APC',
 			connectorType: 'SC_APC'
 		},
 		{
@@ -88,7 +84,6 @@ export function LabWork() {
 			type: 'SPLITTER_1_8',
 			label: 'Сплиттер 1:8',
 			typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_8,
-			connectorA: 'SC_UPC',
 			connectorType: 'SC_UPC'
 		}
 	];
@@ -216,7 +211,6 @@ export function LabWork() {
 									scheme={connectionScheme}
 									currentComponent={selectedComponent}
 									onSchemeChange={setConnectionScheme}
-									attemptCount={attemptCount}
 								/>
 							</>
 

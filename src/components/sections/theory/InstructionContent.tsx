@@ -1043,7 +1043,7 @@ export function InstructionContent() {
 				/>
 			</div>
 
-			<h2 className={headingClassNames}>
+			{/* <h2 className={headingClassNames}>
 				Измерение оптических возвратных потерь
 			</h2>
 
@@ -1282,7 +1282,7 @@ export function InstructionContent() {
 					При необходимости повторите вышеописанную процедуру для других длин
 					волн.
 				</li>
-			</ol>
+			</ol> */}
 
 			<h2 className={headingClassNames}>
 				Выполнение автоматических измерений вносимых потерь/ORL/длины волокна
