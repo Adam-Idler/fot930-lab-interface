@@ -11,33 +11,93 @@
 export type MeasurementMode = 'POWER' | 'LOSS';
 
 /** Длины волн (нм) */
-export type Wavelength = 850 | 1300 | 1310 | 1550;
+export type Wavelength = 850 | 1300 | 1310 | 1550 | 1625;
 
 /** Кнопки управления прибором */
 export type DeviceButton =
+	| 'F1'
+	| 'F2'
 	| 'POWER'
 	| 'MENU'
 	| 'UP'
 	| 'DOWN'
 	| 'ENTER'
 	| 'BACK'
-	| 'MEASURE';
+	| 'FASTEST';
 
 /** Экраны прибора (LCD) */
 export type DeviceScreen =
 	| 'OFF' // Прибор выключен
 	| 'LOADING' // Экран загрузки
 	| 'MAIN' // Главный экран
-	| 'MODE_SELECT' // Выбор режима измерения
-	| 'WAVELENGTH_SELECT' // Выбор длины волны
-	| 'READY' // Готов к измерению
-	| 'MEASURING' // Процесс измерения
-	| 'RESULT' // Результат измерения
-	| 'ERROR'; // Ошибка измерения
+	| 'MENU_SETUP' // Меню настроек
+	| 'FASTEST_SETUP' // Настройка FasTest
+	| 'FASTEST_MAIN' // Главный экран FasTest
+	| 'FASTEST_MEASURING'; // Измерение FasTest
 
 // ============================================================
 // СОСТОЯНИЕ ПРИБОРА
 // ============================================================
+
+/** Статус порта прибора */
+export type PortStatus = 'dirty' | 'cleaning' | 'clean';
+
+/** Тип порта FasTest */
+export type FasTestPortType = 'SM' | 'MM'; // Single-mode / Multi-mode
+
+/** Единицы измерения длины */
+export type LengthUnit = 'm' | 'km' | 'ft' | 'mi';
+
+/** Тип измерения опорного значения */
+export type ReferenceType = 'LOOPBACK' | 'POINT_TO_POINT' | 'NONE';
+
+/** Настройки FasTest */
+export interface FasTestSettings {
+	/** Тип порта (SM/MM) */
+	portType: FasTestPortType;
+
+	/** Единица измерения длины */
+	lengthUnit: LengthUnit;
+
+	/** Выбранные длины волн для измерения потерь */
+	lossWavelengths: Wavelength[];
+
+	/** Выбранные длины волн для измерения ORL */
+	orlWavelengths: Wavelength[];
+
+	/** Настроен ли FasTest */
+	isConfigured: boolean;
+}
+
+/** Результат измерения Reference */
+export interface ReferenceResult {
+	/** Длина волны */
+	wavelength: Wavelength;
+
+	/** Значение опорного сигнала (dBm) */
+	value: number;
+
+	/** Временная метка */
+	timestamp: number;
+}
+
+/** Состояние подготовки прибора */
+export interface PreparationState {
+	/** Статус очистки портов */
+	portStatus: PortStatus;
+
+	/** Настройки FasTest */
+	fastestSettings: FasTestSettings;
+
+	/** Результаты измерения Reference */
+	referenceResults: ReferenceResult[];
+
+	/** Тип измерения опорного значения */
+	referenceType: ReferenceType;
+
+	/** Готов ли прибор к измерениям */
+	isReadyForMeasurements: boolean;
+}
 
 /** Состояние прибора FOT-930 */
 export interface DeviceState {
@@ -47,23 +107,23 @@ export interface DeviceState {
 	/** Питание включено */
 	isPoweredOn: boolean;
 
-	/** Выбранный режим измерения */
-	mode: MeasurementMode | null;
+	/** Состояние подготовки прибора */
+	preparation: PreparationState;
 
-	/** Выбранная длина волны */
-	wavelength: Wavelength | null;
+	/** Индекс меню Setup */
+	setupMenuIndex: number;
 
-	/** Текущий индекс в меню выбора режима */
-	modeMenuIndex: number;
+	/** Индекс выбранной секции на экране FasTest Setup */
+	fastestSetupSectionIndex: number;
 
-	/** Текущий индекс в меню выбора длины волны */
-	wavelengthMenuIndex: number;
+	/** Индекс выбранной единицы измерения в Length Unit */
+	fastestLengthUnitIndex: number;
 
-	/** Последний результат измерения */
-	lastMeasurement: MeasurementResult | null;
+	/** Индекс выбранной длины волны в Loss Wavelengths */
+	fastestWavelengthIndex: number;
 
-	/** Последняя ошибка */
-	lastError: string | null;
+	/** Выбран ли тип опорного значения на экране FASTEST_MAIN */
+	fastestMainReferenceTypeSelected: boolean;
 }
 
 /** Результат измерения */
@@ -96,10 +156,17 @@ export type DeviceAction =
 	| { type: 'PRESS_DOWN' }
 	| { type: 'PRESS_ENTER' }
 	| { type: 'PRESS_BACK' }
-	| { type: 'PRESS_MEASURE' }
+	| { type: 'PRESS_FASTEST' }
+	| { type: 'PRESS_F1' }
+	| { type: 'PRESS_F2' }
 	| { type: 'COMPLETE_LOADING' }
-	| { type: 'COMPLETE_MEASUREMENT'; payload: MeasurementResult }
-	| { type: 'MEASUREMENT_ERROR'; payload: string };
+	| { type: 'CLEAN_PORTS' }
+	| { type: 'COMPLETE_PORT_CLEANING' }
+	| { type: 'TOGGLE_FASTEST_PORT' }
+	| { type: 'TOGGLE_LOSS_WAVELENGTH'; payload: Wavelength }
+	| { type: 'SET_REFERENCE_TYPE'; payload: ReferenceType }
+	| { type: 'START_REFERENCE_MEASUREMENT' }
+	| { type: 'COMPLETE_REFERENCE_MEASUREMENT'; payload: ReferenceResult[] };
 
 // ============================================================
 // ЛАБОРАТОРНАЯ РАБОТА

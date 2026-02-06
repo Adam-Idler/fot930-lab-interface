@@ -38,7 +38,7 @@ export function PassiveMeasurementsStage({
 						</div>
 						<div className="grid grid-cols-1 gap-2">
 							{components.map((component) => {
-								const measurements = getMeasurementsForComponent(component.id)
+								const measurements = getMeasurementsForComponent(component.id);
 								const measurementCount = measurements.length;
 								const isMeasured = measurementCount === 3;
 
@@ -68,7 +68,9 @@ export function PassiveMeasurementsStage({
 										>
 											{isMeasured
 												? 'Измерение выполнено'
-												: measurementCount === 0 ? 'Измерение не выполнено' : `Выполнено ${measurementCount} из 3 измерений`}
+												: measurementCount === 0
+													? 'Измерение не выполнено'
+													: `Выполнено ${measurementCount} из 3 измерений`}
 										</div>
 									</button>
 								);

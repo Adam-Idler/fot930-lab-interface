@@ -3,18 +3,16 @@
  * Координирует работу всех этапов лабораторной работы
  */
 
-import { useCallback, useState } from 'react';
-import {
-	COMPONENT_LOSS_DB,
-	generateSingleComponentMeasurement
-} from '../../../lib/fot930/measurementEngine';
+import { type Dispatch, useCallback, useRef, useState } from 'react';
+import { initialDeviceState } from '../../../lib/fot930/deviceReducer';
+import { COMPONENT_LOSS_DB } from '../../../lib/fot930/measurementEngine';
 import type {
 	CompletedMeasurement,
 	ConnectionScheme,
+	DeviceAction,
+	DeviceState,
 	LabStage,
-	MeasurementMode,
-	PassiveComponent,
-	Wavelength
+	PassiveComponent
 } from '../../../types/fot930';
 import { Device } from '../../fot930';
 import {
@@ -30,8 +28,9 @@ export function LabWork() {
 	const [currentStage, setCurrentStage] = useState<LabStage>('PREPARATION');
 	const [selectedComponent, setSelectedComponent] =
 		useState<PassiveComponent | null>(null);
-	const [attemptCount, setAttemptCount] = useState(1);
-	const [measurements, setMeasurements] = useState<CompletedMeasurement[]>([]);
+	// TODO: Восстановить при повторном подходе к реализации измерений
+	const [_attemptCount, setAttemptCount] = useState(1);
+	const [measurements, _setMeasurements] = useState<CompletedMeasurement[]>([]);
 	const [connectionScheme, setConnectionScheme] = useState<ConnectionScheme>({
 		sequence: [],
 		correctSequence: [
@@ -43,11 +42,11 @@ export function LabWork() {
 		]
 	});
 
-	// Текущие настройки прибора (из Device component)
-	const [currentMode, setCurrentMode] = useState<MeasurementMode | null>(null);
-	const [currentWavelength, setCurrentWavelength] = useState<Wavelength | null>(
-		null
-	);
+	const [deviceState, setDeviceState] =
+		useState<DeviceState>(initialDeviceState);
+
+	// Ссылка на dispatch для отправки действий в Device
+	const deviceDispatchRef = useRef<Dispatch<DeviceAction> | null>(null);
 
 	// Доступные компоненты для измерений
 	const availableComponents: PassiveComponent[] = [
@@ -88,57 +87,20 @@ export function LabWork() {
 		}
 	];
 
-	// Обработчик измерения
-	const handleMeasure = useCallback(async (): Promise<
-		{ value: number; unit: 'dBm' | 'dB' } | { error: string }
-	> => {
-		if (!selectedComponent || !currentMode || !currentWavelength) {
-			return { error: 'Выберите компонент и настройте прибор' };
+	// Обработчик очистки портов
+	const handleCleanPorts = useCallback(() => {
+		if (deviceDispatchRef.current) {
+			// Отправляем действие очистки портов в Device
+			deviceDispatchRef.current({ type: 'CLEAN_PORTS' });
+
+			// Через 3 секунды завершаем очистку
+			setTimeout(() => {
+				if (deviceDispatchRef.current) {
+					deviceDispatchRef.current({ type: 'COMPLETE_PORT_CLEANING' });
+				}
+			}, 3000);
 		}
-
-		// Имитация задержки измерения
-		await new Promise((resolve) => setTimeout(resolve, 1500));
-
-		// Генерируем результат измерения
-		const result = generateSingleComponentMeasurement(
-			selectedComponent,
-			currentMode,
-			currentWavelength
-		);
-
-		if ('error' in result) {
-			return result;
-		}
-
-		// Сохраняем измерение
-		const completedMeasurement: CompletedMeasurement = {
-			componentId: selectedComponent.id,
-			componentLabel: selectedComponent.label,
-			wavelength: currentWavelength,
-			attemptNumber: attemptCount,
-			result: {
-				value: result.value,
-				unit: result.unit,
-				mode: currentMode,
-				wavelength: currentWavelength,
-				timestamp: Date.now()
-			}
-		};
-
-		setMeasurements((prev) => [...prev, completedMeasurement]);
-
-		// Увеличиваем счётчик попыток
-		if (attemptCount < 3) {
-			setAttemptCount((prev) => prev + 1);
-		}
-
-		return result;
-	}, [
-		selectedComponent,
-		currentMode,
-		currentWavelength,
-		attemptCount
-	]);
+	}, []);
 
 	// Переключение между этапами
 	const handleStageChange = (stage: LabStage) => {
@@ -187,15 +149,21 @@ export function LabWork() {
 					{/* Левая колонка: Прибор */}
 					<div>
 						<Device
-							onMeasure={handleMeasure}
-							onModeChange={setCurrentMode}
-							onWavelengthChange={setCurrentWavelength}
+							onDeviceStateChange={setDeviceState}
+							onDispatchReady={(dispatch) => {
+								deviceDispatchRef.current = dispatch;
+							}}
 						/>
 					</div>
 
 					{/* Правая колонка: Контент этапа */}
 					<div className="space-y-6">
-						{currentStage === 'PREPARATION' && <PreparationStage />}
+						{currentStage === 'PREPARATION' && (
+							<PreparationStage
+								deviceState={deviceState}
+								onCleanPorts={handleCleanPorts}
+							/>
+						)}
 
 						{currentStage === 'CONNECTION_SCHEME' && (
 							<>
@@ -213,7 +181,6 @@ export function LabWork() {
 									onSchemeChange={setConnectionScheme}
 								/>
 							</>
-
 						)}
 
 						{currentStage === 'RESULTS_ANALYSIS' && (
@@ -224,14 +191,16 @@ export function LabWork() {
 						)}
 
 						{/* Инструкции по текущему этапу */}
-						<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-							<h3 className="font-semibold text-blue-900 mb-2">
-								{getStageTitle(currentStage)}
-							</h3>
-							<p className="text-sm text-blue-800">
-								{getStageInstructions(currentStage)}
-							</p>
-						</div>
+						{currentStage !== 'PREPARATION' && (
+							<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+								<h3 className="font-semibold text-blue-900 mb-2">
+									{getStageTitle(currentStage)}
+								</h3>
+								<p className="text-sm text-blue-800">
+									{getStageInstructions(currentStage)}
+								</p>
+							</div>
+						)}
 					</div>
 				</div>
 			</div>
@@ -245,7 +214,7 @@ export function LabWork() {
 
 function getStageTitle(stage: LabStage): string {
 	const titles: Record<LabStage, string> = {
-		PREPARATION: 'Подготовка прибора к работе',
+		PREPARATION: '',
 		CONNECTION_SCHEME: 'Сборка измерительной схемы',
 		COMPLEX_SCHEMES: 'Сложные измерительные схемы',
 		RESULTS_ANALYSIS: 'Анализ результатов'
@@ -255,8 +224,7 @@ function getStageTitle(stage: LabStage): string {
 
 function getStageInstructions(stage: LabStage): string {
 	const instructions: Record<LabStage, string> = {
-		PREPARATION:
-			'Включите прибор, очистите порты прибора, выберите режим измерения и длину волны. После настройки прибор будет готов к работе.',
+		PREPARATION: '',
 		CONNECTION_SCHEME:
 			'Выберите компонент для измерения и соберите правильную схему подключения, перетаскивая элементы мышью. Проверьте корректность последовательности перед измерениями. Выполните 3 измерения для каждого компонента.',
 		COMPLEX_SCHEMES:

@@ -4,5 +4,5 @@
 
 export { ConnectionBuilder } from './ConnectionBuilder';
 export { Device } from './Device';
- export { DeviceScreen } from './DeviceScreen';
+export { DeviceScreen } from './DeviceScreen';
 export { MeasurementTable } from './MeasurementTable';

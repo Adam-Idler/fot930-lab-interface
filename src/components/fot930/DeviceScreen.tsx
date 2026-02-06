@@ -5,15 +5,13 @@
 
 import type { DeviceState } from '../../types/fot930';
 import {
-	ScreenError,
+	ScreenFastestMain,
+	ScreenFastestMeasuring,
+	ScreenFastestSetup,
 	ScreenLoading,
 	ScreenMain,
-	ScreenMeasuring,
-	ScreenModeSelect,
-	ScreenOff,
-	ScreenReady,
-	ScreenResult,
-	ScreenWavelengthSelect
+	ScreenMenuSetup,
+	ScreenOff
 } from './device-screen';
 
 interface DeviceScreenProps {
@@ -24,11 +22,13 @@ export function DeviceScreen({ state }: DeviceScreenProps) {
 	const isOff = state.screen === 'OFF';
 
 	return (
-			<div className={`w-full h-full rounded border-2 border-gray-800 flex items-center justify-center font-mono p-4 ${
+		<div
+			className={`w-full h-full rounded border-2 border-gray-800 flex items-center justify-center font-mono p-4 ${
 				isOff ? 'bg-gray-700' : 'bg-white'
-			}`}>
-				{renderScreen(state)}
-			</div>
+			}`}
+		>
+			{renderScreen(state)}
+		</div>
 	);
 }
 
@@ -41,25 +41,19 @@ function renderScreen(state: DeviceState) {
 			return <ScreenLoading />;
 
 		case 'MAIN':
-			return <ScreenMain state={state} />;
+			return <ScreenMain />;
 
-		case 'MODE_SELECT':
-			return <ScreenModeSelect state={state} />;
+		case 'MENU_SETUP':
+			return <ScreenMenuSetup state={state} />;
 
-		case 'WAVELENGTH_SELECT':
-			return <ScreenWavelengthSelect state={state} />;
+		case 'FASTEST_SETUP':
+			return <ScreenFastestSetup state={state} />;
 
-		case 'READY':
-			return <ScreenReady state={state} />;
+		case 'FASTEST_MAIN':
+			return <ScreenFastestMain state={state} />;
 
-		case 'MEASURING':
-			return <ScreenMeasuring state={state} />;
-
-		case 'RESULT':
-			return <ScreenResult state={state} />;
-
-		case 'ERROR':
-			return <ScreenError state={state} />;
+		case 'FASTEST_MEASURING':
+			return <ScreenFastestMeasuring state={state} />;
 
 		default:
 			return <ScreenOff />;

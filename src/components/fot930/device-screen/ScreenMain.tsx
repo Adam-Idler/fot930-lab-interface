@@ -1,10 +1,4 @@
-import type { DeviceState } from '../../../types/fot930';
-
-interface ScreenMainProps {
-	state: DeviceState;
-}
-
-export function ScreenMain({ state }: ScreenMainProps) {
+export function ScreenMain() {
 	return (
 		<div className="flex flex-col items-center justify-center gap-6 text-center w-full">
 			<div className="text-2xl font-bold tracking-wider border-b-2 border-fot930-blue pb-2 text-fot930-blue">
@@ -12,15 +6,7 @@ export function ScreenMain({ state }: ScreenMainProps) {
 			</div>
 			<div className="text-xs">Optical Power Meter</div>
 
-			{state.mode && state.wavelength ? (
-				<div className="mt-4 space-y-1 text-sm">
-					<div>Mode: {state.mode}</div>
-					<div>λ: {state.wavelength} nm</div>
-					<div className="text-xs mt-2 opacity-70">Press MEASURE</div>
-				</div>
-			) : (
-				<div className="text-xs mt-4 opacity-70">Press MENU</div>
-			)}
+			<div className="text-xs mt-4 opacity-70">Press MENU</div>
 		</div>
 	);
 }

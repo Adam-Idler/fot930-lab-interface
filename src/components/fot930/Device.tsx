@@ -10,29 +10,21 @@ import {
 } from '../../lib/fot930/deviceReducer';
 import { noop } from '../../lib/utils';
 import type {
+	DeviceAction,
 	DeviceButton as DeviceButtonType,
-	MeasurementMode,
-	Wavelength
+	DeviceState
 } from '../../types/fot930';
 import { DeviceScreen } from './DeviceScreen';
 import { DeviceButton } from './device/DeviceButton';
 
 interface DeviceProps {
-	/** Callback для запуска измерения (возвращает промис с результатом) */
-	onMeasure?: () => Promise<
-		{ value: number; unit: 'dBm' | 'dB' } | { error: string }
-	>;
-	/** Callback для передачи текущего режима измерения */
-	onModeChange?: (mode: MeasurementMode | null) => void;
-	/** Callback для передачи текущей длины волны */
-	onWavelengthChange?: (wavelength: Wavelength | null) => void;
+	/** Callback для передачи состояния прибора */
+	onDeviceStateChange?: (state: DeviceState) => void;
+	/** Функция для получения dispatch (для внешних действий) */
+	onDispatchReady?: (dispatch: React.Dispatch<DeviceAction>) => void;
 }
 
-export function Device({
-	onMeasure,
-	onModeChange,
-	onWavelengthChange
-}: DeviceProps) {
+export function Device({ onDeviceStateChange, onDispatchReady }: DeviceProps) {
 	const [state, dispatch] = useReducer(deviceReducer, initialDeviceState);
 
 	// Автоматическое завершение загрузки
@@ -45,52 +37,40 @@ export function Device({
 		}
 	}, [state.screen]);
 
-	// Передача изменений режима и длины волны
+	// Передача dispatch наружу (один раз при монтировании)
 	useEffect(() => {
-		onModeChange?.(state.mode);
-	}, [state.mode, onModeChange]);
+		onDispatchReady?.(dispatch);
+	}, [onDispatchReady]);
 
+	// Передача состояния прибора наружу
 	useEffect(() => {
-		onWavelengthChange?.(state.wavelength);
-	}, [state.wavelength, onWavelengthChange]);
+		onDeviceStateChange?.(state);
+	}, [state, onDeviceStateChange]);
 
-	// Обработка измерения
+	// Обработка измерения Reference
 	useEffect(() => {
-		if (state.screen === 'MEASURING' && onMeasure) {
-			const performMeasurement = async () => {
-				try {
-					const result = await onMeasure();
+		if (state.screen === 'FASTEST_MEASURING') {
+			const performReferenceMeasurement = async () => {
+				// Симуляция измерения опорных значений для каждой длины волны
+				const referenceResults =
+					state.preparation.fastestSettings.lossWavelengths.map(
+						(wavelength) => ({
+							wavelength,
+							value: -20 + Math.random() * 5, // Случайное значение от -20 до -15 dBm
+							timestamp: Date.now()
+						})
+					);
 
-					if ('error' in result) {
-						dispatch({
-							type: 'MEASUREMENT_ERROR',
-							payload: result.error
-						});
-					} else {
-						dispatch({
-							type: 'COMPLETE_MEASUREMENT',
-							payload: {
-								value: result.value,
-								unit: result.unit,
-								mode: state.mode!,
-								wavelength: state.wavelength!,
-								timestamp: Date.now()
-							}
-						});
-					}
-				} catch (error) {
-					console.error('Measurement error:', error);
-					dispatch({
-						type: 'MEASUREMENT_ERROR',
-						payload: 'Measurement failed'
-					});
-				}
+				dispatch({
+					type: 'COMPLETE_REFERENCE_MEASUREMENT',
+					payload: referenceResults
+				});
 			};
 
-			const timer = setTimeout(performMeasurement, 1500);
+			const timer = setTimeout(performReferenceMeasurement, 3000);
 			return () => clearTimeout(timer);
 		}
-	}, [state.screen, onMeasure, state.mode, state.wavelength]);
+	}, [state.screen, state.preparation.fastestSettings.lossWavelengths]);
 
 	const handleButtonPress = (button: DeviceButtonType) => {
 		const actionMap: Record<DeviceButtonType, () => void> = {
@@ -100,7 +80,9 @@ export function Device({
 			DOWN: () => dispatch({ type: 'PRESS_DOWN' }),
 			ENTER: () => dispatch({ type: 'PRESS_ENTER' }),
 			BACK: () => dispatch({ type: 'PRESS_BACK' }),
-			MEASURE: () => dispatch({ type: 'PRESS_MEASURE' })
+			FASTEST: () => dispatch({ type: 'PRESS_FASTEST' }),
+			F1: () => dispatch({ type: 'PRESS_F1' }),
+			F2: () => dispatch({ type: 'PRESS_F2' })
 		};
 
 		actionMap[button]?.();
@@ -130,8 +112,14 @@ export function Device({
 								}
 								onClick={noop}
 							/>
-							<DeviceButton label="F1" onClick={noop} />
-							<DeviceButton label="F2" onClick={noop} />
+							<DeviceButton
+								label="F1"
+								onClick={() => handleButtonPress('F1')}
+							/>
+							<DeviceButton
+								label="F2"
+								onClick={() => handleButtonPress('F2')}
+							/>
 							<DeviceButton
 								icon={
 									<img
@@ -224,7 +212,7 @@ export function Device({
 						<div className="rotate-90 absolute top-2/3 left-0">
 							<DeviceButton
 								label="FasTest"
-								onClick={() => handleButtonPress('MEASURE')}
+								onClick={() => handleButtonPress('FASTEST')}
 							/>
 						</div>
 
