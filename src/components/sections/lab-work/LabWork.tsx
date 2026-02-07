@@ -55,35 +55,40 @@ export function LabWork() {
 			type: 'OPTICAL_CABLE',
 			label: 'Оптический шнур 1',
 			typicalLoss: COMPONENT_LOSS_DB.OPTICAL_CABLE,
-			connectorType: 'SC_APC'
+			connectorType: 'SC_APC',
+			fiberLength: 2
 		},
 		{
 			id: 'fiber_coil_1',
 			type: 'FIBER_COIL',
 			label: 'Катушка ОВ (500м)',
 			typicalLoss: COMPONENT_LOSS_DB.FIBER_COIL,
-			connectorType: 'SC_UPC'
+			connectorType: 'SC_UPC',
+			fiberLength: 500
 		},
 		{
 			id: 'splitter_1_2',
 			type: 'SPLITTER_1_2',
 			label: 'Сплиттер 1:2',
 			typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_2,
-			connectorType: 'SC_APC'
+			connectorType: 'SC_APC',
+			fiberLength: 1
 		},
 		{
 			id: 'splitter_1_4',
 			type: 'SPLITTER_1_4',
 			label: 'Сплиттер 1:4',
 			typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_4,
-			connectorType: 'SC_APC'
+			connectorType: 'SC_APC',
+			fiberLength: 1
 		},
 		{
 			id: 'splitter_1_8',
 			type: 'SPLITTER_1_8',
 			label: 'Сплиттер 1:8',
 			typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_8,
-			connectorType: 'SC_UPC'
+			connectorType: 'SC_UPC',
+			fiberLength: 2
 		}
 	];
 
@@ -153,6 +158,7 @@ export function LabWork() {
 							onDispatchReady={(dispatch) => {
 								deviceDispatchRef.current = dispatch;
 							}}
+							selectedComponent={selectedComponent}
 						/>
 					</div>
 

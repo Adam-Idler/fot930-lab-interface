@@ -4,7 +4,9 @@
  */
 
 import type {
+	BidirectionalMeasurementResult,
 	ConnectionScheme,
+	FiberMeasurementResult,
 	MeasurementMode,
 	PassiveComponent,
 	Wavelength
@@ -235,30 +237,117 @@ function gaussianRandom(): number {
 }
 
 /**
- * Создаёт тестовый сценарий с заведомо избыточными потерями
- * Для демонстрации ошибки измерения
+ * Генерирует двунаправленное FASTEST измерение для компонента
+ * Эмулирует измерения A→B и B→A для всех настроенных длин волн
+ * Если есть предыдущее измерение, использует его с минимальной вариацией (±0.01-0.02 dB)
+ *
+ * @param component - Пассивный компонент для измерения
+ * @param wavelengths - Длины волн для измерения
+ * @param fiberCounter - Текущий номер измерения (для имени волокна)
+ * @param previousResult - Предыдущий результат измерения этого компонента (если есть)
+ * @returns Результат измерения волокна или ошибка
  */
-export function createExcessiveLossScenario(): ConnectionScheme {
+export function generateFiberMeasurement(
+	component: PassiveComponent,
+	wavelengths: Wavelength[],
+	fiberCounter: number,
+	previousResult?: FiberMeasurementResult
+): FiberMeasurementResult | { error: string } {
+	if (!component.fiberLength) {
+		return { error: 'Component has no fiber length specified' };
+	}
+
+	const bidirectionalResults: BidirectionalMeasurementResult[] = [];
+
+	// Если есть предыдущий результат для этого компонента, используем его с минимальной вариацией
+	if (previousResult) {
+		for (const wavelength of wavelengths) {
+			const prevWavelengthResult = previousResult.wavelengths.find(
+				(w) => w.wavelength === wavelength
+			);
+
+			if (prevWavelengthResult) {
+				// Добавляем очень маленькую вариацию (±0.01-0.02 dB)
+				const minimalVariation = gaussianRandom() * 0.015;
+				const aToB = prevWavelengthResult.aToB + minimalVariation;
+				const bToA = prevWavelengthResult.bToA + minimalVariation;
+				const average = (aToB + bToA) / 2;
+
+				bidirectionalResults.push({
+					wavelength,
+					aToB: parseFloat(aToB.toFixed(2)),
+					bToA: parseFloat(bToA.toFixed(2)),
+					average: parseFloat(average.toFixed(2))
+				});
+			} else {
+				// Если длины волны нет в предыдущем результате, генерируем новое
+				const baseResult = generateSingleComponentMeasurement(
+					component,
+					'LOSS',
+					wavelength
+				);
+
+				if ('error' in baseResult) {
+					return baseResult;
+				}
+
+				const aToB = baseResult.value;
+				const asymmetry = gaussianRandom() * 0.15;
+				const bToA = aToB + asymmetry;
+				const average = (aToB + bToA) / 2;
+
+				bidirectionalResults.push({
+					wavelength,
+					aToB: parseFloat(aToB.toFixed(2)),
+					bToA: parseFloat(bToA.toFixed(2)),
+					average: parseFloat(average.toFixed(2))
+				});
+			}
+		}
+	} else {
+		// Нет предыдущего результата - генерируем новые измерения
+		for (const wavelength of wavelengths) {
+			// Генерируем базовое измерение потерь (A→B)
+			const baseResult = generateSingleComponentMeasurement(
+				component,
+				'LOSS',
+				wavelength
+			);
+
+			if ('error' in baseResult) {
+				return baseResult;
+			}
+
+			// A→B: используем базовый результат
+			const aToB = baseResult.value;
+
+			// B→A: добавляем небольшую асимметрию (±0.1-0.2 dB)
+			// Реальные волокна имеют небольшую асимметрию из-за неоднородности
+			const asymmetry = gaussianRandom() * 0.15;
+			const bToA = aToB + asymmetry;
+
+			// Среднее значение
+			const average = (aToB + bToA) / 2;
+
+			bidirectionalResults.push({
+				wavelength,
+				aToB: parseFloat(aToB.toFixed(2)),
+				bToA: parseFloat(bToA.toFixed(2)),
+				average: parseFloat(average.toFixed(2))
+			});
+		}
+	}
+
+	// Форматируем номер волокна с лидирующими нулями
+	const fiberNumber = fiberCounter.toString().padStart(3, '0');
+
 	return {
-		sequence: [
-			{ type: 'TESTER', id: 'tester' },
-			{ type: 'CONNECTOR', id: 'conn1', connectorType: 'SC_APC' },
-			{ type: 'COMPONENT', id: 'splitter_1_32' },
-			{ type: 'CONNECTOR', id: 'conn2', connectorType: 'SC_APC' },
-			{ type: 'COMPONENT', id: 'splitter_1_32' },
-			{ type: 'CONNECTOR', id: 'conn3', connectorType: 'SC_APC' },
-			{ type: 'COMPONENT', id: 'fiber_coil' },
-			{ type: 'CONNECTOR', id: 'conn4', connectorType: 'SC_APC' }
-		],
-		correctSequence: [
-			'tester',
-			'conn1',
-			'splitter_1_32',
-			'conn2',
-			'splitter_1_32',
-			'conn3',
-			'fiber_coil',
-			'conn4'
-		]
+		fiberName: `BCFiber${fiberNumber}`,
+		cableName: 'BigCable',
+		componentId: component.id,
+		componentLabel: component.label,
+		fiberLength: component.fiberLength,
+		wavelengths: bidirectionalResults,
+		timestamp: Date.now()
 	};
 }

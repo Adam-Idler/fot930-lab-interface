@@ -33,7 +33,8 @@ export type DeviceScreen =
 	| 'MENU_SETUP' // Меню настроек
 	| 'FASTEST_SETUP' // Настройка FasTest
 	| 'FASTEST_MAIN' // Главный экран FasTest
-	| 'FASTEST_MEASURING'; // Измерение FasTest
+	| 'FASTEST_MEASURING' // Измерение FasTest
+	| 'FASTEST_RESULTS'; // Результаты измерения FasTest
 
 // ============================================================
 // СОСТОЯНИЕ ПРИБОРА
@@ -81,6 +82,45 @@ export interface ReferenceResult {
 	timestamp: number;
 }
 
+/** Результат двунаправленного измерения для одной длины волны */
+export interface BidirectionalMeasurementResult {
+	/** Длина волны */
+	wavelength: Wavelength;
+
+	/** Потери A→B (dB) */
+	aToB: number;
+
+	/** Потери B→A (dB) */
+	bToA: number;
+
+	/** Среднее значение потерь (dB) */
+	average: number;
+}
+
+/** Результат FASTEST измерения волокна */
+export interface FiberMeasurementResult {
+	/** Название волокна (BCFiber001, BCFiber002, ...) */
+	fiberName: string;
+
+	/** Название кабеля */
+	cableName: string;
+
+	/** ID компонента */
+	componentId: string;
+
+	/** Название компонента */
+	componentLabel: string;
+
+	/** Длина волокна (метры) */
+	fiberLength: number;
+
+	/** Результаты измерений для каждой длины волны */
+	wavelengths: BidirectionalMeasurementResult[];
+
+	/** Временная метка измерения */
+	timestamp: number;
+}
+
 /** Состояние подготовки прибора */
 export interface PreparationState {
 	/** Статус очистки портов */
@@ -124,6 +164,15 @@ export interface DeviceState {
 
 	/** Выбран ли тип опорного значения на экране FASTEST_MAIN */
 	fastestMainReferenceTypeSelected: boolean;
+
+	/** Счетчик волокон для автоувеличения номера (001, 002, ...) */
+	fiberCounter: number;
+
+	/** Результат последнего FASTEST измерения волокна */
+	currentFiberResult: FiberMeasurementResult | null;
+
+	/** История измерений волокон (для сохранения результатов) */
+	fiberMeasurementsHistory: Record<string, FiberMeasurementResult>;
 }
 
 /** Результат измерения */
@@ -166,7 +215,9 @@ export type DeviceAction =
 	| { type: 'TOGGLE_LOSS_WAVELENGTH'; payload: Wavelength }
 	| { type: 'SET_REFERENCE_TYPE'; payload: ReferenceType }
 	| { type: 'START_REFERENCE_MEASUREMENT' }
-	| { type: 'COMPLETE_REFERENCE_MEASUREMENT'; payload: ReferenceResult[] };
+	| { type: 'COMPLETE_REFERENCE_MEASUREMENT'; payload: ReferenceResult[] }
+	| { type: 'START_FIBER_MEASUREMENT'; payload: PassiveComponent }
+	| { type: 'COMPLETE_FIBER_MEASUREMENT'; payload: FiberMeasurementResult };
 
 // ============================================================
 // ЛАБОРАТОРНАЯ РАБОТА
@@ -204,6 +255,9 @@ export interface PassiveComponent {
 
 	/** Тип коннектора */
 	connectorType: ConnectorType;
+
+	/** Длина волокна (метры) */
+	fiberLength: number;
 }
 
 /** Схема подключения */

@@ -35,7 +35,10 @@ export const initialDeviceState: DeviceState = {
 	fastestSetupSectionIndex: 0,
 	fastestLengthUnitIndex: 0,
 	fastestWavelengthIndex: 0,
-	fastestMainReferenceTypeSelected: false
+	fastestMainReferenceTypeSelected: false,
+	fiberCounter: 0,
+	currentFiberResult: null,
+	fiberMeasurementsHistory: {}
 };
 
 /** Доступные длины волн для FasTest */
@@ -136,6 +139,24 @@ export function deviceReducer(
 						...state.preparation,
 						referenceResults: action.payload
 					})
+				}
+			};
+
+		case 'START_FIBER_MEASUREMENT':
+			return {
+				...state,
+				screen: 'FASTEST_MEASURING'
+			};
+
+		case 'COMPLETE_FIBER_MEASUREMENT':
+			return {
+				...state,
+				screen: 'FASTEST_RESULTS',
+				currentFiberResult: action.payload,
+				fiberCounter: state.fiberCounter + 1,
+				fiberMeasurementsHistory: {
+					...state.fiberMeasurementsHistory,
+					[action.payload.componentId]: action.payload
 				}
 			};
 
@@ -449,9 +470,16 @@ function handleBackButton(state: DeviceState): DeviceState {
 }
 
 function handleFastestButton(state: DeviceState): DeviceState {
-	// Кнопка FasTest всегда открывает экран FASTEST_MAIN
-	// если FasTest уже настроен, иначе ничего не делает
 	if (state.preparation.fastestSettings.isConfigured) {
+		// С экрана FASTEST_RESULTS повторное нажатие запускает новое измерение
+		if (state.screen === 'FASTEST_RESULTS' || state.screen === 'FASTEST_MAIN') {
+			return {
+				...state,
+				screen: 'FASTEST_MEASURING'
+			};
+		}
+
+		// С других экранов открывает FASTEST_MAIN
 		return {
 			...state,
 			screen: 'FASTEST_MAIN',
@@ -489,7 +517,25 @@ function handleF1Button(state: DeviceState): DeviceState {
 
 function handleF2Button(state: DeviceState): DeviceState {
 	// F2 на экране FASTEST_MAIN начинает измерение тестируемого волокна
-	// Это будет реализовано позже
+	if (
+		state.screen === 'FASTEST_MAIN' &&
+		state.preparation.isReadyForMeasurements
+	) {
+		return {
+			...state,
+			screen: 'FASTEST_MEASURING'
+		};
+	}
+
+	// F2 на экране FASTEST_RESULTS возвращает на FASTEST_MAIN
+	if (state.screen === 'FASTEST_RESULTS') {
+		return {
+			...state,
+			screen: 'FASTEST_MAIN',
+			currentFiberResult: null
+		};
+	}
+
 	return state;
 }
 

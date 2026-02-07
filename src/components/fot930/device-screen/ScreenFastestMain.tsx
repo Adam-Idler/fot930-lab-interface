@@ -7,9 +7,12 @@ interface ScreenFastestMainProps {
 export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 	const { referenceResults, referenceType, fastestSettings } =
 		state.preparation;
+	const { fiberCounter } = state;
 	const hasReference = referenceResults.length > 0;
 	const isReferenceTypeSelected = state.fastestMainReferenceTypeSelected;
-	const waveLengthsLength = fastestSettings.lossWavelengths.length;
+
+	// Форматирование номера волокна с лидирующими нулями
+	const fiberNumber = fiberCounter.toString().padStart(3, '0');
 
 	// Форматирование даты и времени
 	const formatDateTime = (timestamp: number) => {
@@ -31,7 +34,7 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 
 				<div>
 					<span className="font-semibold">След. волокно:</span>{' '}
-					<span className="text-gray-600">BCFiber001</span>
+					<span className="text-gray-600">BCFiber{fiberNumber}</span>
 				</div>
 
 				<div
@@ -59,21 +62,19 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 
 						{/* Таблица опорных значений */}
 						<div className="border border-gray-300 mt-2">
-							<div
-								className={`grid grid-cols-${waveLengthsLength + 1} bg-gray-100 border-b border-gray-300`}
-							>
-								<div className="p-1 text-[10px] font-semibold border-r border-gray-300"></div>
+							<div className="flex bg-gray-100 border-b border-gray-300">
+								<div className="w-1/3 p-1 text-[10px] font-semibold border-r border-gray-300"></div>
 								{fastestSettings.lossWavelengths.map((wl) => (
 									<div
 										key={wl}
-										className="p-1 text-[10px] font-semibold text-center border-r border-gray-300 last:border-r-0"
+										className="w-1/3 p-1 text-[10px] font-semibold text-center border-r border-gray-300 last:border-r-0"
 									>
 										{wl}
 									</div>
 								))}
 							</div>
-							<div className={`grid grid-cols-${waveLengthsLength + 1}`}>
-								<div className="p-1 text-[10px] border-r border-gray-300">
+							<div className="flex">
+								<div className="w-1/3 p-1 text-[10px] border-r border-gray-300">
 									вн. помехи
 								</div>
 								{fastestSettings.lossWavelengths.map((wl) => {
@@ -81,7 +82,7 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 									return (
 										<div
 											key={wl}
-											className="p-1 text-[10px] text-center border-r border-gray-300 last:border-r-0"
+											className="w-1/3 p-1 text-[10px] text-center border-r border-gray-300 last:border-r-0"
 										>
 											{ref ? `${ref.value.toFixed(2)}dBm` : '-'}
 										</div>
@@ -104,7 +105,8 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 			</div>
 
 			<div className="text-[10px] text-gray-500 text-center border-t border-gray-200 pt-1">
-				UP/DOWN: Navigation | ENTER: Change | F1: Reference | F2: Measure
+				UP/DOWN: Navigation | ENTER: Change | F1: Reference | F2/FasTest:
+				Measure
 			</div>
 		</div>
 	);

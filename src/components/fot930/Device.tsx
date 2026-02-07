@@ -8,11 +8,13 @@ import {
 	deviceReducer,
 	initialDeviceState
 } from '../../lib/fot930/deviceReducer';
+import { generateFiberMeasurement } from '../../lib/fot930/measurementEngine';
 import { noop } from '../../lib/utils';
 import type {
 	DeviceAction,
 	DeviceButton as DeviceButtonType,
-	DeviceState
+	DeviceState,
+	PassiveComponent
 } from '../../types/fot930';
 import { DeviceScreen } from './DeviceScreen';
 import { DeviceButton } from './device/DeviceButton';
@@ -22,9 +24,15 @@ interface DeviceProps {
 	onDeviceStateChange?: (state: DeviceState) => void;
 	/** Функция для получения dispatch (для внешних действий) */
 	onDispatchReady?: (dispatch: React.Dispatch<DeviceAction>) => void;
+	/** Выбранный компонент для измерений */
+	selectedComponent?: PassiveComponent | null;
 }
 
-export function Device({ onDeviceStateChange, onDispatchReady }: DeviceProps) {
+export function Device({
+	onDeviceStateChange,
+	onDispatchReady,
+	selectedComponent
+}: DeviceProps) {
 	const [state, dispatch] = useReducer(deviceReducer, initialDeviceState);
 
 	// Автоматическое завершение загрузки
@@ -49,7 +57,10 @@ export function Device({ onDeviceStateChange, onDispatchReady }: DeviceProps) {
 
 	// Обработка измерения Reference
 	useEffect(() => {
-		if (state.screen === 'FASTEST_MEASURING') {
+		if (
+			state.screen === 'FASTEST_MEASURING' &&
+			state.preparation.referenceResults.length === 0
+		) {
 			const performReferenceMeasurement = async () => {
 				// Симуляция измерения опорных значений для каждой длины волны
 				const referenceResults =
@@ -70,7 +81,50 @@ export function Device({ onDeviceStateChange, onDispatchReady }: DeviceProps) {
 			const timer = setTimeout(performReferenceMeasurement, 3000);
 			return () => clearTimeout(timer);
 		}
-	}, [state.screen, state.preparation.fastestSettings.lossWavelengths]);
+	}, [state.screen, state.preparation]);
+
+	// Обработка измерения Fiber
+	useEffect(() => {
+		if (
+			state.screen === 'FASTEST_MEASURING' &&
+			state.preparation.referenceResults.length > 0 &&
+			selectedComponent
+		) {
+			const performFiberMeasurement = async () => {
+				// Проверяем, есть ли предыдущее измерение для этого компонента
+				const previousResult =
+					state.fiberMeasurementsHistory[selectedComponent.id];
+
+				// Генерируем двунаправленное измерение с кешированием
+				const result = generateFiberMeasurement(
+					selectedComponent,
+					state.preparation.fastestSettings.lossWavelengths,
+					state.fiberCounter,
+					previousResult
+				);
+
+				if ('error' in result) {
+					// Ошибка - возврат на FASTEST_MAIN
+					dispatch({ type: 'PRESS_BACK' });
+					return;
+				}
+
+				dispatch({
+					type: 'COMPLETE_FIBER_MEASUREMENT',
+					payload: result
+				});
+			};
+
+			const timer = setTimeout(performFiberMeasurement, 3000);
+			return () => clearTimeout(timer);
+		}
+	}, [
+		state.screen,
+		state.preparation,
+		selectedComponent,
+		state.fiberCounter,
+		state.fiberMeasurementsHistory
+	]);
 
 	const handleButtonPress = (button: DeviceButtonType) => {
 		const actionMap: Record<DeviceButtonType, () => void> = {

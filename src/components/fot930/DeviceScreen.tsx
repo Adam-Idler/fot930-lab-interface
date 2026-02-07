@@ -7,6 +7,7 @@ import type { DeviceState } from '../../types/fot930';
 import {
 	ScreenFastestMain,
 	ScreenFastestMeasuring,
+	ScreenFastestResults,
 	ScreenFastestSetup,
 	ScreenLoading,
 	ScreenMain,
@@ -54,6 +55,9 @@ function renderScreen(state: DeviceState) {
 
 		case 'FASTEST_MEASURING':
 			return <ScreenFastestMeasuring state={state} />;
+
+		case 'FASTEST_RESULTS':
+			return <ScreenFastestResults state={state} />;
 
 		default:
 			return <ScreenOff />;
