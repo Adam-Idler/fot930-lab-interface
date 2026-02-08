@@ -6,7 +6,7 @@ import { ConnectionBuilder } from '../../../fot930';
 
 interface ConnectionSchemeStageProps {
 	scheme: ConnectionScheme;
-	currentComponent: PassiveComponent | null;
+	currentComponent: PassiveComponent;
 	onSchemeChange: (scheme: ConnectionScheme) => void;
 }
 
@@ -32,8 +32,8 @@ export function ConnectionSchemeStage({
 		},
 		{
 			type: 'COMPONENT' as const,
-			id: currentComponent?.id || 'optical_cable_1',
-			label: currentComponent?.label || 'Optical Cable'
+			id: currentComponent.id,
+			label: currentComponent.label
 		},
 		{ type: 'TESTER' as const, id: 'tester_2', label: 'Тестер FOT-930 2' }
 	];

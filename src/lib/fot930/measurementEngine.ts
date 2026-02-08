@@ -9,6 +9,7 @@ import type {
 	FiberMeasurementResult,
 	MeasurementMode,
 	PassiveComponent,
+	PortStatus,
 	Wavelength
 } from '../../types/fot930';
 
@@ -350,4 +351,76 @@ export function generateFiberMeasurement(
 		wavelengths: bidirectionalResults,
 		timestamp: Date.now()
 	};
+}
+
+/**
+ * Генерирует стабильные опорные значения для FasTest измерений
+ * Учитывает состояние портов и предыдущие измерения
+ *
+ * @param wavelengths - Длины волн для измерения
+ * @param portStatus - Состояние портов ('clean' | 'dirty' | 'cleaning')
+ * @param previousResults - Предыдущие опорные значения (для стабильности при повторных измерениях)
+ * @returns Массив опорных значений
+ */
+export function generateReferenceMeasurement(
+	wavelengths: Wavelength[],
+	portStatus: PortStatus,
+	previousResults?: { wavelength: Wavelength; value: number }[]
+): { wavelength: Wavelength; value: number }[] {
+	// Базовые потери для обратной петли (loopback):
+	// - 2 коннектора (на приборе и в петле): 2 × 0.3 = 0.6 dB
+	// - Патч-корд (~1 метр): ~0.1 dB
+	// - Итого: ~0.7 dB
+	const BASE_LOOPBACK_LOSS: Record<Wavelength, number> = {
+		850: 0.75,
+		1300: 0.72,
+		1310: 0.7,
+		1550: 0.68,
+		1625: 0.69
+	};
+
+	// Дополнительные потери от грязных портов
+	const DIRTY_PORT_PENALTY = 0.8; // +0.8 dB для грязных портов
+
+	return wavelengths.map((wavelength) => {
+		// Генерируем ожидаемое базовое значение для текущего состояния портов
+		let expectedBaseLoss = BASE_LOOPBACK_LOSS[wavelength];
+
+		// Добавляем penalty если порты грязные или в процессе очистки
+		if (portStatus === 'dirty' || portStatus === 'cleaning') {
+			expectedBaseLoss += DIRTY_PORT_PENALTY;
+		}
+
+		// Проверяем есть ли предыдущее измерение для этой длины волны
+		const prevResult = previousResults?.find(
+			(r) => r.wavelength === wavelength
+		);
+
+		if (prevResult) {
+			// Проверяем отличается ли предыдущее значение от ожидаемого для текущего состояния
+			// Если разница больше 0.3 dB - значит состояние портов изменилось
+			const difference = Math.abs(prevResult.value - expectedBaseLoss);
+
+			if (difference < 0.3) {
+				// Состояние портов не изменилось: добавляем минимальную вариацию (±0.01-0.02 dB)
+				const minimalVariation = gaussianRandom() * 0.015;
+				const value = prevResult.value + minimalVariation;
+				return {
+					wavelength,
+					value: parseFloat(value.toFixed(2))
+				};
+			}
+			// Иначе: состояние портов изменилось - генерируем новое базовое значение
+		}
+
+		// Первое измерение или после изменения состояния портов:
+		// генерируем новое базовое значение с вариацией
+		const variation = gaussianRandom() * MEASUREMENT_CONFIG.MEASUREMENT_STD_DEV;
+		const value = expectedBaseLoss + variation;
+
+		return {
+			wavelength,
+			value: parseFloat(value.toFixed(2))
+		};
+	});
 }

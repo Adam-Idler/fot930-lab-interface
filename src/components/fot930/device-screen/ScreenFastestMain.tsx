@@ -129,15 +129,17 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 							</div>
 
 							{/* Дата последнего измерения */}
-							<div className="text-[9px] text-fot930-blue mt-1">
+							<div className="text-[10px] text-fot930-blue mt-1">
 								Изм. опорн. зн. между точек (
 								{formatDateTime(referenceResults[0].timestamp)})
 							</div>
 						</div>
 					</div>
 				) : (
-					<div className="bg-yellow-50 border border-yellow-300 px-2 py-2 text-[10px] text-yellow-800 rounded">
-						Измерение опорного значения ещё не было произведено
+					<div className="flex justify-center text-center mt-2">
+						<span className="bg-yellow-50 border border-yellow-300 mt-2 px-2 py-2 text-[10px] text-yellow-800 rounded">
+							Измерение опорного значения ещё не было произведено
+						</span>
 					</div>
 				)}
 			</div>

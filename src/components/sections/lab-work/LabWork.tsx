@@ -23,11 +23,56 @@ import {
 	StageButton
 } from './components';
 
+// Доступные компоненты для измерений
+const availableComponents: PassiveComponent[] = [
+	{
+		id: 'optical_cable_1',
+		type: 'OPTICAL_CABLE',
+		label: 'Оптический шнур 1',
+		typicalLoss: COMPONENT_LOSS_DB.OPTICAL_CABLE,
+		connectorType: 'SC_APC',
+		fiberLength: 2
+	},
+	{
+		id: 'fiber_coil_1',
+		type: 'FIBER_COIL',
+		label: 'Катушка ОВ (500м)',
+		typicalLoss: COMPONENT_LOSS_DB.FIBER_COIL,
+		connectorType: 'SC_UPC',
+		fiberLength: 500
+	},
+	{
+		id: 'splitter_1_2',
+		type: 'SPLITTER_1_2',
+		label: 'Сплиттер 1:2',
+		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_2,
+		connectorType: 'SC_APC',
+		fiberLength: 1
+	},
+	{
+		id: 'splitter_1_4',
+		type: 'SPLITTER_1_4',
+		label: 'Сплиттер 1:4',
+		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_4,
+		connectorType: 'SC_APC',
+		fiberLength: 1
+	},
+	{
+		id: 'splitter_1_8',
+		type: 'SPLITTER_1_8',
+		label: 'Сплиттер 1:8',
+		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_8,
+		connectorType: 'SC_UPC',
+		fiberLength: 2
+	}
+];
+
 // Добавить завершение лабораторной работы после всех измерений
 export function LabWork() {
 	const [currentStage, setCurrentStage] = useState<LabStage>('PREPARATION');
-	const [selectedComponent, setSelectedComponent] =
-		useState<PassiveComponent | null>(null);
+	const [selectedComponent, setSelectedComponent] = useState<PassiveComponent>(
+		availableComponents[0]
+	);
 	// TODO: Восстановить при повторном подходе к реализации измерений
 	const [_attemptCount, setAttemptCount] = useState(1);
 	const [measurements, _setMeasurements] = useState<CompletedMeasurement[]>([]);
@@ -36,20 +81,19 @@ export function LabWork() {
 		correctSequence: [
 			'tester',
 			'connector_apc_1',
-			selectedComponent?.id || 'optical_cable_1',
+			selectedComponent.id,
 			'connector_apc_2',
 			'tester_2'
 		]
 	});
 
 	useEffect(() => {
-		// Сбросить измерения при смене выбранного компонента
 		setConnectionScheme((prev) => ({
 			...prev,
 			correctSequence: [
 				'tester',
 				'connector_apc_1',
-				selectedComponent?.id || 'optical_cable_1',
+				selectedComponent.id,
 				'connector_apc_2',
 				'tester_2'
 			]
@@ -61,50 +105,6 @@ export function LabWork() {
 
 	// Ссылка на dispatch для отправки действий в Device
 	const deviceDispatchRef = useRef<Dispatch<DeviceAction> | null>(null);
-
-	// Доступные компоненты для измерений
-	const availableComponents: PassiveComponent[] = [
-		{
-			id: 'optical_cable_1',
-			type: 'OPTICAL_CABLE',
-			label: 'Оптический шнур 1',
-			typicalLoss: COMPONENT_LOSS_DB.OPTICAL_CABLE,
-			connectorType: 'SC_APC',
-			fiberLength: 2
-		},
-		{
-			id: 'fiber_coil_1',
-			type: 'FIBER_COIL',
-			label: 'Катушка ОВ (500м)',
-			typicalLoss: COMPONENT_LOSS_DB.FIBER_COIL,
-			connectorType: 'SC_UPC',
-			fiberLength: 500
-		},
-		{
-			id: 'splitter_1_2',
-			type: 'SPLITTER_1_2',
-			label: 'Сплиттер 1:2',
-			typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_2,
-			connectorType: 'SC_APC',
-			fiberLength: 1
-		},
-		{
-			id: 'splitter_1_4',
-			type: 'SPLITTER_1_4',
-			label: 'Сплиттер 1:4',
-			typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_4,
-			connectorType: 'SC_APC',
-			fiberLength: 1
-		},
-		{
-			id: 'splitter_1_8',
-			type: 'SPLITTER_1_8',
-			label: 'Сплиттер 1:8',
-			typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_8,
-			connectorType: 'SC_UPC',
-			fiberLength: 2
-		}
-	];
 
 	// Обработчик очистки портов
 	const handleCleanPorts = useCallback(() => {

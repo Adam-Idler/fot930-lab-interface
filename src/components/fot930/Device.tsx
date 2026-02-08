@@ -8,7 +8,10 @@ import {
 	deviceReducer,
 	initialDeviceState
 } from '../../lib/fot930/deviceReducer';
-import { generateFiberMeasurement } from '../../lib/fot930/measurementEngine';
+import {
+	generateFiberMeasurement,
+	generateReferenceMeasurement
+} from '../../lib/fot930/measurementEngine';
 import { noop } from '../../lib/utils';
 import type {
 	DeviceAction,
@@ -62,15 +65,20 @@ export function Device({
 			state.currentMeasurementType === 'REFERENCE'
 		) {
 			const performReferenceMeasurement = async () => {
-				// Симуляция измерения опорных значений для каждой длины волны
-				const referenceResults =
-					state.preparation.fastestSettings.lossWavelengths.map(
-						(wavelength) => ({
-							wavelength,
-							value: 0.5 + Math.random() * 2.5, // Случайное значение от 0.5 до 3 dB (потери обратной петли)
-							timestamp: Date.now()
-						})
-					);
+				// Генерируем стабильные опорные значения с учетом состояния портов
+				const measurements = generateReferenceMeasurement(
+					state.preparation.fastestSettings.lossWavelengths,
+					state.preparation.portStatus,
+					state.preparation.referenceResults.length > 0
+						? state.preparation.referenceResults
+						: undefined
+				);
+
+				// Добавляем timestamp к каждому измерению
+				const referenceResults = measurements.map((m) => ({
+					...m,
+					timestamp: Date.now()
+				}));
 
 				dispatch({
 					type: 'COMPLETE_REFERENCE_MEASUREMENT',
