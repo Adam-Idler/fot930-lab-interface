@@ -1,4 +1,5 @@
 import type { DeviceState, Wavelength } from '../../../types/fot930';
+import { DropdownField } from './DropdownField';
 
 interface ScreenFastestSetupProps {
 	state: DeviceState;
@@ -18,80 +19,72 @@ export function ScreenFastestSetup({ state }: ScreenFastestSetupProps) {
 	const isLengthUnitSelected = state.fastestSetupSectionIndex === 1;
 	const isWavelengthsSelected = state.fastestSetupSectionIndex === 2;
 
+	const portOptions = ['Singlemode', 'Multimode'];
+	const lengthUnitOptions = lengthUnits.map((u) => u.label);
+
 	return (
-		<div className="flex flex-col w-full h-full p-3 text-xs">
-			<div className="text-sm font-bold mb-3 pb-1 border-b border-fot930-blue text-fot930-blue">
+		<div className="flex flex-col w-full h-full text-xs">
+			<div className="text-lg font-bold mb-3 text-fot930-blue">
 				FasTest Setup (As Master)
 			</div>
 
 			<div className="grid grid-cols-2 gap-4 flex-1">
 				{/* Левая колонка */}
 				<div className="space-y-2">
-					<div
-						className={`p-2 -ml-2 rounded border-2 transition-all ${
-							isPortSelected
-								? 'border-blue-500 bg-blue-50'
-								: 'border-transparent'
-						}`}
-					>
-						<div className="font-semibold mb-1">FasTest Port</div>
-						<div className="font-bold text-gray-800">
-							{fastestSettings.portType === 'SM' ? 'Single-mode' : 'Multi-mode'}
-						</div>
-					</div>
+					<DropdownField
+						label="FasTest Port"
+						value={
+							fastestSettings.portType === 'SM' ? 'Singlemode' : 'Multimode'
+						}
+						isSelected={isPortSelected}
+						isActive={true}
+						options={portOptions}
+						selectedIndex={state.dropdownIndex}
+						isOpen={state.openDropdown === 'PORT'}
+					/>
 
-					<div>
-						<div className="font-semibold mb-1">DUT Type</div>
-						<div className="text-gray-400">125/9</div>
-					</div>
+					<DropdownField
+						label="DUT Type"
+						value="125/9"
+						isSelected={false}
+						isActive={false}
+						options={[]}
+						isOpen={false}
+					/>
 
-					<div
-						className={`p-2 -ml-2 rounded border-2 transition-all ${
-							isLengthUnitSelected
-								? 'border-blue-500 bg-blue-50'
-								: 'border-transparent'
-						}`}
-					>
-						<div className="font-semibold mb-1">Length Unit</div>
-						<div className="space-y-1">
-							{lengthUnits.map((unit, index) => {
-								const isSelected = fastestSettings.lengthUnit === unit.value;
-								const isCursor =
-									isLengthUnitSelected &&
-									index === state.fastestLengthUnitIndex;
+					<DropdownField
+						label="Length Unit"
+						value={fastestSettings.lengthUnit}
+						isSelected={isLengthUnitSelected}
+						isActive={true}
+						options={lengthUnitOptions}
+						selectedIndex={state.dropdownIndex}
+						isOpen={state.openDropdown === 'LENGTH_UNIT'}
+					/>
 
-								return (
-									<div
-										key={unit.value}
-										className={`flex items-center gap-2 px-1 rounded ${
-											isCursor ? 'bg-blue-100 font-bold' : ''
-										}`}
-									>
-										<span className="text-sm font-normal text-gray-800">
-											{isSelected ? '◉' : '○'}
-										</span>
-										<span className="text-gray-800">{unit.label}</span>
-									</div>
-								);
-							})}
-						</div>
-					</div>
+					<DropdownField
+						label="Auto Save to"
+						value="Master"
+						isSelected={false}
+						isActive={false}
+						options={[]}
+						isOpen={false}
+					/>
 
-					<div>
-						<div className="font-semibold mb-1">Auto Save to</div>
-						<div className="text-gray-400">Master</div>
-					</div>
-
-					<div>
-						<div className="font-semibold mb-1">Mode/wave.</div>
-						<div className="text-gray-400">Custom</div>
-					</div>
+					<DropdownField
+						label="Mode/wave."
+						value="Custom"
+						isSelected={false}
+						isActive={false}
+						options={[]}
+						isOpen={false}
+					/>
 				</div>
 
 				{/* Правая колонка */}
 				<div className="space-y-2">
 					<div
-						className={`p-2 -ml-2 rounded border-2 transition-all ${
+						className={`p-2 -ml-2 -mt-2 rounded border-2 transition-all ${
 							isWavelengthsSelected
 								? 'border-blue-500 bg-blue-50'
 								: 'border-transparent'

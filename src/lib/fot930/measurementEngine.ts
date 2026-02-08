@@ -208,7 +208,7 @@ export function validateConnectionScheme(scheme: ConnectionScheme): {
 	if (sequence.length !== correctSequence.length) {
 		return {
 			valid: false,
-			error: 'Incorrect number of elements in scheme'
+			error: 'Неверное число элементов в схеме'
 		};
 	}
 
@@ -217,7 +217,7 @@ export function validateConnectionScheme(scheme: ConnectionScheme): {
 		if (sequence[i].id !== correctSequence[i]) {
 			return {
 				valid: false,
-				error: `Incorrect element at position ${i + 1}`
+				error: `Неверный элемент на ${i + 1} позиции`
 			};
 		}
 	}

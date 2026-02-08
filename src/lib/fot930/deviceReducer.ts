@@ -6,8 +6,10 @@
 import type {
 	DeviceAction,
 	DeviceState,
+	FasTestPortType,
 	LengthUnit,
 	PreparationState,
+	ReferenceType,
 	Wavelength
 } from '../../types/fot930';
 
@@ -36,9 +38,12 @@ export const initialDeviceState: DeviceState = {
 	fastestLengthUnitIndex: 0,
 	fastestWavelengthIndex: 0,
 	fastestMainReferenceTypeSelected: false,
+	openDropdown: null,
+	dropdownIndex: 0,
 	fiberCounter: 0,
 	currentFiberResult: null,
-	fiberMeasurementsHistory: {}
+	fiberMeasurementsHistory: {},
+	currentMeasurementType: null
 };
 
 /** Доступные длины волн для FasTest */
@@ -132,6 +137,7 @@ export function deviceReducer(
 			return {
 				...state,
 				screen: 'FASTEST_MAIN',
+				currentMeasurementType: null,
 				preparation: {
 					...state.preparation,
 					referenceResults: action.payload,
@@ -152,6 +158,7 @@ export function deviceReducer(
 			return {
 				...state,
 				screen: 'FASTEST_RESULTS',
+				currentMeasurementType: null,
 				currentFiberResult: action.payload,
 				fiberCounter: state.fiberCounter + 1,
 				fiberMeasurementsHistory: {
@@ -201,47 +208,63 @@ function handleUpButton(state: DeviceState): DeviceState {
 			};
 
 		case 'FASTEST_SETUP':
-			// Навигация по FasTest Setup (3 секции: 0-Port, 1-Length Unit, 2-Wavelengths)
+			// Если dropdown открыт - навигация по элементам dropdown
+			if (state.openDropdown === 'PORT') {
+				// Dropdown Port: SM/MM (2 элемента)
+				return {
+					...state,
+					dropdownIndex: state.dropdownIndex > 0 ? state.dropdownIndex - 1 : 1
+				};
+			} else if (state.openDropdown === 'LENGTH_UNIT') {
+				// Dropdown Length Unit: ft/mi/m/km (4 элемента)
+				return {
+					...state,
+					dropdownIndex:
+						state.dropdownIndex > 0
+							? state.dropdownIndex - 1
+							: LENGTH_UNITS.length - 1
+				};
+			}
+
+			// Dropdown закрыт - навигация между секциями
 			if (state.fastestSetupSectionIndex === 0) {
-				// В секции FasTest Port: UP переходит к Loss Wavelengths
+				// Port -> Loss Wavelengths
 				return {
 					...state,
 					fastestSetupSectionIndex: 2,
 					fastestWavelengthIndex: 0
 				};
 			} else if (state.fastestSetupSectionIndex === 1) {
-				// В секции Length Unit: UP перемещает по единицам измерения или переходит к FasTest Port
-				if (state.fastestLengthUnitIndex > 0) {
-					return {
-						...state,
-						fastestLengthUnitIndex: state.fastestLengthUnitIndex - 1
-					};
-				} else {
-					// Если на первом элементе, переходим к FasTest Port
-					return {
-						...state,
-						fastestSetupSectionIndex: 0
-					};
-				}
+				// Length Unit -> Port
+				return {
+					...state,
+					fastestSetupSectionIndex: 0
+				};
 			} else {
-				// В секции Loss Wavelengths: UP перемещает по длинам волн или переходит к Length Unit
+				// Loss Wavelengths: перемещение по элементам или переход к Length Unit
 				if (state.fastestWavelengthIndex > 0) {
 					return {
 						...state,
 						fastestWavelengthIndex: state.fastestWavelengthIndex - 1
 					};
 				} else {
-					// Если на первом элементе, переходим к Length Unit
 					return {
 						...state,
-						fastestSetupSectionIndex: 1,
-						fastestLengthUnitIndex: 0
+						fastestSetupSectionIndex: 1
 					};
 				}
 			}
 
 		case 'FASTEST_MAIN':
-			// Переключаем выбор типа опорного значения
+			// Если dropdown открыт - навигация по типам опорного значения
+			if (state.openDropdown === 'REFERENCE_TYPE') {
+				// Dropdown Reference Type: Обрат. петля/Точка-точка/Нет этл (3 элемента)
+				return {
+					...state,
+					dropdownIndex: state.dropdownIndex > 0 ? state.dropdownIndex - 1 : 2
+				};
+			}
+			// Dropdown закрыт - переключаем выбор поля
 			return {
 				...state,
 				fastestMainReferenceTypeSelected:
@@ -263,38 +286,46 @@ function handleDownButton(state: DeviceState): DeviceState {
 			};
 
 		case 'FASTEST_SETUP':
-			// Навигация по FasTest Setup (3 секции: 0-Port, 1-Length Unit, 2-Wavelengths)
-			if (state.fastestSetupSectionIndex === 0) {
-				// В секции FasTest Port: DOWN переходит к Length Unit
+			// Если dropdown открыт - навигация по элементам dropdown
+			if (state.openDropdown === 'PORT') {
+				// Dropdown Port: SM/MM (2 элемента)
 				return {
 					...state,
-					fastestSetupSectionIndex: 1,
-					fastestLengthUnitIndex: 0
+					dropdownIndex: state.dropdownIndex < 1 ? state.dropdownIndex + 1 : 0
+				};
+			} else if (state.openDropdown === 'LENGTH_UNIT') {
+				// Dropdown Length Unit: ft/mi/m/km (4 элемента)
+				return {
+					...state,
+					dropdownIndex:
+						state.dropdownIndex < LENGTH_UNITS.length - 1
+							? state.dropdownIndex + 1
+							: 0
+				};
+			}
+
+			// Dropdown закрыт - навигация между секциями
+			if (state.fastestSetupSectionIndex === 0) {
+				// Port -> Length Unit
+				return {
+					...state,
+					fastestSetupSectionIndex: 1
 				};
 			} else if (state.fastestSetupSectionIndex === 1) {
-				// В секции Length Unit: DOWN перемещает по единицам измерения или переходит к Loss Wavelengths
-				if (state.fastestLengthUnitIndex < LENGTH_UNITS.length - 1) {
-					return {
-						...state,
-						fastestLengthUnitIndex: state.fastestLengthUnitIndex + 1
-					};
-				} else {
-					// Если на последнем элементе, переходим к Loss Wavelengths
-					return {
-						...state,
-						fastestSetupSectionIndex: 2,
-						fastestWavelengthIndex: 0
-					};
-				}
+				// Length Unit -> Loss Wavelengths
+				return {
+					...state,
+					fastestSetupSectionIndex: 2,
+					fastestWavelengthIndex: 0
+				};
 			} else {
-				// В секции Loss Wavelengths: DOWN перемещает по длинам волн или переходит к FasTest Port
+				// Loss Wavelengths: перемещение по элементам или переход к Port
 				if (state.fastestWavelengthIndex < FASTEST_WAVELENGTHS.length - 1) {
 					return {
 						...state,
 						fastestWavelengthIndex: state.fastestWavelengthIndex + 1
 					};
 				} else {
-					// Если на последнем элементе, переходим к FasTest Port
 					return {
 						...state,
 						fastestSetupSectionIndex: 0
@@ -303,7 +334,15 @@ function handleDownButton(state: DeviceState): DeviceState {
 			}
 
 		case 'FASTEST_MAIN':
-			// Переключаем выбор типа опорного значения
+			// Если dropdown открыт - навигация по типам опорного значения
+			if (state.openDropdown === 'REFERENCE_TYPE') {
+				// Dropdown Reference Type: Обрат. петля/Точка-точка/Нет этл (3 элемента)
+				return {
+					...state,
+					dropdownIndex: state.dropdownIndex < 2 ? state.dropdownIndex + 1 : 0
+				};
+			}
+			// Dropdown закрыт - переключаем выбор поля
 			return {
 				...state,
 				fastestMainReferenceTypeSelected:
@@ -330,12 +369,14 @@ function handleEnterButton(state: DeviceState): DeviceState {
 		case 'FASTEST_SETUP': {
 			const { fastestSettings } = state.preparation;
 
-			// Если в секции FasTest Port (0)
-			if (state.fastestSetupSectionIndex === 0) {
-				// Переключаем тип порта MM ↔ SM
-				const newPortType = fastestSettings.portType === 'SM' ? 'MM' : 'SM';
+			// Если dropdown открыт - применяем выбранное значение
+			if (state.openDropdown === 'PORT') {
+				const portTypes: FasTestPortType[] = ['SM', 'MM'];
+				const newPortType = portTypes[state.dropdownIndex];
 				return {
 					...state,
+					openDropdown: null,
+					dropdownIndex: 0,
 					preparation: {
 						...state.preparation,
 						fastestSettings: {
@@ -346,12 +387,12 @@ function handleEnterButton(state: DeviceState): DeviceState {
 				};
 			}
 
-			// Если в секции Length Unit (1)
-			if (state.fastestSetupSectionIndex === 1) {
-				// Переключаем единицу измерения циклически
-				const newLengthUnit = LENGTH_UNITS[state.fastestLengthUnitIndex];
+			if (state.openDropdown === 'LENGTH_UNIT') {
+				const newLengthUnit = LENGTH_UNITS[state.dropdownIndex];
 				return {
 					...state,
+					openDropdown: null,
+					dropdownIndex: 0,
 					preparation: {
 						...state.preparation,
 						fastestSettings: {
@@ -362,7 +403,28 @@ function handleEnterButton(state: DeviceState): DeviceState {
 				};
 			}
 
-			// Если в секции Loss Wavelengths (2)
+			// Dropdown закрыт - открываем его или toggle checkbox
+			// Если в секции FasTest Port (0) - открываем dropdown
+			if (state.fastestSetupSectionIndex === 0) {
+				const currentIndex = fastestSettings.portType === 'SM' ? 0 : 1;
+				return {
+					...state,
+					openDropdown: 'PORT',
+					dropdownIndex: currentIndex
+				};
+			}
+
+			// Если в секции Length Unit (1) - открываем dropdown
+			if (state.fastestSetupSectionIndex === 1) {
+				const currentIndex = LENGTH_UNITS.indexOf(fastestSettings.lengthUnit);
+				return {
+					...state,
+					openDropdown: 'LENGTH_UNIT',
+					dropdownIndex: currentIndex
+				};
+			}
+
+			// Если в секции Loss Wavelengths (2) - toggle checkbox
 			if (state.fastestSetupSectionIndex === 2) {
 				const selectedWavelength =
 					FASTEST_WAVELENGTHS[state.fastestWavelengthIndex];
@@ -390,21 +452,38 @@ function handleEnterButton(state: DeviceState): DeviceState {
 		}
 
 		case 'FASTEST_MAIN':
-			// Переключаем тип опорного значения
-			if (state.fastestMainReferenceTypeSelected) {
-				const currentType = state.preparation.referenceType;
-				const newReferenceType =
-					currentType === 'LOOPBACK'
-						? 'POINT_TO_POINT'
-						: currentType === 'POINT_TO_POINT'
-							? 'NONE'
-							: 'LOOPBACK';
+			// Если dropdown открыт - применяем выбранное значение
+			if (state.openDropdown === 'REFERENCE_TYPE') {
+				const referenceTypes: ReferenceType[] = [
+					'LOOPBACK',
+					'POINT_TO_POINT',
+					'NONE'
+				];
+				const newReferenceType = referenceTypes[state.dropdownIndex];
 				return {
 					...state,
+					openDropdown: null,
+					dropdownIndex: 0,
 					preparation: {
 						...state.preparation,
 						referenceType: newReferenceType
 					}
+				};
+			}
+
+			// Dropdown закрыт - открываем его если поле выбрано
+			if (state.fastestMainReferenceTypeSelected) {
+				const currentType = state.preparation.referenceType;
+				const currentIndex =
+					currentType === 'LOOPBACK'
+						? 0
+						: currentType === 'POINT_TO_POINT'
+							? 1
+							: 2;
+				return {
+					...state,
+					openDropdown: 'REFERENCE_TYPE',
+					dropdownIndex: currentIndex
 				};
 			}
 			return state;
@@ -424,6 +503,15 @@ function handleBackButton(state: DeviceState): DeviceState {
 			};
 
 		case 'FASTEST_SETUP': {
+			// Если dropdown открыт - закрываем его без применения
+			if (state.openDropdown !== null) {
+				return {
+					...state,
+					openDropdown: null,
+					dropdownIndex: 0
+				};
+			}
+
 			// Сохраняем настройки и возвращаемся в меню
 			const { fastestSettings } = state.preparation;
 			const isCorrect =
@@ -456,7 +544,24 @@ function handleBackButton(state: DeviceState): DeviceState {
 			};
 		}
 
+		case 'FASTEST_RESULTS': {
+			return {
+				...state,
+				screen: 'FASTEST_MAIN',
+				currentFiberResult: null
+			};
+		}
+
 		case 'FASTEST_MAIN':
+			// Если dropdown открыт - закрываем его без применения
+			if (state.openDropdown !== null) {
+				return {
+					...state,
+					openDropdown: null,
+					dropdownIndex: 0
+				};
+			}
+
 			// Возврат на главный экран или READY
 			return {
 				...state,
@@ -509,7 +614,8 @@ function handleF1Button(state: DeviceState): DeviceState {
 	) {
 		return {
 			...state,
-			screen: 'FASTEST_MEASURING'
+			screen: 'FASTEST_MEASURING',
+			currentMeasurementType: 'REFERENCE'
 		};
 	}
 	return state;
@@ -523,16 +629,8 @@ function handleF2Button(state: DeviceState): DeviceState {
 	) {
 		return {
 			...state,
-			screen: 'FASTEST_MEASURING'
-		};
-	}
-
-	// F2 на экране FASTEST_RESULTS возвращает на FASTEST_MAIN
-	if (state.screen === 'FASTEST_RESULTS') {
-		return {
-			...state,
-			screen: 'FASTEST_MAIN',
-			currentFiberResult: null
+			screen: 'FASTEST_MEASURING',
+			currentMeasurementType: 'FIBER'
 		};
 	}
 

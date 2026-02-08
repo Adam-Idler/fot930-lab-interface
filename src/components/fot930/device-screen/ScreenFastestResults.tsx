@@ -18,9 +18,9 @@ export function ScreenFastestResults({ state }: ScreenFastestResultsProps) {
 	}
 
 	return (
-		<div className="flex flex-col w-full h-full p-3 text-xs">
+		<div className="flex flex-col w-full h-full text-xs">
 			{/* Заголовок */}
-			<div className="text-sm font-bold mb-2 pb-1 border-b border-fot930-blue text-fot930-blue">
+			<div className="text-lg font-bold mb-2 text-fot930-blue">
 				Результаты по кабелю
 			</div>
 
@@ -102,7 +102,7 @@ export function ScreenFastestResults({ state }: ScreenFastestResultsProps) {
 
 			{/* Подсказки управления */}
 			<div className="text-[10px] text-gray-500 text-center border-t border-gray-200 pt-1 mt-auto">
-				F2: Return | FasTest: Measure Next
+				FasTest: Measure Next
 			</div>
 		</div>
 	);

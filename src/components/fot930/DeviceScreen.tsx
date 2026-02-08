@@ -24,7 +24,7 @@ export function DeviceScreen({ state }: DeviceScreenProps) {
 
 	return (
 		<div
-			className={`w-full h-full rounded border-2 border-gray-800 flex items-center justify-center font-mono p-4 ${
+			className={`w-full h-full rounded border-2 border-gray-800 flex items-center justify-center font-mono p-2 ${
 				isOff ? 'bg-gray-700' : 'bg-white'
 			}`}
 		>

@@ -1,4 +1,6 @@
+import { Show } from '../../../lib/components';
 import type { DeviceState } from '../../../types/fot930';
+import { DropdownField } from './DropdownField';
 
 interface ScreenFastestMainProps {
 	state: DeviceState;
@@ -20,83 +22,119 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 		return date.toISOString().slice(0, 19).replace('T', ' ');
 	};
 
+	const imageFile =
+		referenceType === 'LOOPBACK' ? 'loopback.png' : 'point-to-point.png';
+
+	// Опции для выпадающего списка типа опорного значения
+	const referenceTypeOptions = ['Обрат. петля', 'Точка-точка', 'Нет этл'];
+	const referenceTypeValue =
+		referenceType === 'LOOPBACK'
+			? 'Обрат. петля'
+			: referenceType === 'POINT_TO_POINT'
+				? 'Точка-точка'
+				: 'Нет этл';
+
 	return (
-		<div className="flex flex-col w-full h-full p-3 text-xs">
-			<div className="text-sm font-bold mb-3 pb-1 border-b border-fot930-blue text-fot930-blue">
+		<div className="flex flex-col w-full h-full text-xs">
+			<div className="text-lg font-bold mb-2 text-fot930-blue">
 				FasTest 930 ({fastestSettings.portType})
 			</div>
 
-			<div className="space-y-2 flex-1">
+			<div className="flex gap-2">
 				<div>
-					<span className="font-semibold">След. кабель:</span>{' '}
-					<span className="text-gray-600">BigCable</span>
+					<DropdownField
+						label="След. кабель:"
+						value="BigCable"
+						isSelected={false}
+						isActive={false}
+						options={[]}
+						isOpen={false}
+					/>
+
+					<DropdownField
+						label="След. волокно:"
+						value={`BCFiber${fiberNumber}`}
+						isSelected={false}
+						isActive={false}
+						options={[]}
+						isOpen={false}
+					/>
+
+					<DropdownField
+						label="Тип опор. зн:"
+						value={referenceTypeValue}
+						isSelected={isReferenceTypeSelected}
+						isActive={true}
+						options={referenceTypeOptions}
+						selectedIndex={state.dropdownIndex}
+						isOpen={state.openDropdown === 'REFERENCE_TYPE'}
+					/>
 				</div>
 
-				<div>
-					<span className="font-semibold">След. волокно:</span>{' '}
-					<span className="text-gray-600">BCFiber{fiberNumber}</span>
+				<div className="flex h-20 grow justify-center items-center">
+					<Show when={referenceType !== 'NONE'}>
+						<img
+							className="h-20"
+							src={`/images/device/${imageFile}`}
+							alt={referenceTypeValue}
+						/>
+					</Show>
 				</div>
+			</div>
 
-				<div
-					className={`p-2 -ml-2 rounded border-2 transition-all ${
-						isReferenceTypeSelected
-							? 'border-blue-500 bg-blue-50'
-							: 'border-transparent'
-					}`}
-				>
-					<span className="font-semibold">Тип опор. зн:</span>{' '}
-					<span className="text-gray-800 font-bold">
-						{referenceType === 'LOOPBACK'
-							? 'Обрат. петля'
-							: referenceType === 'POINT_TO_POINT'
-								? 'Точка-точка'
-								: 'Нет этл'}
-					</span>
-				</div>
-
+			<div className="flex-1">
 				{hasReference ? (
-					<>
-						<div className="bg-green-50 border border-green-300 px-2 py-1 text-[10px] text-green-700 inline-block rounded">
+					<div className="flex gap-2">
+						<div className="w-18 text-center bg-green-50 border border-green-300 px-2 py-1 text-[10px] inline-block rounded">
 							Нажмите FasTest, чтобы начать тест
 						</div>
 
-						{/* Таблица опорных значений */}
-						<div className="border border-gray-300 mt-2">
-							<div className="flex bg-gray-100 border-b border-gray-300">
-								<div className="w-1/3 p-1 text-[10px] font-semibold border-r border-gray-300"></div>
-								{fastestSettings.lossWavelengths.map((wl) => (
-									<div
-										key={wl}
-										className="w-1/3 p-1 text-[10px] font-semibold text-center border-r border-gray-300 last:border-r-0"
-									>
-										{wl}
-									</div>
-								))}
+						<div className="grow">
+							<div className="flex gap-3 items-center">
+								<div className="shrink-0 text-fot930-blue">Опор. зн. (дБ)</div>
+								<div className="w-full h-px bg-fot930-blue"></div>
 							</div>
-							<div className="flex">
-								<div className="w-1/3 p-1 text-[10px] border-r border-gray-300">
-									вн. помехи
-								</div>
-								{fastestSettings.lossWavelengths.map((wl) => {
-									const ref = referenceResults.find((r) => r.wavelength === wl);
-									return (
+
+							{/* Таблица опорных значений */}
+							<div className="border border-gray-300 mt-2">
+								<div className="flex bg-gray-100 border-b border-gray-300">
+									<div className="w-1/3 p-1 text-[10px] font-semibold border-r border-gray-300"></div>
+									{fastestSettings.lossWavelengths.map((wl) => (
 										<div
 											key={wl}
-											className="w-1/3 p-1 text-[10px] text-center border-r border-gray-300 last:border-r-0"
+											className="w-1/3 p-1 text-[10px] font-semibold text-center border-r border-gray-300 last:border-r-0"
 										>
-											{ref ? `${ref.value.toFixed(2)}dBm` : '-'}
+											{wl}
 										</div>
-									);
-								})}
+									))}
+								</div>
+								<div className="flex">
+									<div className="w-1/3 p-1 text-[10px] border-r border-gray-300">
+										вн. помехи
+									</div>
+									{fastestSettings.lossWavelengths.map((wl) => {
+										const ref = referenceResults.find(
+											(r) => r.wavelength === wl
+										);
+										return (
+											<div
+												key={wl}
+												className="w-1/3 p-1 text-[10px] text-center border-r border-gray-300 last:border-r-0"
+											>
+												{ref ? `${ref.value.toFixed(2)}` : '-'}
+											</div>
+										);
+									})}
+								</div>
+							</div>
+
+							{/* Дата последнего измерения */}
+							<div className="text-[9px] text-fot930-blue mt-1">
+								Изм. опорн. зн. между точек (
+								{formatDateTime(referenceResults[0].timestamp)})
 							</div>
 						</div>
-
-						{/* Дата последнего измерения */}
-						<div className="text-[9px] text-gray-500 mt-1">
-							Изм. опорн. зн. между точек (
-							{formatDateTime(referenceResults[0].timestamp)})
-						</div>
-					</>
+					</div>
 				) : (
 					<div className="bg-yellow-50 border border-yellow-300 px-2 py-2 text-[10px] text-yellow-800 rounded">
 						Измерение опорного значения ещё не было произведено

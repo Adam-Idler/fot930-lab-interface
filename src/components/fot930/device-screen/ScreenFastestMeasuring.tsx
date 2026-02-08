@@ -5,14 +5,14 @@ interface ScreenFastestMeasuringProps {
 }
 
 export function ScreenFastestMeasuring({ state }: ScreenFastestMeasuringProps) {
-	const { fastestSettings, referenceResults } = state.preparation;
+	const { fastestSettings } = state.preparation;
 
 	// Если нет referenceResults, это Reference измерение
-	const isReferenceMeasurement = referenceResults.length === 0;
+	const isReferenceMeasurement = state.currentMeasurementType === 'REFERENCE';
 
 	return (
-		<div className="flex flex-col items-center justify-center w-full h-full p-4">
-			<div className="text-sm font-bold mb-4 text-fot930-blue">
+		<div className="flex flex-col items-center justify-center w-full h-full">
+			<div className="text-lg font-bold mb-2 text-fot930-blue">
 				{isReferenceMeasurement
 					? 'Measuring Reference...'
 					: 'Measuring Fiber...'}

@@ -3,7 +3,7 @@
  * Координирует работу всех этапов лабораторной работы
  */
 
-import { type Dispatch, useCallback, useRef, useState } from 'react';
+import { type Dispatch, useCallback, useEffect, useRef, useState } from 'react';
 import { initialDeviceState } from '../../../lib/fot930/deviceReducer';
 import { COMPONENT_LOSS_DB } from '../../../lib/fot930/measurementEngine';
 import type {
@@ -41,6 +41,20 @@ export function LabWork() {
 			'tester_2'
 		]
 	});
+
+	useEffect(() => {
+		// Сбросить измерения при смене выбранного компонента
+		setConnectionScheme((prev) => ({
+			...prev,
+			correctSequence: [
+				'tester',
+				'connector_apc_1',
+				selectedComponent?.id || 'optical_cable_1',
+				'connector_apc_2',
+				'tester_2'
+			]
+		}));
+	}, [selectedComponent]);
 
 	const [deviceState, setDeviceState] =
 		useState<DeviceState>(initialDeviceState);
@@ -150,9 +164,9 @@ export function LabWork() {
 				</div>
 
 				{/* Содержимое этапа */}
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+				<div className="flex flex-wrap xl:flex-nowrap gap-6">
 					{/* Левая колонка: Прибор */}
-					<div>
+					<div className="w-full xl:w-auto">
 						<Device
 							onDeviceStateChange={setDeviceState}
 							onDispatchReady={(dispatch) => {
@@ -163,7 +177,7 @@ export function LabWork() {
 					</div>
 
 					{/* Правая колонка: Контент этапа */}
-					<div className="space-y-6">
+					<div className="space-y-6 grow">
 						{currentStage === 'PREPARATION' && (
 							<PreparationStage
 								deviceState={deviceState}

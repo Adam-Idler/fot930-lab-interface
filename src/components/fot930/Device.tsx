@@ -59,7 +59,7 @@ export function Device({
 	useEffect(() => {
 		if (
 			state.screen === 'FASTEST_MEASURING' &&
-			state.preparation.referenceResults.length === 0
+			state.currentMeasurementType === 'REFERENCE'
 		) {
 			const performReferenceMeasurement = async () => {
 				// Симуляция измерения опорных значений для каждой длины волны
@@ -67,7 +67,7 @@ export function Device({
 					state.preparation.fastestSettings.lossWavelengths.map(
 						(wavelength) => ({
 							wavelength,
-							value: -20 + Math.random() * 5, // Случайное значение от -20 до -15 dBm
+							value: 0.5 + Math.random() * 2.5, // Случайное значение от 0.5 до 3 dB (потери обратной петли)
 							timestamp: Date.now()
 						})
 					);
@@ -81,13 +81,13 @@ export function Device({
 			const timer = setTimeout(performReferenceMeasurement, 3000);
 			return () => clearTimeout(timer);
 		}
-	}, [state.screen, state.preparation]);
+	}, [state.screen, state.currentMeasurementType, state.preparation]);
 
 	// Обработка измерения Fiber
 	useEffect(() => {
 		if (
 			state.screen === 'FASTEST_MEASURING' &&
-			state.preparation.referenceResults.length > 0 &&
+			state.currentMeasurementType === 'FIBER' &&
 			selectedComponent
 		) {
 			const performFiberMeasurement = async () => {
@@ -120,6 +120,7 @@ export function Device({
 		}
 	}, [
 		state.screen,
+		state.currentMeasurementType,
 		state.preparation,
 		selectedComponent,
 		state.fiberCounter,
@@ -143,12 +144,12 @@ export function Device({
 	};
 
 	return (
-		<div className="flex flex-col gap-4 max-w-2xl mx-auto">
+		<div className="flex flex-col gap-4 min-w-xl max-w-xl mx-auto">
 			<div className="bg-fot930-blue p-8 rounded-3xl">
 				{/* Основная область */}
 				<div className="bg-gray-900 rounded-2xl p-4 shadow-inner">
 					{/* LCD Экран */}
-					<div className="aspect-4/3 mb-6 overflow-hidden shadow-xl">
+					<div className="aspect-16/10 mb-6 overflow-hidden shadow-xl">
 						<DeviceScreen state={state} />
 					</div>
 
@@ -300,7 +301,7 @@ export function Device({
 						</div>
 
 						{/* Индикатор питания на корпусе */}
-						<div className="absolute bottom-4 right-6 flex flex-col items-end gap-1">
+						<div className="absolute bottom-4 right-6 flex flex-col items-end gap-1 cursor-default">
 							<span className="text-sm text-white/40 font-medium">Active</span>
 							<div
 								className={`w-3 h-3 border border-gray-900 transition-all ${
@@ -312,7 +313,7 @@ export function Device({
 						</div>
 					</div>
 
-					<div className="bg-fot930-blue -mx-4 -mb-4">
+					<div className="bg-fot930-blue -mx-4 -mb-4 cursor-default">
 						<div className="mx-auto w-4/5 rounded-b-md mt-8  border-12 border-t-0 border-gray-900">
 							<div className="flex justify-between items-center p-2 bg-[#dfdcdd] text-fot930-blue">
 								<div>

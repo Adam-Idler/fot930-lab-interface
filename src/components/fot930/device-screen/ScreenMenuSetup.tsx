@@ -1,3 +1,4 @@
+import { Show } from '../../../lib/components';
 import type { DeviceState } from '../../../types/fot930';
 
 interface ScreenMenuSetupProps {
@@ -10,7 +11,7 @@ export function ScreenMenuSetup({ state }: ScreenMenuSetupProps) {
 
 	return (
 		<div className="flex flex-col w-full h-full p-3">
-			<div className="text-sm font-bold mb-3 pb-1 border-b border-fot930-blue text-fot930-blue">
+			<div className="text-lg font-bold mb-3 pb-1 border-b border-fot930-blue text-fot930-blue">
 				Menu
 			</div>
 
@@ -24,6 +25,7 @@ export function ScreenMenuSetup({ state }: ScreenMenuSetupProps) {
 								: 'text-gray-800'
 						}`}
 					>
+						<Show when={index === selectedIndex}>▶ </Show>
 						{item}
 					</div>
 				))}

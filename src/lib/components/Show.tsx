@@ -1,9 +1,9 @@
-import type { JSX } from 'react';
+import type { ReactNode } from 'react';
 
 interface ShowProps {
 	when: boolean;
-	children: JSX.Element;
-	fallback?: JSX.Element;
+	children: ReactNode;
+	fallback?: ReactNode;
 }
 
 export function Show({ when, fallback, children }: ShowProps) {

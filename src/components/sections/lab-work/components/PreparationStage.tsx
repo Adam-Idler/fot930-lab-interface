@@ -18,6 +18,11 @@ export function PreparationStage({
 	const isStep3Complete = preparation.fastestSettings.isConfigured;
 	const isStep4Complete = preparation.referenceResults.length > 0;
 
+	const isWavelengthsCorrect =
+		preparation.fastestSettings.lossWavelengths.includes(1310) &&
+		preparation.fastestSettings.lossWavelengths.includes(1550) &&
+		!preparation.fastestSettings.lossWavelengths.includes(1625);
+
 	const isAllComplete = preparation.isReadyForMeasurements;
 
 	return (
@@ -213,7 +218,7 @@ export function PreparationStage({
 									Выполните настройку режима измерений FasTest на приборе
 								</p>
 
-								{!isStep2Complete || !isStep1Complete ? (
+								{(!isStep3Complete && !isStep2Complete) || !isStep1Complete ? (
 									<div className="text-xs text-gray-500 italic">
 										⚠️ Сначала выполните предыдущие шаги
 									</div>
@@ -270,30 +275,12 @@ export function PreparationStage({
 												<li className="flex items-center gap-2">
 													<span
 														className={
-															preparation.fastestSettings.lossWavelengths.includes(
-																1310
-															) &&
-															preparation.fastestSettings.lossWavelengths.includes(
-																1550
-															) &&
-															!preparation.fastestSettings.lossWavelengths.includes(
-																1625
-															)
+															isWavelengthsCorrect
 																? 'text-green-600'
 																: 'text-gray-500'
 														}
 													>
-														{preparation.fastestSettings.lossWavelengths.includes(
-															1310
-														) &&
-														preparation.fastestSettings.lossWavelengths.includes(
-															1550
-														) &&
-														!preparation.fastestSettings.lossWavelengths.includes(
-															1625
-														)
-															? '✓'
-															: '•'}
+														{isWavelengthsCorrect ? '✓' : '•'}
 													</span>
 													<span>
 														Loss Wavelengths: выберите{' '}

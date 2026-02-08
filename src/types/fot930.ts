@@ -165,6 +165,12 @@ export interface DeviceState {
 	/** Выбран ли тип опорного значения на экране FASTEST_MAIN */
 	fastestMainReferenceTypeSelected: boolean;
 
+	/** Открытый выпадающий список */
+	openDropdown: 'PORT' | 'LENGTH_UNIT' | 'REFERENCE_TYPE' | null;
+
+	/** Индекс элемента в открытом выпадающем списке */
+	dropdownIndex: number;
+
 	/** Счетчик волокон для автоувеличения номера (001, 002, ...) */
 	fiberCounter: number;
 
@@ -173,6 +179,9 @@ export interface DeviceState {
 
 	/** История измерений волокон (для сохранения результатов) */
 	fiberMeasurementsHistory: Record<string, FiberMeasurementResult>;
+
+	/** Тип текущего измерения (для различения Reference и Fiber) */
+	currentMeasurementType: 'REFERENCE' | 'FIBER' | null;
 }
 
 /** Результат измерения */
