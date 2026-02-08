@@ -269,7 +269,6 @@ interface FasTestSettings {
   portType: 'SM' | 'MM';  // Single-mode / Multi-mode
   lengthUnit: 'm' | 'km' | 'ft' | 'mi';
   lossWavelengths: Wavelength[];
-  orlWavelengths: Wavelength[];
   isConfigured: boolean;
 }
 
@@ -940,17 +939,7 @@ await window.electronAPI.loadStudent()
 ```typescript
 dispatch({ type: 'PRESS_POWER' }); // Выключить
 dispatch({ type: 'PRESS_POWER' }); // Включить
-```
-
-### Логирование действий прибора
-
-Добавить в `deviceReducer.ts`:
-```typescript
-export function deviceReducer(state: DeviceState, action: DeviceAction): DeviceState {
-  console.log('Action:', action.type, 'State:', state.screen);
-  // ...остальной код
-}
-```
+``` s
 
 ---
 

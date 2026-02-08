@@ -63,9 +63,6 @@ export interface FasTestSettings {
 	/** Выбранные длины волн для измерения потерь */
 	lossWavelengths: Wavelength[];
 
-	/** Выбранные длины волн для измерения ORL */
-	orlWavelengths: Wavelength[];
-
 	/** Настроен ли FasTest */
 	isConfigured: boolean;
 }
@@ -300,6 +297,81 @@ export type LabStage =
 	| 'COMPLEX_SCHEMES' // Сложные схемы
 	| 'RESULTS_ANALYSIS'; // Анализ результатов
 
+// ============================================================
+// ИНТЕРАКТИВНАЯ ТАБЛИЦА РЕЗУЛЬТАТОВ
+// ============================================================
+
+/** Статус ячейки таблицы */
+export type CellStatus = 'empty' | 'valid' | 'error';
+
+/** Введенное студентом значение */
+export interface StudentMeasurementEntry {
+	/** Введенное значение (dB) */
+	value: number | null;
+
+	/** Фактическое значение из прибора (для валидации) */
+	actualValue: number;
+
+	/** Статус валидации */
+	status: CellStatus;
+
+	/** Сообщение об ошибке */
+	errorMessage?: string;
+}
+
+/** Строка таблицы для одной длины волны */
+export interface WavelengthTableRow {
+	/** Длина волны */
+	wavelength: Wavelength;
+
+	/** Три измерения (попытки) */
+	measurements: [
+		StudentMeasurementEntry | null,
+		StudentMeasurementEntry | null,
+		StudentMeasurementEntry | null
+	];
+
+	/** Среднее значение (расчитывается студентом) */
+	average: StudentMeasurementEntry | null;
+
+	/** Километрическое затухание (dB/км) */
+	kilometricAttenuation: StudentMeasurementEntry | null;
+}
+
+/** Таблица результатов для одного компонента */
+export interface ComponentResultsTable {
+	/** ID компонента */
+	componentId: string;
+
+	/** Название компонента */
+	componentLabel: string;
+
+	/** Длина волокна (м) */
+	fiberLength: number;
+
+	/** Строки таблицы (по одной на длину волны) */
+	rows: WavelengthTableRow[];
+
+	/** Номер текущего измерения (1-3) */
+	currentMeasurementNumber: number;
+
+	/** Все измерения завершены и введены */
+	isCompleted: boolean;
+}
+
+/** Состояние всех таблиц результатов */
+export interface ResultsTableState {
+	/** Таблицы по ID компонентов */
+	tables: Record<string, ComponentResultsTable>;
+
+	/** ID компонента ожидающего ввода результатов */
+	pendingInputComponentId: string | null;
+}
+
+// ============================================================
+// СОСТОЯНИЕ ЛАБОРАТОРНОЙ РАБОТЫ
+// ============================================================
+
 /** Состояние лабораторной работы */
 export interface LabWorkState {
 	/** Текущий этап */
@@ -319,6 +391,9 @@ export interface LabWorkState {
 
 	/** Прогресс по этапам */
 	stageProgress: Record<LabStage, boolean>;
+
+	/** Состояние таблиц результатов */
+	resultsTableState: ResultsTableState;
 }
 
 /** Выполненное измерение (для таблицы результатов) */

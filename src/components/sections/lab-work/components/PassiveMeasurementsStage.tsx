@@ -1,32 +1,36 @@
 import clsx from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
-	CompletedMeasurement,
-	PassiveComponent
+	PassiveComponent,
+	ResultsTableState
 } from '../../../../types/fot930';
 
 interface PassiveMeasurementsStageProps {
 	components: PassiveComponent[];
 	selectedComponent: PassiveComponent | null;
-	measurements: CompletedMeasurement[];
+	resultsTableState: ResultsTableState;
+	canStartNextMeasurement: boolean;
 	onSelectComponent: (component: PassiveComponent) => void;
-	onResetAttempts: () => void;
 }
 
 export function PassiveMeasurementsStage({
 	components,
 	selectedComponent,
-	measurements,
-	onSelectComponent,
-	onResetAttempts
+	resultsTableState,
+	canStartNextMeasurement,
+	onSelectComponent
 }: PassiveMeasurementsStageProps) {
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const [showLeftFade, setShowLeftFade] = useState(false);
 	const [showRightFade, setShowRightFade] = useState(false);
 
-	// Проверяем, было ли выполнено хотя бы одно измерение для компонента
-	const getMeasurementsForComponent = (componentId: string) => {
-		return measurements.filter((m) => m.componentId === componentId);
+	// Получаем количество выполненных измерений для компонента
+	const getMeasurementCountForComponent = (componentId: string) => {
+		const table = resultsTableState.tables[componentId];
+		if (!table) return 0;
+		return table.currentMeasurementNumber > 3
+			? 3
+			: table.currentMeasurementNumber;
 	};
 
 	// Функция для проверки позиции скролла
@@ -101,11 +105,10 @@ export function PassiveMeasurementsStage({
 								}}
 							>
 								{components.map((component) => {
-									const measurements = getMeasurementsForComponent(
+									const measurementCount = getMeasurementCountForComponent(
 										component.id
 									);
-									const measurementCount = measurements.length;
-									const isMeasured = measurementCount === 3;
+									const isMeasured = measurementCount >= 3;
 
 									return (
 										<button
@@ -113,7 +116,6 @@ export function PassiveMeasurementsStage({
 											key={component.id}
 											onClick={() => {
 												onSelectComponent(component);
-												onResetAttempts();
 											}}
 											className={clsx(
 												'p-3 rounded-lg border-2 text-left transition shrink-0',
@@ -145,6 +147,25 @@ export function PassiveMeasurementsStage({
 					</div>
 				</div>
 			</div>
+
+			{/* Индикатор блокировки измерения */}
+			{!canStartNextMeasurement && selectedComponent && (
+				<div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg shadow-md">
+					<div className="flex items-start gap-3">
+						<span className="text-2xl">⚠️</span>
+						<div>
+							<p className="font-semibold text-yellow-900 text-base">
+								Требуется ввод результатов
+							</p>
+							<p className="text-sm text-yellow-800 mt-1">
+								Перед выполнением следующего измерения необходимо внести
+								результаты предыдущего измерения в таблицу на вкладке
+								"Результаты".
+							</p>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

@@ -122,9 +122,7 @@ export function ScreenFastestSetup({ state }: ScreenFastestSetupProps) {
 						<div className="space-y-1 text-gray-400">
 							{wavelengths.map((wl) => (
 								<div key={wl} className="flex items-center gap-2">
-									<span className="text-sm">
-										{fastestSettings.orlWavelengths.includes(wl) ? '☑' : '☐'}
-									</span>
+									<span className="text-sm">{wl === 1625 ? '☑' : '☐'}</span>
 									<span>{wl}nm</span>
 								</div>
 							))}

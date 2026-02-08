@@ -20,7 +20,6 @@ export const initialPreparationState: PreparationState = {
 		portType: 'MM',
 		lengthUnit: 'ft',
 		lossWavelengths: [1625],
-		orlWavelengths: [1625],
 		isConfigured: false
 	},
 	referenceResults: [],
@@ -186,7 +185,11 @@ function handlePowerButton(state: DeviceState): DeviceState {
 		};
 	} else {
 		// Выключаем прибор
-		return initialDeviceState;
+		return {
+			...initialDeviceState,
+			isPoweredOn: false,
+			screen: 'OFF'
+		};
 	}
 }
 
@@ -576,11 +579,23 @@ function handleBackButton(state: DeviceState): DeviceState {
 
 function handleFastestButton(state: DeviceState): DeviceState {
 	if (state.preparation.fastestSettings.isConfigured) {
-		// С экрана FASTEST_RESULTS повторное нажатие запускает новое измерение
-		if (state.screen === 'FASTEST_RESULTS' || state.screen === 'FASTEST_MAIN') {
+		// С экрана FASTEST_RESULTS повторное нажатие запускает новое измерение волокна
+		if (state.screen === 'FASTEST_RESULTS') {
 			return {
 				...state,
-				screen: 'FASTEST_MEASURING'
+				screen: 'FASTEST_MEASURING',
+				currentMeasurementType: 'FIBER'
+			};
+		}
+
+		// С экрана FASTEST_MAIN переход на измерение (для совместимости)
+		if (state.screen === 'FASTEST_MAIN') {
+			return {
+				...state,
+				screen: 'FASTEST_MEASURING',
+				currentMeasurementType: state.preparation.isReadyForMeasurements
+					? 'FIBER'
+					: 'REFERENCE'
 			};
 		}
 

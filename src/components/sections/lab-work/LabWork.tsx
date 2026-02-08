@@ -3,16 +3,24 @@
  * Координирует работу всех этапов лабораторной работы
  */
 
-import { type Dispatch, useCallback, useEffect, useRef, useState } from 'react';
+import {
+	type Dispatch,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState
+} from 'react';
 import { initialDeviceState } from '../../../lib/fot930/deviceReducer';
 import { COMPONENT_LOSS_DB } from '../../../lib/fot930/measurementEngine';
+import { useResultsTable } from '../../../lib/fot930/useResultsTable';
 import type {
-	CompletedMeasurement,
 	ConnectionScheme,
 	DeviceAction,
 	DeviceState,
 	LabStage,
-	PassiveComponent
+	PassiveComponent,
+	Wavelength
 } from '../../../types/fot930';
 import { Device } from '../../fot930';
 import {
@@ -73,9 +81,6 @@ export function LabWork() {
 	const [selectedComponent, setSelectedComponent] = useState<PassiveComponent>(
 		availableComponents[0]
 	);
-	// TODO: Восстановить при повторном подходе к реализации измерений
-	const [_attemptCount, setAttemptCount] = useState(1);
-	const [measurements, _setMeasurements] = useState<CompletedMeasurement[]>([]);
 	const [connectionScheme, setConnectionScheme] = useState<ConnectionScheme>({
 		sequence: [],
 		correctSequence: [
@@ -86,6 +91,19 @@ export function LabWork() {
 			'tester_2'
 		]
 	});
+
+	const [deviceState, setDeviceState] =
+		useState<DeviceState>(initialDeviceState);
+
+	// Хук управления таблицами результатов
+	const {
+		state: resultsTableState,
+		createTableForComponent,
+		addDeviceMeasurement,
+		enterStudentValue,
+		isCellEditable,
+		canProceedToNextMeasurement
+	} = useResultsTable();
 
 	useEffect(() => {
 		setConnectionScheme((prev) => ({
@@ -99,9 +117,6 @@ export function LabWork() {
 			]
 		}));
 	}, [selectedComponent]);
-
-	const [deviceState, setDeviceState] =
-		useState<DeviceState>(initialDeviceState);
 
 	// Ссылка на dispatch для отправки действий в Device
 	const deviceDispatchRef = useRef<Dispatch<DeviceAction> | null>(null);
@@ -120,6 +135,101 @@ export function LabWork() {
 			}, 3000);
 		}
 	}, []);
+
+	// Ссылка для отслеживания последнего обработанного результата
+	const lastProcessedResultRef = useRef<{
+		componentId: string;
+		timestamp: number;
+	} | null>(null);
+
+	// Отслеживание завершения FASTEST измерения
+	// biome-ignore lint: Сложная логика обработки результатов из прибора, которая может быть трудно читаемой, но необходимой для корректной работы
+	useEffect(() => {
+		if (
+			deviceState.screen === 'FASTEST_RESULTS' &&
+			deviceState.currentFiberResult &&
+			selectedComponent
+		) {
+			const componentId = selectedComponent.id;
+			const resultTimestamp = deviceState.currentFiberResult.timestamp;
+
+			// Проверяем, был ли этот результат уже обработан
+			// Если timestamp совпадает, это старый результат (не важно для какого компонента)
+			const isAlreadyProcessed =
+				lastProcessedResultRef.current?.timestamp === resultTimestamp;
+
+			if (isAlreadyProcessed) {
+				return; // Результат уже обработан, пропускаем
+			}
+
+			const existingTable = resultsTableState.tables[componentId];
+
+			// Таблица должна существовать (создается при выборе компонента)
+			if (!existingTable) {
+				createTableForComponent(
+					selectedComponent,
+					deviceState.preparation.fastestSettings.lossWavelengths
+				);
+			}
+
+			// Добавляем результат измерения
+			addDeviceMeasurement(
+				componentId,
+				1, // Этот параметр игнорируется, хук использует внутреннее состояние
+				deviceState.currentFiberResult
+			);
+
+			// Запоминаем, что обработали этот результат
+			lastProcessedResultRef.current = {
+				componentId,
+				timestamp: resultTimestamp
+			};
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [
+		createTableForComponent,
+		deviceState.preparation.fastestSettings.lossWavelengths,
+		deviceState.screen,
+		deviceState.currentFiberResult,
+		selectedComponent,
+		addDeviceMeasurement
+	]);
+
+	// Вывод предупреждения при попытке начать следующее измерение без ввода данных текущего
+	const canStartNextMeasurement = useMemo(() => {
+		if (!selectedComponent) return false;
+
+		const table = resultsTableState.tables[selectedComponent.id];
+		if (!table) return true; // Первое измерение всегда доступно
+
+		// Проверяем, можно ли начать следующее измерение
+		// (все данные текущего измерения введены)
+		return canProceedToNextMeasurement(selectedComponent.id);
+	}, [
+		selectedComponent,
+		resultsTableState.tables,
+		canProceedToNextMeasurement
+	]);
+
+	// Обработчик ввода значений
+	const handleValueChange = useCallback(
+		(
+			componentId: string,
+			wavelength: Wavelength,
+			field: 'measurement' | 'average' | 'kilometricAttenuation',
+			measurementIndex: number | null,
+			value: number
+		) => {
+			enterStudentValue(
+				componentId,
+				wavelength,
+				field,
+				measurementIndex,
+				value
+			);
+		},
+		[enterStudentValue]
+	);
 
 	// Переключение между этапами
 	const handleStageChange = (stage: LabStage) => {
@@ -190,9 +300,9 @@ export function LabWork() {
 								<PassiveMeasurementsStage
 									components={availableComponents}
 									selectedComponent={selectedComponent}
-									measurements={measurements}
+									resultsTableState={resultsTableState}
+									canStartNextMeasurement={canStartNextMeasurement}
 									onSelectComponent={setSelectedComponent}
-									onResetAttempts={() => setAttemptCount(1)}
 								/>
 
 								<ConnectionSchemeStage
@@ -205,8 +315,22 @@ export function LabWork() {
 
 						{currentStage === 'RESULTS_ANALYSIS' && (
 							<ResultsStage
-								measurements={measurements}
-								components={availableComponents}
+								resultsTableState={resultsTableState}
+								selectedComponentId={selectedComponent.id}
+								onValueChange={handleValueChange}
+								isCellEditable={(
+									componentId,
+									wavelength,
+									field,
+									measurementIndex
+								) =>
+									isCellEditable(
+										componentId,
+										wavelength,
+										field,
+										measurementIndex
+									)
+								}
 							/>
 						)}
 
