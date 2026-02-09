@@ -18,7 +18,7 @@ export function ScreenFastestMeasuring({ state }: ScreenFastestMeasuringProps) {
 					: 'Measuring Fiber...'}
 			</div>
 
-			<div className="w-full max-w-[200px] mb-4">
+			<div className="w-full max-w-50 mb-4">
 				<div className="flex justify-center gap-1">
 					{[0, 1, 2, 3, 4].map((i) => (
 						<div

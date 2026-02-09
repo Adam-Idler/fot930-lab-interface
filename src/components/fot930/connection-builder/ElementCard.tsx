@@ -32,7 +32,7 @@ export function ElementCard({ element, onRemove, onDrop }: ElementCardProps) {
 			<button
 				type="button"
 				onClick={onRemove}
-				className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
+				className="absolute -top-2 -right-2 w-6 h-6 text-sm bg-red-500 text-white rounded-full opacity-0 hover:cursor-pointer group-hover:opacity-100 transition hover:bg-red-600"
 			>
 				×
 			</button>

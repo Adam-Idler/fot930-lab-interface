@@ -42,7 +42,8 @@ export const initialDeviceState: DeviceState = {
 	fiberCounter: 0,
 	currentFiberResult: null,
 	fiberMeasurementsHistory: {},
-	currentMeasurementType: null
+	currentMeasurementType: null,
+	connectionError: false
 };
 
 /** Доступные длины волн для FasTest */
@@ -164,6 +165,14 @@ export function deviceReducer(
 					...state.fiberMeasurementsHistory,
 					[action.payload.componentId]: action.payload
 				}
+			};
+
+		case 'SET_CONNECTION_ERROR':
+			return {
+				...state,
+				screen: 'FASTEST_MAIN',
+				currentMeasurementType: null,
+				connectionError: action.payload
 			};
 
 		default:
@@ -551,7 +560,8 @@ function handleBackButton(state: DeviceState): DeviceState {
 			return {
 				...state,
 				screen: 'FASTEST_MAIN',
-				currentFiberResult: null
+				currentFiberResult: null,
+				connectionError: false
 			};
 		}
 
@@ -569,7 +579,8 @@ function handleBackButton(state: DeviceState): DeviceState {
 			return {
 				...state,
 				screen: 'MAIN',
-				fastestMainReferenceTypeSelected: false
+				fastestMainReferenceTypeSelected: false,
+				connectionError: false
 			};
 
 		default:
@@ -603,7 +614,8 @@ function handleFastestButton(state: DeviceState): DeviceState {
 		return {
 			...state,
 			screen: 'FASTEST_MAIN',
-			fastestMainReferenceTypeSelected: true
+			fastestMainReferenceTypeSelected: true,
+			connectionError: false
 		};
 	}
 
