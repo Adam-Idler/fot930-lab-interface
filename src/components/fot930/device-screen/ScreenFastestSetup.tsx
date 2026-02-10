@@ -9,32 +9,32 @@ export function ScreenFastestSetup({ state }: ScreenFastestSetupProps) {
 	const { fastestSettings } = state.preparation;
 	const wavelengths: Wavelength[] = [1310, 1550, 1625];
 	const lengthUnits = [
-		{ value: 'ft', label: 'ft' },
-		{ value: 'mi', label: 'mi' },
-		{ value: 'm', label: 'm' },
-		{ value: 'km', label: 'km' }
+		{ value: 'ft', label: 'фт' },
+		{ value: 'mi', label: 'ми' },
+		{ value: 'm', label: 'м' },
+		{ value: 'km', label: 'км' }
 	];
 
 	const isPortSelected = state.fastestSetupSectionIndex === 0;
 	const isLengthUnitSelected = state.fastestSetupSectionIndex === 1;
 	const isWavelengthsSelected = state.fastestSetupSectionIndex === 2;
 
-	const portOptions = ['Singlemode', 'Multimode'];
+	const portOptions = ['Одномодовый', 'Многомодовый'];
 	const lengthUnitOptions = lengthUnits.map((u) => u.label);
 
 	return (
 		<div className="flex flex-col w-full h-full text-xs">
 			<div className="text-lg font-bold mb-3 text-fot930-blue">
-				FasTest Setup (As Master)
+				Настройка FasTest (В роли мастера)
 			</div>
 
 			<div className="grid grid-cols-2 gap-4 flex-1">
 				{/* Левая колонка */}
 				<div className="space-y-2">
 					<DropdownField
-						label="FasTest Port"
+						label="Порт FasTest"
 						value={
-							fastestSettings.portType === 'SM' ? 'Singlemode' : 'Multimode'
+							fastestSettings.portType === 'SM' ? 'Одномодовый' : 'Многомодовый'
 						}
 						isSelected={isPortSelected}
 						isActive={true}
@@ -53,8 +53,8 @@ export function ScreenFastestSetup({ state }: ScreenFastestSetupProps) {
 					/>
 
 					<DropdownField
-						label="Length Unit"
-						value={fastestSettings.lengthUnit}
+						label="Единица длины"
+						value={lengthUnits.find((option) => option.value === fastestSettings.lengthUnit)?.label || lengthUnitOptions[0]}
 						isSelected={isLengthUnitSelected}
 						isActive={true}
 						options={lengthUnitOptions}
@@ -63,7 +63,7 @@ export function ScreenFastestSetup({ state }: ScreenFastestSetupProps) {
 					/>
 
 					<DropdownField
-						label="Auto Save to"
+						label="Автосохранение в"
 						value="Master"
 						isSelected={false}
 						isActive={false}
@@ -72,7 +72,7 @@ export function ScreenFastestSetup({ state }: ScreenFastestSetupProps) {
 					/>
 
 					<DropdownField
-						label="Mode/wave."
+						label="Режим/длина волны"
 						value="Custom"
 						isSelected={false}
 						isActive={false}
@@ -90,7 +90,7 @@ export function ScreenFastestSetup({ state }: ScreenFastestSetupProps) {
 								: 'border-transparent'
 						}`}
 					>
-						<div className="font-semibold mb-1">Loss Wavelengths</div>
+						<div className="font-semibold mb-1">Длины волн потерь</div>
 						<div className="space-y-1">
 							{wavelengths.map((wl, index) => {
 								const isSelected = fastestSettings.lossWavelengths.includes(wl);
@@ -108,7 +108,7 @@ export function ScreenFastestSetup({ state }: ScreenFastestSetupProps) {
 										<span className="text-sm font-normal text-gray-800">
 											{isSelected ? '☑' : '☐'}
 										</span>
-										<span className="text-gray-800">{wl}nm</span>
+										<span className="text-gray-800">{wl}нм</span>
 									</div>
 								);
 							})}
@@ -117,13 +117,13 @@ export function ScreenFastestSetup({ state }: ScreenFastestSetupProps) {
 
 					<div>
 						<div className="font-semibold mb-1 text-gray-400">
-							ORL Wavelengths
+							Длины волн ORL
 						</div>
 						<div className="space-y-1 text-gray-400">
 							{wavelengths.map((wl) => (
 								<div key={wl} className="flex items-center gap-2">
 									<span className="text-sm">{wl === 1625 ? '☑' : '☐'}</span>
-									<span>{wl}nm</span>
+									<span>{wl}нм</span>
 								</div>
 							))}
 						</div>

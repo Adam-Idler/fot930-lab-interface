@@ -1,18 +1,18 @@
 import { Show } from '../../../lib/components';
 import type { DeviceState } from '../../../types/fot930';
 
-interface ScreenMenuSetupProps {
+interface ScreenSettingsProps {
 	state: DeviceState;
 }
 
-export function ScreenMenuSetup({ state }: ScreenMenuSetupProps) {
-	const menuItems = ['Настройка', 'Автоимена данных', 'Порог. значения', 'Результаты/Информация', 'Источник/VFL', 'Телефон/Сообщения'];
-	const selectedIndex = state.setupMenuIndex;
+export function ScreenSettings({ state }: ScreenSettingsProps) {
+	const menuItems = ['Устройство', 'Автоимена данных', 'Порог. значения', 'Измеритель мощности', 'Измеритель ORL', 'FasTest'];
+	const selectedIndex = state.settingsMenuIndex;
 
 	return (
 		<div className="flex flex-col w-full h-full p-3">
 			<div className="text-lg font-bold mb-3 pb-1 border-b border-fot930-blue text-fot930-blue">
-				Меню
+				Настройка
 			</div>
 
 			<div className="space-y-1">

@@ -232,7 +232,7 @@ export function PreparationStage({
 								) : (
 									<>
 										<div className="text-xs text-blue-600 font-medium mb-2">
-											Нажмите MENU → Setup → FasTest
+											Нажмите Menu → Настройка → FasTest
 										</div>
 										<div className="bg-blue-50 border border-blue-200 rounded p-2 text-xs text-gray-700">
 											<div className="font-semibold mb-1">
@@ -252,8 +252,8 @@ export function PreparationStage({
 															: '•'}
 													</span>
 													<span>
-														FasTest Port:{' '}
-														<span className="font-bold">Single-mode (SM)</span>
+														Порт FasTest:{' '}
+														<span className="font-bold">Одномодовый</span>
 													</span>
 												</li>
 												<li className="flex items-center gap-2">
@@ -269,8 +269,8 @@ export function PreparationStage({
 															: '•'}
 													</span>
 													<span>
-														Length Unit:{' '}
-														<span className="font-bold">m (метры)</span>
+														Единица измерения:{' '}
+														<span className="font-bold">м (метры)</span>
 													</span>
 												</li>
 												<li className="flex items-center gap-2">
@@ -284,7 +284,7 @@ export function PreparationStage({
 														{isWavelengthsCorrect ? '✓' : '•'}
 													</span>
 													<span>
-														Loss Wavelengths: выберите{' '}
+														Длины волн потерь: выберите{' '}
 														<span className="font-bold">1310 нм</span> и{' '}
 														<span className="font-bold">1550 нм</span>
 													</span>

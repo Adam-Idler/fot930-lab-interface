@@ -145,8 +145,8 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 			</div>
 
 			<div className="text-[10px] text-gray-500 text-center border-t border-gray-200 pt-1">
-				UP/DOWN: Navigation | ENTER: Change | F1: Reference | F2/FasTest:
-				Measure
+				UP/DOWN: Навигация | ENTER: Изменение | F1: Опор. знач. | F2/FasTest:
+				Измерение
 			</div>
 
 			{/* Overlay для ошибки подключения */}

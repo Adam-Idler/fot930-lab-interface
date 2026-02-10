@@ -14,8 +14,8 @@ export function ScreenFastestMeasuring({ state }: ScreenFastestMeasuringProps) {
 		<div className="flex flex-col items-center justify-center w-full h-full">
 			<div className="text-lg font-bold mb-2 text-fot930-blue">
 				{isReferenceMeasurement
-					? 'Measuring Reference...'
-					: 'Measuring Fiber...'}
+					? 'Измерение опор. значения...'
+					: 'Измерение волокна...'}
 			</div>
 
 			<div className="w-full max-w-50 mb-4">
@@ -31,11 +31,11 @@ export function ScreenFastestMeasuring({ state }: ScreenFastestMeasuringProps) {
 			</div>
 
 			<div className="text-xs text-gray-600 text-center space-y-1">
-				<div>Mode: {fastestSettings.portType}</div>
-				<div>Wavelengths: {fastestSettings.lossWavelengths.join('nm, ')}nm</div>
+				<div>Режим: {fastestSettings.portType}</div>
+				<div>Длины волн: {fastestSettings.lossWavelengths.join('nm, ')}nm</div>
 			</div>
 
-			<div className="text-[10px] text-gray-500 mt-4">Please wait...</div>
+			<div className="text-[10px] text-gray-500 mt-4">Пожалуйста, подождите...</div>
 		</div>
 	);
 }
