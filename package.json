@@ -7,7 +7,10 @@
 	"build": {
 		"appId": "com.diplom",
 		"win": {
-			"target": "nsis",
+			"target": {
+				"target": "nsis",
+				"arch": ["x64", "ia32"]
+			},
 			"icon": "icon.png"
 		},
 		"files": [
@@ -18,8 +21,8 @@
 	"scripts": {
 		"dev": "vite",
 		"pack": "electron-builder --dir",
-		"build": "tsc -b && vite build",
-		"dist": "tsc -b && vite build && electron-builder",
+		"build": "vite build",
+		"dist": "vite build && electron-builder",
 		"lint": "eslint . && biome check --write .",
 		"vite:preview": "vite preview",
 		"tailwind:init": "tailwindcss init -p",
