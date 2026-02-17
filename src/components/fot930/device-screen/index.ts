@@ -1,3 +1,4 @@
+export { DeviceHeader } from './DeviceHeader';
 export { DropdownField } from './DropdownField';
 export { ScreenFastestMain } from './ScreenFastestMain';
 export { ScreenFastestMeasuring } from './ScreenFastestMeasuring';

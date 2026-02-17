@@ -156,7 +156,7 @@ export function Device({
 			<div className="bg-fot930-blue p-8 rounded-3xl">
 				{/* Основная область */}
 				<div className="bg-gray-900 rounded-2xl p-4 shadow-inner">
-					{/* LCD Экран */}
+					{/* Экран */}
 					<div className="aspect-16/10 mb-6 overflow-hidden shadow-xl">
 						<DeviceScreen state={state} />
 					</div>
@@ -313,9 +313,11 @@ export function Device({
 							<span className="text-sm text-white/40 font-medium">Active</span>
 							<div
 								className={`w-3 h-3 border border-gray-900 transition-all ${
-									state.isPoweredOn
-										? 'bg-green-500 shadow-lg shadow-green-400/50'
-										: 'bg-gray-700'
+									state.screen === 'FASTEST_MEASURING'
+										? 'bg-red-500 animate-pulse-red'
+										: state.isPoweredOn
+											? 'bg-green-500 shadow-lg shadow-green-400/50'
+											: 'bg-gray-700'
 								}`}
 							/>
 						</div>

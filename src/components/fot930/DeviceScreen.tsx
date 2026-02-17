@@ -5,6 +5,7 @@
 
 import type { DeviceState } from '../../types/fot930';
 import {
+	DeviceHeader,
 	ScreenFastestMain,
 	ScreenFastestMeasuring,
 	ScreenFastestResults,
@@ -24,11 +25,14 @@ export function DeviceScreen({ state }: DeviceScreenProps) {
 
 	return (
 		<div
-			className={`w-full h-full rounded border-2 border-gray-800 flex items-center justify-center font-mono p-2 ${
+			className={`w-full h-full rounded border-2 border-gray-800 flex flex-col font-mono overflow-hidden ${
 				isOff ? 'bg-gray-700' : 'bg-white'
 			}`}
 		>
-			{renderScreen(state)}
+			{!isOff && <DeviceHeader />}
+			<div className="flex-1 flex items-center justify-center p-2">
+				{renderScreen(state)}
+			</div>
 		</div>
 	);
 }
