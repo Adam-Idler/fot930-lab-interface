@@ -35,6 +35,7 @@ import {
 const availableComponents: PassiveComponent[] = [
 	{
 		id: 'optical_cable_1',
+		icon: '/images/icons/coil.png',
 		type: 'OPTICAL_CABLE',
 		label: 'Оптический шнур 1',
 		typicalLoss: COMPONENT_LOSS_DB.OPTICAL_CABLE,
@@ -43,6 +44,7 @@ const availableComponents: PassiveComponent[] = [
 	},
 	{
 		id: 'fiber_coil_1',
+		icon: '/images/icons/cable-reel.png',
 		type: 'FIBER_COIL',
 		label: 'Катушка ОВ (500м)',
 		typicalLoss: COMPONENT_LOSS_DB.FIBER_COIL,
@@ -51,6 +53,7 @@ const availableComponents: PassiveComponent[] = [
 	},
 	{
 		id: 'splitter_1_2',
+		icon: '/images/icons/splitter.png',
 		type: 'SPLITTER_1_2',
 		label: 'Сплиттер 1:2',
 		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_2,
@@ -59,6 +62,7 @@ const availableComponents: PassiveComponent[] = [
 	},
 	{
 		id: 'splitter_1_4',
+		icon: '/images/icons/splitter.png',
 		type: 'SPLITTER_1_4',
 		label: 'Сплиттер 1:4',
 		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_4,
@@ -67,6 +71,7 @@ const availableComponents: PassiveComponent[] = [
 	},
 	{
 		id: 'splitter_1_8',
+		icon: '/images/icons/splitter.png',
 		type: 'SPLITTER_1_8',
 		label: 'Сплиттер 1:8',
 		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_8,
@@ -75,7 +80,7 @@ const availableComponents: PassiveComponent[] = [
 	}
 ];
 
-// Добавить завершение лабораторной работы после всех измерений
+// TODO: Добавить завершение лабораторной работы после всех измерений
 export function LabWork() {
 	const [currentStage, setCurrentStage] = useState<LabStage>('PREPARATION');
 	const [selectedComponent, setSelectedComponent] = useState<PassiveComponent>(
@@ -85,9 +90,9 @@ export function LabWork() {
 		sequence: [],
 		correctSequence: [
 			'tester',
-			'connector_apc_1',
+			selectedComponent.connectorType === 'SC_APC' ? 'connector_apc_1' : 'connector_upc_1',
 			selectedComponent.id,
-			'connector_apc_2',
+			selectedComponent.connectorType === 'SC_APC' ? 'connector_apc_2' : 'connector_upc_2',
 			'tester_2'
 		]
 	});
@@ -110,9 +115,9 @@ export function LabWork() {
 			...prev,
 			correctSequence: [
 				'tester',
-				'connector_apc_1',
+				selectedComponent.connectorType === 'SC_APC' ? 'connector_apc_1' : 'connector_upc_1',
 				selectedComponent.id,
-				'connector_apc_2',
+				selectedComponent.connectorType === 'SC_APC' ? 'connector_apc_2' : 'connector_upc_2',
 				'tester_2'
 			]
 		}));
@@ -283,6 +288,7 @@ export function LabWork() {
 								deviceDispatchRef.current = dispatch;
 							}}
 							selectedComponent={selectedComponent}
+							connectionScheme={connectionScheme}
 						/>
 					</div>
 

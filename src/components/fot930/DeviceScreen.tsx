@@ -13,7 +13,8 @@ import {
 	ScreenLoading,
 	ScreenMain,
 	ScreenMenuSetup,
-	ScreenOff
+	ScreenOff,
+	ScreenSettings
 } from './device-screen';
 
 interface DeviceScreenProps {
@@ -50,6 +51,9 @@ function renderScreen(state: DeviceState) {
 
 		case 'MENU_SETUP':
 			return <ScreenMenuSetup state={state} />;
+
+		case 'SETUP_SETTINGS':
+			return <ScreenSettings state={state} />;
 
 		case 'FASTEST_SETUP':
 			return <ScreenFastestSetup state={state} />;

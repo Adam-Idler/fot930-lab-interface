@@ -33,6 +33,7 @@ export const initialDeviceState: DeviceState = {
 	isPoweredOn: false,
 	preparation: initialPreparationState,
 	setupMenuIndex: 0,
+	settingsMenuIndex: 0,
 	fastestSetupSectionIndex: 0,
 	fastestLengthUnitIndex: 0,
 	fastestWavelengthIndex: 0,
@@ -42,7 +43,8 @@ export const initialDeviceState: DeviceState = {
 	fiberCounter: 0,
 	currentFiberResult: null,
 	fiberMeasurementsHistory: {},
-	currentMeasurementType: null
+	currentMeasurementType: null,
+	connectionError: false
 };
 
 /** Доступные длины волн для FasTest */
@@ -166,6 +168,14 @@ export function deviceReducer(
 				}
 			};
 
+		case 'SET_CONNECTION_ERROR':
+			return {
+				...state,
+				screen: 'FASTEST_MAIN',
+				currentMeasurementType: null,
+				connectionError: action.payload
+			};
+
 		default:
 			return state;
 	}
@@ -207,7 +217,14 @@ function handleUpButton(state: DeviceState): DeviceState {
 			// Навигация по меню Setup (пока только FasTest)
 			return {
 				...state,
-				setupMenuIndex: state.setupMenuIndex > 0 ? state.setupMenuIndex - 1 : 0
+				setupMenuIndex: state.setupMenuIndex > 0 ? state.setupMenuIndex - 1 : 5
+			};
+
+		case 'SETUP_SETTINGS':
+			// Навигация по меню настроек
+			return {
+				...state,
+				settingsMenuIndex: state.settingsMenuIndex > 0 ? state.settingsMenuIndex - 1 : 5
 			};
 
 		case 'FASTEST_SETUP':
@@ -285,7 +302,14 @@ function handleDownButton(state: DeviceState): DeviceState {
 			// Навигация по меню Setup (пока только FasTest)
 			return {
 				...state,
-				setupMenuIndex: state.setupMenuIndex < 0 ? state.setupMenuIndex + 1 : 0
+				setupMenuIndex: state.setupMenuIndex < 5 ? state.setupMenuIndex + 1 : 0
+			};
+
+		case 'SETUP_SETTINGS':
+			// Навигация по меню настроек
+			return {
+				...state,
+				settingsMenuIndex: state.settingsMenuIndex < 5 ? state.settingsMenuIndex + 1 : 0
 			};
 
 		case 'FASTEST_SETUP':
@@ -360,8 +384,19 @@ function handleDownButton(state: DeviceState): DeviceState {
 function handleEnterButton(state: DeviceState): DeviceState {
 	switch (state.screen) {
 		case 'MENU_SETUP':
-			// Переход в FasTest Setup
+			// Переход в экран настроек
 			if (state.setupMenuIndex === 0) {
+				return {
+					...state,
+					screen: 'SETUP_SETTINGS',
+					settingsMenuIndex: 0
+				};
+			}
+			return state;
+
+		case 'SETUP_SETTINGS':
+			// Переход в FasTest Setup при выборе пункта "FasTest"
+			if (state.settingsMenuIndex === 5) {
 				return {
 					...state,
 					screen: 'FASTEST_SETUP'
@@ -505,6 +540,13 @@ function handleBackButton(state: DeviceState): DeviceState {
 				screen: 'MAIN'
 			};
 
+		case 'SETUP_SETTINGS':
+			// Возврат в меню Setup
+			return {
+				...state,
+				screen: 'MENU_SETUP'
+			};
+
 		case 'FASTEST_SETUP': {
 			// Если dropdown открыт - закрываем его без применения
 			if (state.openDropdown !== null) {
@@ -551,7 +593,8 @@ function handleBackButton(state: DeviceState): DeviceState {
 			return {
 				...state,
 				screen: 'FASTEST_MAIN',
-				currentFiberResult: null
+				currentFiberResult: null,
+				connectionError: false
 			};
 		}
 
@@ -569,7 +612,8 @@ function handleBackButton(state: DeviceState): DeviceState {
 			return {
 				...state,
 				screen: 'MAIN',
-				fastestMainReferenceTypeSelected: false
+				fastestMainReferenceTypeSelected: false,
+				connectionError: false
 			};
 
 		default:
@@ -603,7 +647,8 @@ function handleFastestButton(state: DeviceState): DeviceState {
 		return {
 			...state,
 			screen: 'FASTEST_MAIN',
-			fastestMainReferenceTypeSelected: true
+			fastestMainReferenceTypeSelected: true,
+			connectionError: false
 		};
 	}
 

@@ -38,7 +38,7 @@ export function validateMeasurement(
 
 	const errorMessage = isValid
 		? undefined
-		: `Ошибка: разница ${diff.toFixed(2)} dB превышает допустимую (±${MEASUREMENT_TOLERANCE} dB)`;
+		: 'Невереное значение измерения';
 
 	// Обновляем entry
 	const updatedMeasurements = [...row.measurements];
@@ -91,7 +91,7 @@ export function validateAverage(
 		isValid = diff <= CALCULATION_TOLERANCE;
 
 		if (!isValid) {
-			errorMessage = `Ошибка: разница ${diff.toFixed(3)} dB. Ожидается ${calculatedAverage.toFixed(2)} dB`;
+			errorMessage = `Неверное среднее значение`;
 		}
 	}
 
@@ -101,7 +101,7 @@ export function validateAverage(
 		average: {
 			value: value,
 			actualValue: calculatedAverage,
-			status: isValid ? 'valid' : 'error',
+			status: isValid ? 'valid' as const : 'error' as const,
 			errorMessage: isValid ? undefined : errorMessage
 		}
 	};
@@ -124,10 +124,11 @@ export function validateKilometricAttenuation(
 	let errorMessage: string | undefined;
 	let updatedRow: WavelengthTableRow;
 
+	// TODO: Проверить надобность. По идеи километрическое затухание не выводится для элементов где оно не требуется
 	if (!requiresKmAttenuation) {
 		// Километрическое затухание не требуется
 		if (value !== 0) {
-			errorMessage = `Километрическое затухание не требуется для длины ${table.fiberLength} м`;
+			errorMessage = `Не требуется для длины ${table.fiberLength} м`;
 			isValid = false;
 		} else {
 			isValid = true;
@@ -171,7 +172,7 @@ export function validateKilometricAttenuation(
 			isValid = diff <= CALCULATION_TOLERANCE;
 
 			if (!isValid) {
-				errorMessage = `Ошибка: разница ${diff.toFixed(3)} dB/км. Ожидается ${calculatedKmAttenuation.toFixed(2)} dB/км`;
+				errorMessage = `Неверное километрическое затухание`;
 			}
 
 			updatedRow = {

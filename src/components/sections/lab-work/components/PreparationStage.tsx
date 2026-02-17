@@ -125,7 +125,7 @@ export function PreparationStage({
 
 								{!isStep1Complete ? (
 									<div className="text-xs text-gray-500 italic">
-										⚠️ Сначала выполните предыдущие шаги
+										Сначала выполните предыдущие шаги
 									</div>
 								) : isStep2Complete ? (
 									<div className="bg-green-100 border border-green-300 rounded p-2">
@@ -168,15 +168,16 @@ export function PreparationStage({
 												onClick={onCleanPorts}
 												disabled={preparation.portStatus === 'cleaning'}
 												className={clsx(
-													'w-full font-semibold py-2 px-4 rounded-lg transition-colors',
+													'flex w-full gap-2 justify-center items-center font-semibold py-2 px-4 rounded-lg transition-colors',
 													preparation.portStatus === 'cleaning'
 														? 'bg-yellow-400 text-yellow-900 cursor-not-allowed opacity-70'
 														: 'bg-blue-600 hover:bg-blue-700 text-white hover:cursor-pointer'
 												)}
 											>
+												<img className='h-5' src={preparation.portStatus === 'cleaning' ? '/images/icons/hourglass.svg' : '/images/icons/broomstick.svg'} alt={preparation.portStatus === 'cleaning' ? 'Песочные часы' : 'Метла'} />
 												{preparation.portStatus === 'cleaning'
-													? '⏳ Очистка...'
-													: '🧹 Очистить порт'}
+													? 'Очистка...'
+													: 'Очистить порт'}
 											</button>
 										</div>
 									</>
@@ -220,7 +221,7 @@ export function PreparationStage({
 
 								{(!isStep3Complete && !isStep2Complete) || !isStep1Complete ? (
 									<div className="text-xs text-gray-500 italic">
-										⚠️ Сначала выполните предыдущие шаги
+										Сначала выполните предыдущие шаги
 									</div>
 								) : isStep3Complete ? (
 									<div className="bg-green-100 border border-green-300 rounded p-2">
@@ -231,7 +232,7 @@ export function PreparationStage({
 								) : (
 									<>
 										<div className="text-xs text-blue-600 font-medium mb-2">
-											Нажмите MENU → Setup → FasTest
+											Нажмите Menu → Настройка → FasTest
 										</div>
 										<div className="bg-blue-50 border border-blue-200 rounded p-2 text-xs text-gray-700">
 											<div className="font-semibold mb-1">
@@ -251,8 +252,8 @@ export function PreparationStage({
 															: '•'}
 													</span>
 													<span>
-														FasTest Port:{' '}
-														<span className="font-bold">Single-mode (SM)</span>
+														Порт FasTest:{' '}
+														<span className="font-bold">Одномодовый</span>
 													</span>
 												</li>
 												<li className="flex items-center gap-2">
@@ -268,8 +269,8 @@ export function PreparationStage({
 															: '•'}
 													</span>
 													<span>
-														Length Unit:{' '}
-														<span className="font-bold">m (метры)</span>
+														Единица измерения:{' '}
+														<span className="font-bold">м (метры)</span>
 													</span>
 												</li>
 												<li className="flex items-center gap-2">
@@ -283,7 +284,7 @@ export function PreparationStage({
 														{isWavelengthsCorrect ? '✓' : '•'}
 													</span>
 													<span>
-														Loss Wavelengths: выберите{' '}
+														Длины волн потерь: выберите{' '}
 														<span className="font-bold">1310 нм</span> и{' '}
 														<span className="font-bold">1550 нм</span>
 													</span>
@@ -331,7 +332,7 @@ export function PreparationStage({
 
 								{!isStep3Complete ? (
 									<div className="text-xs text-gray-500 italic">
-										⚠️ Сначала выполните предыдущие шаги
+										Сначала выполните предыдущие шаги
 									</div>
 								) : isStep4Complete ? (
 									<div className="bg-green-100 border border-green-300 rounded p-2">
@@ -342,8 +343,7 @@ export function PreparationStage({
 								) : (
 									<>
 										<div className="text-xs text-blue-600 font-medium mb-2">
-											Нажмите кнопку FasTest, затем UP/DOWN и ENTER для выбора
-											типа измерения, затем F1
+											Нажмите кнопку FasTest, выберите тип измерения, затем F1
 										</div>
 										<div className="bg-blue-50 border border-blue-200 rounded p-2 text-xs text-gray-700">
 											<div className="font-semibold mb-1">
@@ -398,7 +398,7 @@ export function PreparationStage({
 					</>
 				) : (
 					<>
-						<div className="text-4xl mb-2">⏳</div>
+						<div className="flex justify-center text-4xl mb-2"><img className="h-8" src="/images/icons/hourglass.svg" alt="Песочные часы" /></div>
 						<h3 className="text-xl font-bold text-gray-800 mb-2">
 							Подготовка не завершена
 						</h3>

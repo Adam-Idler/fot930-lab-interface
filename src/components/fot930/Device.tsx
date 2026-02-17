@@ -10,10 +10,12 @@ import {
 } from '../../lib/fot930/deviceReducer';
 import {
 	generateFiberMeasurement,
-	generateReferenceMeasurement
+	generateReferenceMeasurement,
+	validateConnectionScheme
 } from '../../lib/fot930/measurementEngine';
 import { noop } from '../../lib/utils';
 import type {
+	ConnectionScheme,
 	DeviceAction,
 	DeviceButton as DeviceButtonType,
 	DeviceState,
@@ -29,12 +31,15 @@ interface DeviceProps {
 	onDispatchReady?: (dispatch: React.Dispatch<DeviceAction>) => void;
 	/** Выбранный компонент для измерений */
 	selectedComponent?: PassiveComponent | null;
+	/** Схема подключения для проверки перед измерениями */
+	connectionScheme?: ConnectionScheme | null;
 }
 
 export function Device({
 	onDeviceStateChange,
 	onDispatchReady,
-	selectedComponent
+	selectedComponent,
+	connectionScheme
 }: DeviceProps) {
 	const [state, dispatch] = useReducer(deviceReducer, initialDeviceState);
 
@@ -99,6 +104,25 @@ export function Device({
 			selectedComponent
 		) {
 			const performFiberMeasurement = async () => {
+				// Проверяем схему подключения перед измерением
+				if (connectionScheme) {
+					const validation = validateConnectionScheme(connectionScheme);
+					if (!validation.valid) {
+						// Показываем ошибку схемы и возвращаемся на главный экран
+						dispatch({ 
+							type: 'SET_CONNECTION_ERROR', 
+							payload: true
+						});
+						return;
+					}
+				} else {
+					// Если схема не задана, показываем ошибку
+					dispatch({ 
+						type: 'SET_CONNECTION_ERROR', 
+						payload: true
+					});
+					return;
+				}
 				// Проверяем, есть ли предыдущее измерение для этого компонента
 				const previousResult =
 					state.fiberMeasurementsHistory[selectedComponent.id];
@@ -132,7 +156,8 @@ export function Device({
 		state.preparation,
 		selectedComponent,
 		state.fiberCounter,
-		state.fiberMeasurementsHistory
+		state.fiberMeasurementsHistory,
+		connectionScheme
 	]);
 
 	const handleButtonPress = (button: DeviceButtonType) => {

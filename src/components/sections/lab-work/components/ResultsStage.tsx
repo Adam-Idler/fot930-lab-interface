@@ -142,7 +142,7 @@ export function ResultsStage({
 						<li>
 							•{' '}
 							<span className="inline-block w-3 h-3 bg-red-50 border border-red-500 rounded mr-1" />
-							Красный фон - ошибка валидации
+							Красный фон - ошибка
 						</li>
 						<li>
 							•{' '}

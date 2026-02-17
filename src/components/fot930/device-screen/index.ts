@@ -8,3 +8,4 @@ export { ScreenLoading } from './ScreenLoading';
 export { ScreenMain } from './ScreenMain';
 export { ScreenMenuSetup } from './ScreenMenuSetup';
 export { ScreenOff } from './ScreenOff';
+export { ScreenSettings } from './ScreenSettings';

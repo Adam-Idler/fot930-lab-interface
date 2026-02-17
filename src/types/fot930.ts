@@ -31,6 +31,7 @@ export type DeviceScreen =
 	| 'LOADING' // Экран загрузки
 	| 'MAIN' // Главный экран
 	| 'MENU_SETUP' // Меню настроек
+	| 'SETUP_SETTINGS' // Экран настроек
 	| 'FASTEST_SETUP' // Настройка FasTest
 	| 'FASTEST_MAIN' // Главный экран FasTest
 	| 'FASTEST_MEASURING' // Измерение FasTest
@@ -150,6 +151,9 @@ export interface DeviceState {
 	/** Индекс меню Setup */
 	setupMenuIndex: number;
 
+	/** Индекс меню настроек */
+	settingsMenuIndex: number;
+
 	/** Индекс выбранной секции на экране FasTest Setup */
 	fastestSetupSectionIndex: number;
 
@@ -179,6 +183,9 @@ export interface DeviceState {
 
 	/** Тип текущего измерения (для различения Reference и Fiber) */
 	currentMeasurementType: 'REFERENCE' | 'FIBER' | null;
+
+	/** Ошибка схемы подключения */
+	connectionError: boolean;
 }
 
 /** Результат измерения */
@@ -223,7 +230,8 @@ export type DeviceAction =
 	| { type: 'START_REFERENCE_MEASUREMENT' }
 	| { type: 'COMPLETE_REFERENCE_MEASUREMENT'; payload: ReferenceResult[] }
 	| { type: 'START_FIBER_MEASUREMENT'; payload: PassiveComponent }
-	| { type: 'COMPLETE_FIBER_MEASUREMENT'; payload: FiberMeasurementResult };
+	| { type: 'COMPLETE_FIBER_MEASUREMENT'; payload: FiberMeasurementResult }
+	| { type: 'SET_CONNECTION_ERROR'; payload: boolean };
 
 // ============================================================
 // ЛАБОРАТОРНАЯ РАБОТА
@@ -249,6 +257,9 @@ export type ConnectorType =
 export interface PassiveComponent {
 	/** Уникальный идентификатор */
 	id: string;
+
+	/** Ссылка на иконку компонента */
+	icon: string;
 
 	/** Тип компонента */
 	type: PassiveComponentType;
@@ -279,6 +290,9 @@ export interface ConnectionScheme {
 export interface ConnectionElement {
 	/** Тип элемента */
 	type: 'TESTER' | 'COMPONENT' | 'CONNECTOR';
+
+	/** Ссылка на иконку элемента */
+	icon: string;
 
 	/** ID элемента */
 	id: string;

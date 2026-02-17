@@ -118,19 +118,9 @@ export function EditableCell({
 
 				{/* Сообщение об ошибке */}
 				{status === 'error' && errorMessage && (
-					<div className="text-xs text-red-600 max-w-[150px] text-center">
+					<div className="text-xs text-red-600 max-w-37.5 text-center">
 						{errorMessage}
 					</div>
-				)}
-
-				{/* Индикатор валидного значения */}
-				{status === 'valid' && (
-					<div className="text-xs text-green-600 font-medium">✓</div>
-				)}
-
-				{/* Подсказка для пустой ячейки */}
-				{status === 'empty' && isEditable && (
-					<div className="text-xs text-yellow-700">Требуется ввод</div>
 				)}
 			</div>
 		</td>

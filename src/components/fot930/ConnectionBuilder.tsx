@@ -3,7 +3,7 @@
  * Позволяет студенту составить правильную последовательность элементов
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { validateConnectionScheme } from '../../lib/fot930/measurementEngine';
 import type { ConnectionElement, ConnectionScheme } from '../../types/fot930';
 import {
@@ -22,10 +22,6 @@ interface ConnectionBuilderProps {
 	availableElements: ConnectionElement[];
 }
 
-// TODO: Заменить смайлики на иконки для элементов схемы
-// Не показывать ошибку, если все элементы еще не были добавлены
-// Добавленные элементы должны пропадать из пулла
-// Добавить очистку портов элементов
 export function ConnectionBuilder({
 	scheme,
 	onChange,
@@ -33,7 +29,25 @@ export function ConnectionBuilder({
 }: ConnectionBuilderProps) {
 	const [draggedElement, setDraggedElement] =
 		useState<ConnectionElement | null>(null);
+	
+	// Состояние для временной схемы (до подтверждения)
+	const [draftScheme, setDraftScheme] = useState<ConnectionScheme>(scheme);
+	
+	const draftSchemeLength = draftScheme.sequence.length;
 
+	// Синхронизируем draftScheme с входящей схемой
+	useEffect(() => {
+		setDraftScheme(scheme);
+	}, [scheme]);
+	
+	// Проверяем, есть ли несохраненные изменения
+	const hasChanges = JSON.stringify(scheme.sequence) !== JSON.stringify(draftScheme.sequence);
+
+	// Фильтруем доступные элементы - исключаем уже добавленные в черновик схемы
+	const usedElementIds = new Set(draftScheme.sequence.map(el => el.id));
+	const filteredAvailableElements = availableElements.filter(element => !usedElementIds.has(element.id));
+
+	// Валидация применяется только к основной схеме
 	const validation = validateConnectionScheme(scheme);
 
 	const handleDragStart = (element: ConnectionElement) => {
@@ -47,7 +61,7 @@ export function ConnectionBuilder({
 	const handleDrop = (targetIndex: number) => {
 		if (!draggedElement) return;
 
-		const newSequence = [...scheme.sequence];
+		const newSequence = [...draftScheme.sequence];
 
 		// Находим, был ли элемент уже в схеме
 		const existingIndex = newSequence.findIndex(
@@ -61,25 +75,29 @@ export function ConnectionBuilder({
 
 		newSequence.splice(targetIndex, 0, draggedElement);
 
-		onChange({
-			...scheme,
+		setDraftScheme({
+			...draftScheme,
 			sequence: newSequence
 		});
 	};
 
 	const handleRemove = (index: number) => {
-		const newSequence = scheme.sequence.filter((_, i) => i !== index);
-		onChange({
-			...scheme,
+		const newSequence = draftScheme.sequence.filter((_, i) => i !== index);
+		setDraftScheme({
+			...draftScheme,
 			sequence: newSequence
 		});
 	};
 
 	const handleReset = () => {
-		onChange({
-			...scheme,
+		setDraftScheme({
+			...draftScheme,
 			sequence: []
 		});
+	};
+
+	const handleConfirm = () => {
+		onChange(draftScheme);
 	};
 
 	return (
@@ -90,12 +108,12 @@ export function ConnectionBuilder({
 					Соберите схему подключения
 				</h3>
 
-				{scheme.sequence.length === 0 ? (
+				{draftSchemeLength === 0 ? (
 					<EmptyDropZone onDrop={() => handleDrop(0)} />
 				) : (
 					<div className="min-h-32 bg-white rounded-lg border-2 border-dashed border-gray-400 p-4">
 						<div className="flex items-center gap-2 flex-wrap">
-							{scheme.sequence.map((element, index) => (
+							{draftScheme.sequence.map((element, index) => (
 								<div
 									key={`${element.id}-${index}`}
 									className="flex items-center gap-2"
@@ -105,18 +123,18 @@ export function ConnectionBuilder({
 										onRemove={() => handleRemove(index)}
 										onDrop={() => handleDrop(index)}
 									/>
-									{index < scheme.sequence.length - 1 && (
+									{index < draftSchemeLength - 1 && (
 										<div className="text-gray-400 text-2xl">→</div>
 									)}
 								</div>
 							))}
 							{/* Зона для добавления нового элемента в конец */}
-							<DropZone onDrop={() => handleDrop(scheme.sequence.length)} />
+							{draftSchemeLength !== scheme.correctSequence.length && <DropZone onDrop={() => handleDrop(draftSchemeLength)} />}
 						</div>
 					</div>
 				)}
 
-				{/* Валидация */}
+				{/* Валидация - показываем только если схема применена */}
 				<div className="mt-4">
 					{scheme.sequence.length > 0 && (
 						<div
@@ -149,6 +167,15 @@ export function ConnectionBuilder({
 					>
 						Сбросить схему
 					</button>
+					{hasChanges && (
+							<button
+								type="button"
+								onClick={handleConfirm}
+								className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 hover:cursor-pointer transition"
+							>
+								Подтвердить
+							</button>
+					)}
 				</div>
 			</div>
 
@@ -156,16 +183,22 @@ export function ConnectionBuilder({
 			<div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-300">
 				<h3 className="text-lg font-semibold mb-4">Доступные элементы</h3>
 
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-					{availableElements.map((element) => (
-						<DraggableElement
-							key={element.id}
-							element={element}
-							onDragStart={() => handleDragStart(element)}
-							onDragEnd={handleDragEnd}
-						/>
-					))}
-				</div>
+				{filteredAvailableElements.length > 0 ? (
+					<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+						{filteredAvailableElements.map((element) => (
+							<DraggableElement
+								key={element.id}
+								element={element}
+								onDragStart={() => handleDragStart(element)}
+								onDragEnd={handleDragEnd}
+							/>
+						))}
+					</div>
+				) : (
+					<div className="text-center py-8 text-gray-500">
+						Все элементы уже добавлены в схему
+					</div>
+				)}
 			</div>
 		</div>
 	);
