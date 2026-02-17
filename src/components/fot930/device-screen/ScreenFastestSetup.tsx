@@ -84,7 +84,7 @@ export function ScreenFastestSetup({ state }: ScreenFastestSetupProps) {
 				{/* Правая колонка */}
 				<div className="space-y-2">
 					<div
-						className={`p-2 -ml-2 -mt-2 rounded border-2 transition-all ${
+						className={`p-2 -ml-2 -mt-2.5 rounded border-2 transition-all ${
 							isWavelengthsSelected
 								? 'border-blue-500 bg-blue-50'
 								: 'border-transparent'
