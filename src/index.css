@@ -2,9 +2,9 @@
 
 @theme {
 	--color-sibguti-main: #1f508f;
-	--color-fot930-blue: #3b7ab5;
-	--color-fot930-blue-hover: #31628f;
-	--color-fot930-blue-active: #22496d;
+	--color-fot930-blue: #5a9fd8;
+	--color-fot930-blue-hover: #4c8ec7;
+	--color-fot930-blue-active: #3f7bb5;
 }
 
 @layer base {
@@ -51,7 +51,8 @@
 
 	/* Анимация пульсации красного индикатора во время измерения */
 	@keyframes pulse-red {
-		0%, 100% {
+		0%,
+		100% {
 			opacity: 1;
 			box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
 		}

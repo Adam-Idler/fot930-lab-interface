@@ -21,6 +21,8 @@ export type DeviceButton =
 	| 'MENU'
 	| 'UP'
 	| 'DOWN'
+	| 'LEFT'
+	| 'RIGHT'
 	| 'ENTER'
 	| 'BACK'
 	| 'FASTEST';
@@ -145,6 +147,9 @@ export interface DeviceState {
 	/** Питание включено */
 	isPoweredOn: boolean;
 
+	/** Индекс текущей страницы нижней панели (F1/F2 функций) */
+	footerPageIndex: number;
+
 	/** Состояние подготовки прибора */
 	preparation: PreparationState;
 
@@ -231,7 +236,10 @@ export type DeviceAction =
 	| { type: 'COMPLETE_REFERENCE_MEASUREMENT'; payload: ReferenceResult[] }
 	| { type: 'START_FIBER_MEASUREMENT'; payload: PassiveComponent }
 	| { type: 'COMPLETE_FIBER_MEASUREMENT'; payload: FiberMeasurementResult }
-	| { type: 'SET_CONNECTION_ERROR'; payload: boolean };
+	| { type: 'SET_CONNECTION_ERROR'; payload: boolean }
+	| { type: 'SET_FOOTER_PAGE'; payload: number }
+	| { type: 'PRESS_LEFT' }
+	| { type: 'PRESS_RIGHT' };
 
 // ============================================================
 // ЛАБОРАТОРНАЯ РАБОТА

@@ -5,6 +5,7 @@
 
 import type { DeviceState } from '../../types/fot930';
 import {
+	DeviceFooter,
 	DeviceHeader,
 	ScreenFastestMain,
 	ScreenFastestMeasuring,
@@ -31,9 +32,10 @@ export function DeviceScreen({ state }: DeviceScreenProps) {
 			}`}
 		>
 			{!isOff && <DeviceHeader />}
-			<div className="flex-1 flex items-center justify-center p-2">
+			<div className="flex-1 flex items-center justify-center p-1">
 				{renderScreen(state)}
 			</div>
+			{!isOff && <DeviceFooter state={state} />}
 		</div>
 	);
 }

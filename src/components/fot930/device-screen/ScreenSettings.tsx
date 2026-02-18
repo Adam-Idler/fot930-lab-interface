@@ -6,7 +6,14 @@ interface ScreenSettingsProps {
 }
 
 export function ScreenSettings({ state }: ScreenSettingsProps) {
-	const menuItems = ['Устройство', 'Автоимена данных', 'Порог. значения', 'Измеритель мощности', 'Измеритель ORL', 'FasTest'];
+	const menuItems = [
+		'Устройство',
+		'Автоимена данных',
+		'Порог. значения',
+		'Измеритель мощности',
+		'Измеритель ORL',
+		'FasTest'
+	];
 	const selectedIndex = state.settingsMenuIndex;
 
 	return (

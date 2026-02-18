@@ -109,16 +109,16 @@ export function Device({
 					const validation = validateConnectionScheme(connectionScheme);
 					if (!validation.valid) {
 						// Показываем ошибку схемы и возвращаемся на главный экран
-						dispatch({ 
-							type: 'SET_CONNECTION_ERROR', 
+						dispatch({
+							type: 'SET_CONNECTION_ERROR',
 							payload: true
 						});
 						return;
 					}
 				} else {
 					// Если схема не задана, показываем ошибку
-					dispatch({ 
-						type: 'SET_CONNECTION_ERROR', 
+					dispatch({
+						type: 'SET_CONNECTION_ERROR',
 						payload: true
 					});
 					return;
@@ -170,7 +170,9 @@ export function Device({
 			BACK: () => dispatch({ type: 'PRESS_BACK' }),
 			FASTEST: () => dispatch({ type: 'PRESS_FASTEST' }),
 			F1: () => dispatch({ type: 'PRESS_F1' }),
-			F2: () => dispatch({ type: 'PRESS_F2' })
+			F2: () => dispatch({ type: 'PRESS_F2' }),
+			LEFT: () => dispatch({ type: 'PRESS_LEFT' }),
+			RIGHT: () => dispatch({ type: 'PRESS_RIGHT' })
 		};
 
 		actionMap[button]?.();
@@ -198,7 +200,7 @@ export function Device({
 										alt="Arrow left"
 									/>
 								}
-								onClick={noop}
+								onClick={() => handleButtonPress('LEFT')}
 							/>
 							<DeviceButton
 								label="F1"
@@ -216,7 +218,7 @@ export function Device({
 										alt="Arrow Right"
 									/>
 								}
-								onClick={noop}
+								onClick={() => handleButtonPress('RIGHT')}
 							/>
 						</div>
 

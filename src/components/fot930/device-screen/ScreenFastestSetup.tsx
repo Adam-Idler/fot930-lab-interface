@@ -54,7 +54,11 @@ export function ScreenFastestSetup({ state }: ScreenFastestSetupProps) {
 
 					<DropdownField
 						label="Единица длины"
-						value={lengthUnits.find((option) => option.value === fastestSettings.lengthUnit)?.label || lengthUnitOptions[0]}
+						value={
+							lengthUnits.find(
+								(option) => option.value === fastestSettings.lengthUnit
+							)?.label || lengthUnitOptions[0]
+						}
 						isSelected={isLengthUnitSelected}
 						isActive={true}
 						options={lengthUnitOptions}
@@ -129,10 +133,6 @@ export function ScreenFastestSetup({ state }: ScreenFastestSetupProps) {
 						</div>
 					</div>
 				</div>
-			</div>
-
-			<div className="text-[10px] text-gray-500 text-center mt-2 border-t border-gray-200 pt-1">
-				Enter: Change | ESC: Save and Exit
 			</div>
 		</div>
 	);

@@ -35,7 +35,9 @@ export function ScreenFastestMeasuring({ state }: ScreenFastestMeasuringProps) {
 				<div>Длины волн: {fastestSettings.lossWavelengths.join('nm, ')}nm</div>
 			</div>
 
-			<div className="text-[10px] text-gray-500 mt-4">Пожалуйста, подождите...</div>
+			<div className="text-[10px] text-gray-500 mt-4">
+				Пожалуйста, подождите...
+			</div>
 		</div>
 	);
 }

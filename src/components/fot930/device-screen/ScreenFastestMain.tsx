@@ -144,16 +144,14 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 				)}
 			</div>
 
-			<div className="text-[10px] text-gray-500 text-center border-t border-gray-200 pt-1">
-				UP/DOWN: Навигация | ENTER: Изменение | F1: Опор. знач. | F2/FasTest:
-				Измерение
-			</div>
-
+			{/* TODO: Сделать вывод ошибки временным */}
 			{/* Overlay для ошибки подключения */}
 			<Show when={state.connectionError}>
-				<div className="absolute -inset-2 bg-black/15 bg-opacity-20 flex justify-center items-center z-10">
+				<div className="absolute -inset-8 bg-black/15 bg-opacity-20 flex justify-center items-center z-10">
 					<div className="bg-red-50 border-2 border-red-300 px-4 py-3 text-[11px] text-red-800 rounded-lg shadow-lg max-w-xs text-center">
-						<div className="font-semibold text-red-600 mb-1">⚠ Ошибка схемы подключения</div>
+						<div className="font-semibold text-red-600 mb-1">
+							⚠ Ошибка схемы подключения
+						</div>
 						<div className="text-[10px]">
 							Проверьте правильность сборки схемы
 						</div>

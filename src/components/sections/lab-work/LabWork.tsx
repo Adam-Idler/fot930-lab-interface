@@ -90,9 +90,13 @@ export function LabWork() {
 		sequence: [],
 		correctSequence: [
 			'tester',
-			selectedComponent.connectorType === 'SC_APC' ? 'connector_apc_1' : 'connector_upc_1',
+			selectedComponent.connectorType === 'SC_APC'
+				? 'connector_apc_1'
+				: 'connector_upc_1',
 			selectedComponent.id,
-			selectedComponent.connectorType === 'SC_APC' ? 'connector_apc_2' : 'connector_upc_2',
+			selectedComponent.connectorType === 'SC_APC'
+				? 'connector_apc_2'
+				: 'connector_upc_2',
 			'tester_2'
 		]
 	});
@@ -115,9 +119,13 @@ export function LabWork() {
 			...prev,
 			correctSequence: [
 				'tester',
-				selectedComponent.connectorType === 'SC_APC' ? 'connector_apc_1' : 'connector_upc_1',
+				selectedComponent.connectorType === 'SC_APC'
+					? 'connector_apc_1'
+					: 'connector_upc_1',
 				selectedComponent.id,
-				selectedComponent.connectorType === 'SC_APC' ? 'connector_apc_2' : 'connector_upc_2',
+				selectedComponent.connectorType === 'SC_APC'
+					? 'connector_apc_2'
+					: 'connector_upc_2',
 				'tester_2'
 			]
 		}));

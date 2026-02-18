@@ -3,7 +3,7 @@
  * Позволяет студенту составить правильную последовательность элементов
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { validateConnectionScheme } from '../../lib/fot930/measurementEngine';
 import type { ConnectionElement, ConnectionScheme } from '../../types/fot930';
 import {
@@ -29,23 +29,26 @@ export function ConnectionBuilder({
 }: ConnectionBuilderProps) {
 	const [draggedElement, setDraggedElement] =
 		useState<ConnectionElement | null>(null);
-	
+
 	// Состояние для временной схемы (до подтверждения)
 	const [draftScheme, setDraftScheme] = useState<ConnectionScheme>(scheme);
-	
+
 	const draftSchemeLength = draftScheme.sequence.length;
 
 	// Синхронизируем draftScheme с входящей схемой
 	useEffect(() => {
 		setDraftScheme(scheme);
 	}, [scheme]);
-	
+
 	// Проверяем, есть ли несохраненные изменения
-	const hasChanges = JSON.stringify(scheme.sequence) !== JSON.stringify(draftScheme.sequence);
+	const hasChanges =
+		JSON.stringify(scheme.sequence) !== JSON.stringify(draftScheme.sequence);
 
 	// Фильтруем доступные элементы - исключаем уже добавленные в черновик схемы
-	const usedElementIds = new Set(draftScheme.sequence.map(el => el.id));
-	const filteredAvailableElements = availableElements.filter(element => !usedElementIds.has(element.id));
+	const usedElementIds = new Set(draftScheme.sequence.map((el) => el.id));
+	const filteredAvailableElements = availableElements.filter(
+		(element) => !usedElementIds.has(element.id)
+	);
 
 	// Валидация применяется только к основной схеме
 	const validation = validateConnectionScheme(scheme);
@@ -129,7 +132,9 @@ export function ConnectionBuilder({
 								</div>
 							))}
 							{/* Зона для добавления нового элемента в конец */}
-							{draftSchemeLength !== scheme.correctSequence.length && <DropZone onDrop={() => handleDrop(draftSchemeLength)} />}
+							{draftSchemeLength !== scheme.correctSequence.length && (
+								<DropZone onDrop={() => handleDrop(draftSchemeLength)} />
+							)}
 						</div>
 					</div>
 				)}
@@ -168,13 +173,13 @@ export function ConnectionBuilder({
 						Сбросить схему
 					</button>
 					{hasChanges && (
-							<button
-								type="button"
-								onClick={handleConfirm}
-								className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 hover:cursor-pointer transition"
-							>
-								Подтвердить
-							</button>
+						<button
+							type="button"
+							onClick={handleConfirm}
+							className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 hover:cursor-pointer transition"
+						>
+							Подтвердить
+						</button>
 					)}
 				</div>
 			</div>

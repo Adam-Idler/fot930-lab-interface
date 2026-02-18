@@ -1,3 +1,4 @@
+export { DeviceFooter } from './DeviceFooter';
 export { DeviceHeader } from './DeviceHeader';
 export { DropdownField } from './DropdownField';
 export { ScreenFastestMain } from './ScreenFastestMain';

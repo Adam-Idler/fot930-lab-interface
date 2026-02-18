@@ -174,7 +174,19 @@ export function PreparationStage({
 														: 'bg-blue-600 hover:bg-blue-700 text-white hover:cursor-pointer'
 												)}
 											>
-												<img className='h-5' src={preparation.portStatus === 'cleaning' ? '/images/icons/hourglass.svg' : '/images/icons/broomstick.svg'} alt={preparation.portStatus === 'cleaning' ? 'Песочные часы' : 'Метла'} />
+												<img
+													className="h-5"
+													src={
+														preparation.portStatus === 'cleaning'
+															? '/images/icons/hourglass.svg'
+															: '/images/icons/broomstick.svg'
+													}
+													alt={
+														preparation.portStatus === 'cleaning'
+															? 'Песочные часы'
+															: 'Метла'
+													}
+												/>
 												{preparation.portStatus === 'cleaning'
 													? 'Очистка...'
 													: 'Очистить порт'}
@@ -398,7 +410,13 @@ export function PreparationStage({
 					</>
 				) : (
 					<>
-						<div className="flex justify-center text-4xl mb-2"><img className="h-8" src="/images/icons/hourglass.svg" alt="Песочные часы" /></div>
+						<div className="flex justify-center text-4xl mb-2">
+							<img
+								className="h-8"
+								src="/images/icons/hourglass.svg"
+								alt="Песочные часы"
+							/>
+						</div>
 						<h3 className="text-xl font-bold text-gray-800 mb-2">
 							Подготовка не завершена
 						</h3>

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
+import { shuffleArray } from '../../../../lib/utils';
 import type {
 	ConnectionElement,
 	ConnectionScheme,
 	PassiveComponent
 } from '../../../../types/fot930';
 import { ConnectionBuilder } from '../../../fot930';
-import { shuffleArray } from '../../../../lib/utils';
 
 interface ConnectionSchemeStageProps {
 	scheme: ConnectionScheme;
@@ -13,7 +13,10 @@ interface ConnectionSchemeStageProps {
 	onSchemeChange: (scheme: ConnectionScheme) => void;
 }
 
-function getConnector(connectorType: PassiveComponent['connectorType'], index: number): ConnectionElement {
+function getConnector(
+	connectorType: PassiveComponent['connectorType'],
+	index: number
+): ConnectionElement {
 	if (connectorType === 'SC_APC') {
 		return {
 			type: 'CONNECTOR' as const,
@@ -21,16 +24,16 @@ function getConnector(connectorType: PassiveComponent['connectorType'], index: n
 			id: `connector_apc_${index}`,
 			label: `SC/APC ${index}`,
 			connectorType: 'SC_APC' as const
-		}
+		};
 	}
-	
+
 	return {
 		type: 'CONNECTOR' as const,
 		icon: '/images/icons/blue-connector.svg',
 		id: `connector_upc_${index}`,
 		label: `SC/UPC ${index}`,
 		connectorType: 'SC_UPC' as const
-	}
+	};
 }
 
 export function ConnectionSchemeStage({
@@ -39,7 +42,12 @@ export function ConnectionSchemeStage({
 	onSchemeChange
 }: ConnectionSchemeStageProps) {
 	const baseElements = [
-		{ type: 'TESTER' as const, id: 'tester', label: 'Тестер FOT-930 (Блок А)', icon: '/images/icons/tester.svg' },
+		{
+			type: 'TESTER' as const,
+			id: 'tester',
+			label: 'Тестер FOT-930 (Блок А)',
+			icon: '/images/icons/tester.svg'
+		},
 		getConnector(currentComponent.connectorType, 1),
 		getConnector(currentComponent.connectorType, 2),
 		{
@@ -48,7 +56,12 @@ export function ConnectionSchemeStage({
 			label: currentComponent.label,
 			icon: currentComponent.icon
 		},
-		{ type: 'TESTER' as const, id: 'tester_2', label: 'Тестер FOT-930 (Блок Б)', icon: '/images/icons/tester.svg' }
+		{
+			type: 'TESTER' as const,
+			id: 'tester_2',
+			label: 'Тестер FOT-930 (Блок Б)',
+			icon: '/images/icons/tester.svg'
+		}
 	];
 
 	const [availableElements, setAvailableElements] = useState(() =>

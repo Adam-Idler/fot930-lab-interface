@@ -36,9 +36,7 @@ export function validateMeasurement(
 	const diff = Math.abs(value - entry.actualValue);
 	const isValid = diff <= MEASUREMENT_TOLERANCE;
 
-	const errorMessage = isValid
-		? undefined
-		: 'Невереное значение измерения';
+	const errorMessage = isValid ? undefined : 'Невереное значение измерения';
 
 	// Обновляем entry
 	const updatedMeasurements = [...row.measurements];
@@ -101,7 +99,7 @@ export function validateAverage(
 		average: {
 			value: value,
 			actualValue: calculatedAverage,
-			status: isValid ? 'valid' as const : 'error' as const,
+			status: isValid ? ('valid' as const) : ('error' as const),
 			errorMessage: isValid ? undefined : errorMessage
 		}
 	};

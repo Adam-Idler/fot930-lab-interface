@@ -44,7 +44,8 @@ export const initialDeviceState: DeviceState = {
 	currentFiberResult: null,
 	fiberMeasurementsHistory: {},
 	currentMeasurementType: null,
-	connectionError: false
+	connectionError: false,
+	footerPageIndex: 0
 };
 
 /** Доступные длины волн для FasTest */
@@ -54,9 +55,21 @@ const FASTEST_WAVELENGTHS: Wavelength[] = [1310, 1550, 1625];
 const LENGTH_UNITS: LengthUnit[] = ['ft', 'mi', 'm', 'km'];
 
 /**
- * Reducer для управления состоянием прибора
+ * Reducer для управления состоянием прибора.
+ * Обёртка сбрасывает footerPageIndex при каждой смене экрана.
  */
 export function deviceReducer(
+	state: DeviceState,
+	action: DeviceAction
+): DeviceState {
+	const newState = innerDeviceReducer(state, action);
+	if (newState.screen !== state.screen) {
+		return { ...newState, footerPageIndex: 0 };
+	}
+	return newState;
+}
+
+function innerDeviceReducer(
 	state: DeviceState,
 	action: DeviceAction
 ): DeviceState {
@@ -87,6 +100,18 @@ export function deviceReducer(
 
 		case 'PRESS_F2':
 			return handleF2Button(state);
+
+		case 'PRESS_LEFT':
+			return state.footerPageIndex > 0
+				? { ...state, footerPageIndex: state.footerPageIndex - 1 }
+				: state;
+
+		case 'PRESS_RIGHT': {
+			const maxIdx = getMaxFooterIndex(state.screen);
+			return state.footerPageIndex < maxIdx
+				? { ...state, footerPageIndex: state.footerPageIndex + 1 }
+				: state;
+		}
 
 		case 'COMPLETE_LOADING':
 			return handleCompleteLoading(state);
@@ -176,8 +201,32 @@ export function deviceReducer(
 				connectionError: action.payload
 			};
 
+		case 'SET_FOOTER_PAGE':
+			return {
+				...state,
+				footerPageIndex: action.payload
+			};
+
 		default:
 			return state;
+	}
+}
+
+// ============================================================
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ============================================================
+
+/**
+ * Максимальный индекс страницы футера для данного экрана.
+ * items.length - 2: показываем пары (F1=items[i], F2=items[i+1]),
+ * поэтому последний допустимый i = totalItems - 2.
+ */
+function getMaxFooterIndex(screen: DeviceState['screen']): number {
+	switch (screen) {
+		case 'FASTEST_MAIN':
+			return 1; // 3 элемента → позиции 0 и 1
+		default:
+			return 0;
 	}
 }
 
@@ -224,7 +273,8 @@ function handleUpButton(state: DeviceState): DeviceState {
 			// Навигация по меню настроек
 			return {
 				...state,
-				settingsMenuIndex: state.settingsMenuIndex > 0 ? state.settingsMenuIndex - 1 : 5
+				settingsMenuIndex:
+					state.settingsMenuIndex > 0 ? state.settingsMenuIndex - 1 : 5
 			};
 
 		case 'FASTEST_SETUP':
@@ -309,7 +359,8 @@ function handleDownButton(state: DeviceState): DeviceState {
 			// Навигация по меню настроек
 			return {
 				...state,
-				settingsMenuIndex: state.settingsMenuIndex < 5 ? state.settingsMenuIndex + 1 : 0
+				settingsMenuIndex:
+					state.settingsMenuIndex < 5 ? state.settingsMenuIndex + 1 : 0
 			};
 
 		case 'FASTEST_SETUP':
@@ -666,32 +717,106 @@ function handleCompleteLoading(state: DeviceState): DeviceState {
 }
 
 function handleF1Button(state: DeviceState): DeviceState {
-	// F1 на экране FASTEST_MAIN запускает измерение Reference
-	// только если выбран правильный тип измерения (LOOPBACK)
-	if (
-		state.screen === 'FASTEST_MAIN' &&
-		state.preparation.referenceType === 'LOOPBACK'
-	) {
+	// F1 на экране FASTEST_SETUP — сброс к заводским настройкам
+	if (state.screen === 'FASTEST_SETUP') {
 		return {
 			...state,
-			screen: 'FASTEST_MEASURING',
-			currentMeasurementType: 'REFERENCE'
+			openDropdown: null,
+			dropdownIndex: 0,
+			fastestSetupSectionIndex: 0,
+			fastestWavelengthIndex: 0,
+			preparation: {
+				...state.preparation,
+				fastestSettings: { ...initialPreparationState.fastestSettings }
+			}
 		};
 	}
+
+	if (state.screen === 'FASTEST_MAIN') {
+		// Элемент, назначенный на F1 — items[footerPageIndex]
+		// Список: 0=Изм.опор.сигнал, 1=Начать тест, 2=Перейти к настр. FasTest
+		switch (state.footerPageIndex) {
+			case 0:
+				// F1 = "Изм. опор. сигнал" — только при типе LOOPBACK
+				if (state.preparation.referenceType === 'LOOPBACK') {
+					return {
+						...state,
+						screen: 'FASTEST_MEASURING',
+						currentMeasurementType: 'REFERENCE'
+					};
+				}
+				break;
+			case 1:
+				// F1 = "Начать тест"
+				if (state.preparation.isReadyForMeasurements) {
+					return {
+						...state,
+						screen: 'FASTEST_MEASURING',
+						currentMeasurementType: 'FIBER'
+					};
+				}
+				break;
+		}
+	}
+
 	return state;
 }
 
 function handleF2Button(state: DeviceState): DeviceState {
-	// F2 на экране FASTEST_MAIN начинает измерение тестируемого волокна
-	if (
-		state.screen === 'FASTEST_MAIN' &&
-		state.preparation.isReadyForMeasurements
-	) {
+	// F2 на экране FASTEST_SETUP — переход к FasTest Изм. (только при верных настройках)
+	if (state.screen === 'FASTEST_SETUP') {
+		const { fastestSettings } = state.preparation;
+		const isCorrect =
+			fastestSettings.portType === 'SM' &&
+			fastestSettings.lengthUnit === 'm' &&
+			fastestSettings.lossWavelengths.includes(1310) &&
+			fastestSettings.lossWavelengths.includes(1550) &&
+			!fastestSettings.lossWavelengths.includes(1625);
+
+		// Заблокировать переход если настройки некорректны
+		if (!isCorrect) {
+			return state;
+		}
+
 		return {
 			...state,
-			screen: 'FASTEST_MEASURING',
-			currentMeasurementType: 'FIBER'
+			screen: 'FASTEST_MAIN',
+			openDropdown: null,
+			dropdownIndex: 0,
+			fastestMainReferenceTypeSelected: false,
+			connectionError: false,
+			preparation: {
+				...state.preparation,
+				fastestSettings: {
+					...fastestSettings,
+					isConfigured: true
+				},
+				isReadyForMeasurements: checkIfReadyForMeasurements({
+					...state.preparation,
+					fastestSettings: { ...fastestSettings, isConfigured: true }
+				})
+			}
 		};
+	}
+
+	if (state.screen === 'FASTEST_MAIN') {
+		// Элемент, назначенный на F2 — items[footerPageIndex + 1]
+		// Список: 0=Изм.опор.сигнал, 1=Начать тест, 2=Перейти к настр. FasTest
+		switch (state.footerPageIndex) {
+			case 0:
+				// F2 = "Начать тест"
+				if (state.preparation.isReadyForMeasurements) {
+					return {
+						...state,
+						screen: 'FASTEST_MEASURING',
+						currentMeasurementType: 'FIBER'
+					};
+				}
+				break;
+			case 1:
+				// F2 = "Перейти к настр. FasTest"
+				return { ...state, screen: 'FASTEST_SETUP' };
+		}
 	}
 
 	return state;

@@ -6,7 +6,14 @@ interface ScreenMenuSetupProps {
 }
 
 export function ScreenMenuSetup({ state }: ScreenMenuSetupProps) {
-	const menuItems = ['Настройка', 'Автоимена данных', 'Порог. значения', 'Результаты/Информация', 'Источник/VFL', 'Телефон/Сообщения'];
+	const menuItems = [
+		'Настройка',
+		'Автоимена данных',
+		'Порог. значения',
+		'Результаты/Информация',
+		'Источник/VFL',
+		'Телефон/Сообщения'
+	];
 	const selectedIndex = state.setupMenuIndex;
 
 	return (

@@ -81,7 +81,15 @@ export function DeviceHeader() {
 					{/* Корпус батареи */}
 					<rect x="2" y="7" width="16" height="10" rx="1" ry="1" />
 					{/* Внутренность батареи (зеленая заливка) */}
-					<rect x="3" y="8" width="14" height="8" rx="0.5" ry="0.5" fill="#22c55e" />
+					<rect
+						x="3"
+						y="8"
+						width="14"
+						height="8"
+						rx="0.5"
+						ry="0.5"
+						fill="#22c55e"
+					/>
 					{/* Контакт батареи */}
 					<line x1="22" y1="11" x2="18" y2="11" />
 					<line x1="22" y1="13" x2="18" y2="13" />
