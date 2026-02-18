@@ -54,6 +54,7 @@ interface DeviceFooterProps {
 
 export function DeviceFooter({ state }: DeviceFooterProps) {
 	const items = getFooterItems(state);
+
 	if (items.length < 2) return null;
 
 	const idx = state.footerPageIndex;
@@ -67,6 +68,7 @@ export function DeviceFooter({ state }: DeviceFooterProps) {
 	const f1Enabled = f1Item?.enabled !== false;
 	const f2Label = f2Item?.label ?? '';
 	const f2Enabled = f2Item?.enabled !== false;
+
 	return (
 		<div className="w-full flex items-center gap-1.5 px-2 pb-1">
 			{/* Левый квадратный блок — индикатор стрелки влево */}
