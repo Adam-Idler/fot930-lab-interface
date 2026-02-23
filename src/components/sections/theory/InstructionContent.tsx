@@ -5,6 +5,7 @@ import {
 	orderedListClassNames,
 	paragraphClassNames
 } from './classnames';
+import { publicUrl } from '../../../lib/utils';
 
 export function InstructionContent() {
 	return (
@@ -14,7 +15,7 @@ export function InstructionContent() {
 			</h1>
 
 			<img
-				src="/images/instruction/fot-930.png"
+				src={publicUrl('/images/instruction/fot-930.png')}
 				alt="Прибор FOT-930"
 				className="max-w-1/2 mx-auto mb-4"
 			/>
@@ -41,7 +42,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-1.jpg"
+				src={publicUrl('/images/instruction/fot-930-1.jpg')}
 				alt="Прибор FOT-930"
 				className="w-75% mx-auto mb-4"
 			/>
@@ -65,7 +66,7 @@ export function InstructionContent() {
 			</ul>
 
 			<img
-				src="/images/instruction/fot-930-2.jpg"
+				src={publicUrl('/images/instruction/fot-930-2.jpg')}
 				alt="Прибор FOT-930"
 				className="w-75% mx-auto mb-4"
 			/>
@@ -91,7 +92,7 @@ export function InstructionContent() {
 			</ul>
 
 			<img
-				src="/images/instruction/fot-930-3.jpg"
+				src={publicUrl('/images/instruction/fot-930-3.jpg')}
 				alt="Прибор FOT-930"
 				className="w-75% mx-auto mb-4"
 			/>
@@ -143,7 +144,7 @@ export function InstructionContent() {
 			<p className={paragraphClassNames}>
 				Для включения прибора нажмите кнопку{' '}
 				<img
-					src="/images/instruction/on-button.png"
+					src={publicUrl('/images/instruction/on-button.png')}
 					alt="кнопка включения"
 					className="inline-block"
 				/>
@@ -151,7 +152,7 @@ export function InstructionContent() {
 				окно <b>Измерителя мощности</b>.<br />
 				Для выключения прибора нажмите и удерживайте кнопку{' '}
 				<img
-					src="/images/instruction/on-button.png"
+					src={publicUrl('/images/instruction/on-button.png')}
 					alt="кнопка включения"
 					className="inline-block"
 				/>{' '}
@@ -167,13 +168,13 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-keyboard.jpg"
+				src={publicUrl('/images/instruction/fot-930-keyboard.jpg')}
 				alt="Клавиатура прибора FOT-930"
 				className="w-75% mx-auto mb-4"
 			/>
 
 			<img
-				src="/images/instruction/fot-930-status-bar.jpg"
+				src={publicUrl('/images/instruction/fot-930-status-bar.jpg')}
 				alt="Клавиатура прибора FOT-930"
 				className="w-75% mx-auto mb-4"
 			/>
@@ -253,7 +254,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-ports-type.jpg"
+				src={publicUrl('/images/instruction/fot-930-ports-type.jpg')}
 				alt="Типы разъёмов FOT-930"
 				className="mx-auto mb-4"
 			/>
@@ -268,7 +269,7 @@ export function InstructionContent() {
 					Держите адаптер разъема EUI таким образом, чтобы пылезащитный колпачок
 					открывался вниз.
 					<img
-						src="/images/instruction/fot-930-port.jpg"
+						src={publicUrl('/images/instruction/fot-930-port.jpg')}
 						alt="Разъём FOT-930"
 						className="mx-auto mb-4"
 					/>
@@ -365,7 +366,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-name-screen.png"
+				src={publicUrl('/images/instruction/fot-930-name-screen.png')}
 				alt="Экран присваивания имён"
 				className="w-1/3 mx-auto mb-4"
 			/>
@@ -434,7 +435,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-threshold-values-screen.png"
+				src={publicUrl('/images/instruction/fot-930-threshold-values-screen.png')}
 				alt="Экран присваивания имён"
 				className="w-1/3 mx-auto mb-4"
 			/>
@@ -514,7 +515,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-power-port.jpg"
+				src={publicUrl('/images/instruction/fot-930-power-port.jpg')}
 				alt="Порт измерителя мощности"
 				className="mx-auto mb-4"
 			/>
@@ -524,7 +525,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-power-screen.jpg"
+				src={publicUrl('/images/instruction/fot-930-power-screen.jpg')}
 				alt="Особенности измерителя мощности"
 				className="w-75% mx-auto mb-4"
 			/>
@@ -588,7 +589,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-power-settings.png"
+				src={publicUrl('/images/instruction/fot-930-power-settings.png')}
 				alt="Экран настройки измерителя мощности"
 				className="w-1/3 mx-auto mb-4"
 			/>
@@ -671,7 +672,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-zeroing-out.png"
+				src={publicUrl('/images/instruction/fot-930-zeroing-out.png')}
 				alt="Обнуление электрических эффектов"
 				className="w-1/4 mx-auto mb-4"
 			/>
@@ -707,7 +708,7 @@ export function InstructionContent() {
 			<h3 className="font-semibold mb-4">Измерение опорного значения</h3>
 
 			<img
-				src="/images/instruction/fot-930-measuring-reference-value.png"
+				src={publicUrl('/images/instruction/fot-930-measuring-reference-value.png')}
 				alt="Измерение опорного значения"
 				className="w-1/3 mx-auto mb-4"
 			/>
@@ -757,7 +758,7 @@ export function InstructionContent() {
 						<li>
 							Один опорный патч-корд
 							<img
-								src="/images/instruction/fot-930-one-patch-cord.jpg"
+								src={publicUrl('/images/instruction/fot-930-one-patch-cord.jpg')}
 								alt="Подключение с одним патч-кордом"
 								className="w-75% mx-auto mb-4"
 							/>
@@ -765,7 +766,7 @@ export function InstructionContent() {
 						<li>
 							Два опорных патч-корда и соединительный адаптер
 							<img
-								src="/images/instruction/fot-930-two-patch-cords.jpg"
+								src={publicUrl('/images/instruction/fot-930-two-patch-cords.jpg')}
 								alt="Подключение с двумя патч-кордами"
 								className="w-75% mx-auto mb-4"
 							/>
@@ -798,7 +799,7 @@ export function InstructionContent() {
 						</ul>
 
 						<img
-							src="/images/instruction/fot-930-measuring-reference-value-2.png"
+							src={publicUrl('/images/instruction/fot-930-measuring-reference-value-2.png')}
 							alt="Установка длины волны"
 							className="w-1/3 object-contain"
 						/>
@@ -823,7 +824,7 @@ export function InstructionContent() {
 						</div>
 
 						<img
-							src="/images/instruction/fot-930-measuring-reference-value-3.png"
+							src={publicUrl('/images/instruction/fot-930-measuring-reference-value-3.png')}
 							alt="Установка длины волны"
 							className="w-1/3 object-contain ml-auto"
 						/>
@@ -908,7 +909,7 @@ export function InstructionContent() {
 					тестируемое волокно к опорным пат-кордам, которые подключены к
 					источнику излучения и измерителю мощности.
 					<img
-						src="/images/instruction/fot-930-connecting-adapter.jpg"
+						src={publicUrl('/images/instruction/fot-930-connecting-adapter.jpg')}
 						alt="Использование соединительных адаптеров"
 						className="w-75% mx-auto object-contain"
 					/>
@@ -974,7 +975,7 @@ export function InstructionContent() {
 						</ul>
 
 						<img
-							src="/images/instruction/fot-930-measuring-reference-value-4.png"
+							src={publicUrl('/images/instruction/fot-930-measuring-reference-value-4.png')}
 							alt="Сохранение отображаемых значений измерителя мощности"
 							className="w-1/3 mx-auto object-contain"
 						/>
@@ -1037,7 +1038,7 @@ export function InstructionContent() {
 				</ol>
 
 				<img
-					src="/images/instruction/fot-930-automatic-wavelength-detection.png"
+					src={publicUrl('/images/instruction/fot-930-automatic-wavelength-detection.png')}
 					alt="Автоматическая установка длины волны от источника"
 					className="w-1/3 mx-auto object-contain"
 				/>
@@ -1060,7 +1061,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-orl-measuring-port.jpg"
+				src={publicUrl('/images/instruction/fot-930-orl-measuring-port.jpg')}
 				alt="Порт измерителя ORL"
 				className="w-1/3 mx-auto object-contain mb-5"
 			/>
@@ -1070,7 +1071,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-functions-orl-meter.jpg"
+				src={publicUrl('/images/instruction/fot-930-functions-orl-meter.jpg')}
 				alt="Функция измерителя ORL"
 				className="w-75% mx-auto object-contain mb-5"
 			/>
@@ -1080,7 +1081,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-orl-measurement-procedure.jpg"
+				src={publicUrl('/images/instruction/fot-930-orl-measurement-procedure.jpg')}
 				alt="Процедура измерения ORL"
 				className="w-75% mx-auto object-contain"
 			/>
@@ -1122,7 +1123,7 @@ export function InstructionContent() {
 				<li>
 					Подключите патч-корд к порту <b>FASTEST</b> SM.
 					<img
-						src="/images/instruction/fot-930-connecting-patch-cord-to-the-fastest-port.jpg"
+						src={publicUrl('/images/instruction/fot-930-connecting-patch-cord-to-the-fastest-port.jpg')}
 						alt="Подключение патч-корда к порту FASTEST"
 						className="w-75% mt-2 mx-auto object-contain"
 					/>
@@ -1212,7 +1213,7 @@ export function InstructionContent() {
 						</div>
 
 						<img
-							src="/images/instruction/fot-930-reference-value-of-orl.png"
+							src={publicUrl('/images/instruction/fot-930-reference-value-of-orl.png')}
 							alt="Выбор опорного значения ORL"
 							className="w-1/3 mx-auto object-contain"
 						/>
@@ -1234,7 +1235,7 @@ export function InstructionContent() {
 					нему. Намотайте не менее 10 витков вокруг оправки или инструмента
 					малого диаметра. Добавляйте витки пока показания не стабилизируются.
 					<img
-						src="/images/instruction/fot-930-connecting-patch-cord-to-the-fastest-port-2.jpg"
+						src={publicUrl('/images/instruction/fot-930-connecting-patch-cord-to-the-fastest-port-2.jpg')}
 						alt="Измерение опорного значения ORL"
 						className="w-1/2 mx-auto my-2 object-contain"
 					/>
@@ -1272,7 +1273,7 @@ export function InstructionContent() {
 						</div>
 
 						<img
-							src="/images/instruction/fot-930-saving-the-displayed-orl-value.png"
+							src={publicUrl('/images/instruction/fot-930-saving-the-displayed-orl-value.png')}
 							alt="Сохранение отображаемого ORL значения"
 							className="w-1/4 mx-auto my-2 object-contain"
 						/>
@@ -1313,7 +1314,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-fastest-ports.jpg"
+				src={publicUrl('/images/instruction/fot-930-fastest-ports.jpg')}
 				alt="Порты FASTEST"
 				className="w-75% mx-auto mb-4"
 			/>
@@ -1323,7 +1324,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-block-diagram-fastest.jpg"
+				src={publicUrl('/images/instruction/fot-930-block-diagram-fastest.jpg')}
 				alt="Блок схема измерения FASTEST"
 				className="w-75% mx-auto mb-4"
 			/>
@@ -1368,7 +1369,7 @@ export function InstructionContent() {
 					</div>
 
 					<img
-						src="/images/instruction/fot-930-fastest-setup.png"
+						src={publicUrl('/images/instruction/fot-930-fastest-setup.png')}
 						alt="Экран настройки FASTEST"
 						className="w-1/3 object-contain"
 					/>
@@ -1400,7 +1401,7 @@ export function InstructionContent() {
 				</ol>
 
 				<img
-					src="/images/instruction/fot-930-fastest-setup-2.png"
+					src={publicUrl('/images/instruction/fot-930-fastest-setup-2.png')}
 					alt="Экран настройки FASTEST"
 					className="w-1/3 object-contain"
 				/>
@@ -1445,7 +1446,7 @@ export function InstructionContent() {
 							Потери, вносимые тестируемой системой и наличием одного разъемного
 							соединения.
 							<img
-								src="/images/instruction/fot-930-point-to-point.jpg"
+								src={publicUrl('/images/instruction/fot-930-point-to-point.jpg')}
 								alt="Метод точка-точка"
 								className="w-100% mx-auto object-contain"
 							/>
@@ -1464,7 +1465,7 @@ export function InstructionContent() {
 							Потери, вносимые тестируемой системой и наличием двух разъемных
 							соединений.
 							<img
-								src="/images/instruction/fot-930-reverse-loop-method.jpg"
+								src={publicUrl('/images/instruction/fot-930-reverse-loop-method.jpg')}
 								alt="Метод обратной петли"
 								className="w-100% mx-auto object-contain"
 							/>
@@ -1496,7 +1497,7 @@ export function InstructionContent() {
 					Соедините оба блока через порты <b>FASTEST</b> с помощью двух опорных
 					патч-кордов и соединительного адаптера.
 					<img
-						src="/images/instruction/fot-930-connecting-using-an-adapter.jpg"
+						src={publicUrl('/images/instruction/fot-930-connecting-using-an-adapter.jpg')}
 						alt="Метод точка-точка"
 						className="w-75% mx-auto mb-4"
 					/>
@@ -1540,7 +1541,7 @@ export function InstructionContent() {
 							Соедините опорным патч-кордом порт <b>FASTEST</b> и адаптер
 							измерителя мощности.
 							<img
-								src="/images/instruction/fot-930-connection-to-power-adapter.jpg"
+								src={publicUrl('/images/instruction/fot-930-connection-to-power-adapter.jpg')}
 								alt="Подключение к адаптеру измерителя мощности"
 								className="w-75% mt-2 mx-auto"
 							/>
@@ -1559,7 +1560,7 @@ export function InstructionContent() {
 					</div>
 
 					<img
-						src="/images/instruction/fot-930-measurement-reference-by-reverse-loop-method.png"
+						src={publicUrl('/images/instruction/fot-930-measurement-reference-by-reverse-loop-method.png')}
 						alt="Выполнение измерения опорного методом обратной петли"
 						className="w-1/3 object-contain mx-auto mb-4"
 					/>
@@ -1607,7 +1608,7 @@ export function InstructionContent() {
 				<li>
 					Подключите опорный патч-корд к тестируемому волокну:
 					<img
-						src="/images/instruction/fot-930-fastest-fiber-testing.jpg"
+						src={publicUrl('/images/instruction/fot-930-fastest-fiber-testing.jpg')}
 						alt="Подключение тестируемого волокна"
 						className="w-75% mx-auto mb-4"
 					/>
@@ -1624,7 +1625,7 @@ export function InstructionContent() {
 					Результаты измерений будут отображаться на обоих блоках по мере их
 					получения.
 					<img
-						src="/images/instruction/fot-930-fastest-fiber-testing-screen.jpg"
+						src={publicUrl('/images/instruction/fot-930-fastest-fiber-testing-screen.jpg')}
 						alt="Экран тестирования волокна"
 						className="w-75% mx-auto mb-4"
 					/>
@@ -1668,7 +1669,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-fiber-testing-results-screen.jpg"
+				src={publicUrl('/images/instruction/fot-930-fiber-testing-results-screen.jpg')}
 				alt="Экран результатов тестирования кабеля"
 				className="w-75% mx-auto mb-4"
 			/>
@@ -1700,7 +1701,7 @@ export function InstructionContent() {
 			</p>
 
 			<img
-				src="/images/instruction/fot-930-single-and-multi-modes-ports.jpg"
+				src={publicUrl('/images/instruction/fot-930-single-and-multi-modes-ports.jpg')}
 				alt="Расположение ОМ и ММ источников"
 				className="w-75% mx-auto mb-4"
 			/>
@@ -1755,7 +1756,7 @@ export function InstructionContent() {
 				</ul>
 
 				<img
-					src="/images/instruction/fot-930-power-meter-screen.png"
+					src={publicUrl('/images/instruction/fot-930-power-meter-screen.png')}
 					alt="Экран измерителя мощности"
 					className="w-1/3 object-contain mx-auto mb-4"
 				/>
@@ -1817,7 +1818,7 @@ export function InstructionContent() {
 				</ol>
 
 				<img
-					src="/images/instruction/fot-930-modulation-measurement-screen.png"
+					src={publicUrl('/images/instruction/fot-930-modulation-measurement-screen.png')}
 					alt="Экран измерения модуляции"
 					className="w-1/3 object-contain mx-auto mb-4"
 				/>

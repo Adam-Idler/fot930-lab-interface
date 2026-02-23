@@ -5,6 +5,7 @@
  */
 
 import clsx from 'clsx';
+import { publicUrl } from '../../../lib/utils';
 import type { DeviceState } from '../../../types/fot930';
 
 interface FooterItem {
@@ -80,7 +81,7 @@ export function DeviceFooter({ state }: DeviceFooterProps) {
 			>
 				{canGoLeft && (
 					<img
-						src="/images/icons/triangle-filled-left.svg"
+						src={publicUrl('/images/icons/triangle-filled-left.svg')}
 						width={8}
 						alt=""
 						className="brightness-0"
@@ -135,7 +136,7 @@ export function DeviceFooter({ state }: DeviceFooterProps) {
 			>
 				{canGoRight && (
 					<img
-						src="/images/icons/triangle-filled-right.svg"
+						src={publicUrl('/images/icons/triangle-filled-right.svg')}
 						width={8}
 						alt=""
 						className="brightness-0"

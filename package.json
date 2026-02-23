@@ -1,6 +1,7 @@
 {
 	"name": "diplom-project",
 	"private": true,
+	"author": "Rakov Pavel",
 	"version": "0.0.0",
 	"type": "commonjs",
 	"main": "dist-electron/main.js",

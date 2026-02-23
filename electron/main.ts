@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { app, BrowserWindow, ipcMain, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { appendServiceMenuItem } from './appendServiceMenuItem';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -29,7 +29,6 @@ app.whenReady().then(() => {
 		const indexPath = path.resolve(appPath, 'dist', 'index.html');
 		win.loadFile(indexPath);
 
-		Menu.setApplicationMenu(null);
 		win.autoHideMenuBar = true;
 	}
 });

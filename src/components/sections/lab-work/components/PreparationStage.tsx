@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import { publicUrl } from '../../../../lib/utils';
 import type { DeviceState } from '../../../../types/fot930';
 
 interface PreparationStageProps {
@@ -176,11 +177,11 @@ export function PreparationStage({
 											>
 												<img
 													className="h-5"
-													src={
+													src={publicUrl(
 														preparation.portStatus === 'cleaning'
 															? '/images/icons/hourglass.svg'
 															: '/images/icons/broomstick.svg'
-													}
+													)}
 													alt={
 														preparation.portStatus === 'cleaning'
 															? 'Песочные часы'
@@ -413,7 +414,7 @@ export function PreparationStage({
 						<div className="flex justify-center text-4xl mb-2">
 							<img
 								className="h-8"
-								src="/images/icons/hourglass.svg"
+								src={publicUrl('/images/icons/hourglass.svg')}
 								alt="Песочные часы"
 							/>
 						</div>

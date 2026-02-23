@@ -13,7 +13,7 @@ import {
 	generateReferenceMeasurement,
 	validateConnectionScheme
 } from '../../lib/fot930/measurementEngine';
-import { noop } from '../../lib/utils';
+import { noop, publicUrl } from '../../lib/utils';
 import type {
 	ConnectionScheme,
 	DeviceAction,
@@ -195,7 +195,7 @@ export function Device({
 							<DeviceButton
 								icon={
 									<img
-										src="/images/icons/arrow-left.svg"
+										src={publicUrl('/images/icons/arrow-left.svg')}
 										width={20}
 										alt="Arrow left"
 									/>
@@ -213,7 +213,7 @@ export function Device({
 							<DeviceButton
 								icon={
 									<img
-										src="/images/icons/arrow-right.svg"
+										src={publicUrl('/images/icons/arrow-right.svg')}
 										width={20}
 										alt="Arrow Right"
 									/>
@@ -243,7 +243,7 @@ export function Device({
 									className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-6 hover:cursor-pointer bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-full flex items-center justify-center text-white text-xl transition shadow-md"
 								>
 									<img
-										src="/images/icons/triangle-filled-up.svg"
+										src={publicUrl('/images/icons/triangle-filled-up.svg')}
 										width={20}
 										alt="Triangle up"
 									/>
@@ -256,7 +256,7 @@ export function Device({
 									className="absolute top-1/2 right-2 -translate-y-1/2 w-6 h-12 hover:cursor-pointer bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-full flex items-center justify-center text-white text-xl transition shadow-md"
 								>
 									<img
-										src="/images/icons/triangle-filled-right.svg"
+										src={publicUrl('/images/icons/triangle-filled-right.svg')}
 										width={20}
 										alt="Triangle up"
 									/>
@@ -269,7 +269,7 @@ export function Device({
 									className="absolute bottom-2 left-1/2 -translate-x-1/2 w-12 h-6 hover:cursor-pointer bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-full flex items-center justify-center text-white text-xl transition shadow-md"
 								>
 									<img
-										src="/images/icons/triangle-filled-down.svg"
+										src={publicUrl('/images/icons/triangle-filled-down.svg')}
 										width={20}
 										alt="Triangle down"
 									/>
@@ -282,7 +282,7 @@ export function Device({
 									className="absolute top-1/2 left-2 -translate-y-1/2 w-6 h-12 hover:cursor-pointer bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-full flex items-center justify-center text-white text-xl transition shadow-md"
 								>
 									<img
-										src="/images/icons/triangle-filled-left.svg"
+										src={publicUrl('/images/icons/triangle-filled-left.svg')}
 										width={20}
 										alt="Triangle up"
 									/>
@@ -308,14 +308,14 @@ export function Device({
 
 						<div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 bg-gray-900">
 							<DeviceButton
-								icon={<img src="/images/icons/sun.svg" width={20} alt="Sun" />}
+								icon={<img src={publicUrl('/images/icons/sun.svg')} width={20} alt="Sun" />}
 								color="beige"
 								onClick={noop}
 							/>
 							<DeviceButton
 								icon={
 									<img
-										src="/images/icons/power-button.svg"
+										src={publicUrl('/images/icons/power-button.svg')}
 										width={20}
 										alt="Power Button"
 									/>
@@ -325,7 +325,7 @@ export function Device({
 							<DeviceButton
 								icon={
 									<img
-										src="/images/icons/question.svg"
+										src={publicUrl('/images/icons/question.svg')}
 										width={20}
 										alt="Question"
 									/>

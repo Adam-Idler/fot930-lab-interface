@@ -1,4 +1,5 @@
 import { Show } from '../../../lib/components';
+import { publicUrl } from '../../../lib/utils';
 import type { DeviceState } from '../../../types/fot930';
 import { DropdownField } from './DropdownField';
 
@@ -75,7 +76,7 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 					<Show when={referenceType !== 'NONE'}>
 						<img
 							className="h-20"
-							src={`/images/device/${imageFile}`}
+							src={publicUrl(`/images/device/${imageFile}`)}
 							alt={referenceTypeValue}
 						/>
 					</Show>
