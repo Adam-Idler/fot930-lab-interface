@@ -33,14 +33,19 @@ app.whenReady().then(() => {
 	}
 });
 
+const isDev = !!process.env.VITE_DEV_SERVER_URL;
+
 // Обработчики чтения/записи данных студента через IPC
+// В production данные не сохраняются — каждый запуск начинается с чистого листа
 ipcMain.handle('save-student', async (_, data) => {
-	fs.writeFileSync(studentFilePath, JSON.stringify(data, null, 2), 'utf-8');
+	if (isDev) {
+		fs.writeFileSync(studentFilePath, JSON.stringify(data, null, 2), 'utf-8');
+	}
 	return true;
 });
 
 ipcMain.handle('load-student', async () => {
-	if (fs.existsSync(studentFilePath)) {
+	if (isDev && fs.existsSync(studentFilePath)) {
 		const content = fs.readFileSync(studentFilePath, 'utf-8');
 		return JSON.parse(content);
 	}

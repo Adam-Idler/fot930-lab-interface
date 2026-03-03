@@ -236,13 +236,13 @@ export const questions: TestQuestion[] = [
 		type: 'single',
 		text: 'С какой целью выполняют "нулевое" измерение ORL?',
 		answers: [
-			{ text: 'Для обнуления памяти', isCorrect: false },
+			{ text: 'Калибровка абсолютной мощности излучения источника для повышения динамического диапазона измерений', isCorrect: false },
 			{
 				text: 'Для исключения паразитных отражений до тестируемого компонента',
 				isCorrect: true
 			},
-			{ text: 'Для включения лазера', isCorrect: false },
-			{ text: 'Для проверки батареи', isCorrect: false }
+			{ text: 'Компенсация температурной нестабильности фотоприёмника измерительного модуля', isCorrect: false },
+			{ text: 'Определение спектрального смещения лазера при выбранной длине волны', isCorrect: false }
 		]
 	},
 	{
@@ -319,8 +319,8 @@ export const questions: TestQuestion[] = [
 		type: 'single',
 		text: 'Что собой представляет FOT-930?',
 		answers: [
-			{ text: 'Источник света', isCorrect: false },
-			{ text: 'Измеритель ORL', isCorrect: false },
+			{ text: 'Источник излучения', isCorrect: false },
+			{ text: 'Измеритель потерь', isCorrect: false },
 			{ text: 'Многофункциональный оптический тестер', isCorrect: true },
 			{ text: 'Лазерный анализатор спектра', isCorrect: false }
 		]

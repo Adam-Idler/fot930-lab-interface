@@ -1,12 +1,12 @@
 {
-	"name": "diplom-project",
+	"name": "fot930-lab-interface",
 	"private": true,
 	"author": "Rakov Pavel",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"type": "commonjs",
 	"main": "dist-electron/main.js",
 	"build": {
-		"appId": "com.diplom",
+		"appId": "com.fot930.lab.interface",
 		"win": {
 			"target": {
 				"target": "nsis",

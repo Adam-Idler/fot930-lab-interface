@@ -27,7 +27,7 @@ export function DeviceScreen({ state }: DeviceScreenProps) {
 
 	return (
 		<div
-			className={`w-full h-full rounded border-2 border-gray-800 flex flex-col font-mono overflow-hidden ${
+			className={`w-full h-full cursor-default select-none rounded border-2 border-gray-800 flex flex-col font-mono overflow-hidden ${
 				isOff ? 'bg-gray-700' : 'bg-white'
 			}`}
 		>

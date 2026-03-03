@@ -115,13 +115,13 @@ export function ResultsStage({
 				</div>
 			)}
 
-			{/* Информация о валидации */}
+			{/* Информация */}
 			{currentTable && (
 				<div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
 					<h3 className="font-semibold text-gray-900 mb-2">
-						ℹ️ Информация о валидации
+						ℹ️ Информация
 					</h3>
-					<ul className="text-sm text-gray-700 space-y-1">
+					<ul className="text-sm marker:• text-gray-700 space-y-1">
 						<li>
 							• <strong>Измерения:</strong> Значение должно точно совпадать с
 							прибором

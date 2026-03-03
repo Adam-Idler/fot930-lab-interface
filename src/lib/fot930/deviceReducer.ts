@@ -468,10 +468,7 @@ function handleEnterButton(state: DeviceState): DeviceState {
 					dropdownIndex: 0,
 					preparation: {
 						...state.preparation,
-						fastestSettings: {
-							...fastestSettings,
-							portType: newPortType
-						}
+						fastestSettings: { ...fastestSettings, portType: newPortType, isConfigured: isFastestSettingsCorrect({ ...fastestSettings, portType: newPortType }) }
 					}
 				};
 			}
@@ -484,10 +481,7 @@ function handleEnterButton(state: DeviceState): DeviceState {
 					dropdownIndex: 0,
 					preparation: {
 						...state.preparation,
-						fastestSettings: {
-							...fastestSettings,
-							lengthUnit: newLengthUnit
-						}
+						fastestSettings: { ...fastestSettings, lengthUnit: newLengthUnit, isConfigured: isFastestSettingsCorrect({ ...fastestSettings, lengthUnit: newLengthUnit }) }
 					}
 				};
 			}
@@ -531,7 +525,8 @@ function handleEnterButton(state: DeviceState): DeviceState {
 						...state.preparation,
 						fastestSettings: {
 							...fastestSettings,
-							lossWavelengths: newWavelengths
+							lossWavelengths: newWavelengths,
+							isConfigured: isFastestSettingsCorrect({ ...fastestSettings, lossWavelengths: newWavelengths })
 						}
 					}
 				};
@@ -610,12 +605,7 @@ function handleBackButton(state: DeviceState): DeviceState {
 
 			// Сохраняем настройки и возвращаемся в меню
 			const { fastestSettings } = state.preparation;
-			const isCorrect =
-				fastestSettings.portType === 'SM' &&
-				fastestSettings.lengthUnit === 'm' &&
-				fastestSettings.lossWavelengths.includes(1310) &&
-				fastestSettings.lossWavelengths.includes(1550) &&
-				!fastestSettings.lossWavelengths.includes(1625);
+			const isCorrect = isFastestSettingsCorrect(fastestSettings);
 
 			// Всегда возвращаемся в меню, но сохраняем правильность настроек
 			return {
@@ -673,37 +663,50 @@ function handleBackButton(state: DeviceState): DeviceState {
 }
 
 function handleFastestButton(state: DeviceState): DeviceState {
-	if (state.preparation.fastestSettings.isConfigured) {
-		// С экрана FASTEST_RESULTS повторное нажатие запускает новое измерение волокна
-		if (state.screen === 'FASTEST_RESULTS') {
-			return {
-				...state,
-				screen: 'FASTEST_MEASURING',
-				currentMeasurementType: 'FIBER'
-			};
-		}
+	const { fastestSettings } = state.preparation;
+	const isReady =
+		fastestSettings.isConfigured || isFastestSettingsCorrect(fastestSettings);
 
-		// С экрана FASTEST_MAIN переход на измерение (для совместимости)
-		if (state.screen === 'FASTEST_MAIN') {
-			return {
-				...state,
-				screen: 'FASTEST_MEASURING',
-				currentMeasurementType: state.preparation.isReadyForMeasurements
-					? 'FIBER'
-					: 'REFERENCE'
-			};
-		}
+	if (!isReady) return state;
 
-		// С других экранов открывает FASTEST_MAIN
+	// Если настройки верны, но isConfigured ещё не выставлен — персистим
+	const preparation = !fastestSettings.isConfigured
+		? {
+				...state.preparation,
+				fastestSettings: { ...fastestSettings, isConfigured: true },
+				isReadyForMeasurements: checkIfReadyForMeasurements({
+					...state.preparation,
+					fastestSettings: { ...fastestSettings, isConfigured: true }
+				})
+			}
+		: state.preparation;
+
+	// С экрана FASTEST_RESULTS повторное нажатие запускает новое измерение волокна
+	if (state.screen === 'FASTEST_RESULTS') {
+		return { ...state, preparation, screen: 'FASTEST_MEASURING', currentMeasurementType: 'FIBER' };
+	}
+
+	// С экрана FASTEST_MAIN запускаем только если опорное значение уже измерено
+	if (state.screen === 'FASTEST_MAIN') {
+		if (state.preparation.referenceResults.length === 0) {
+			return state;
+		}
 		return {
 			...state,
-			screen: 'FASTEST_MAIN',
-			fastestMainReferenceTypeSelected: true,
-			connectionError: false
+			preparation,
+			screen: 'FASTEST_MEASURING',
+			currentMeasurementType: 'FIBER'
 		};
 	}
 
-	return state;
+	// С других экранов открывает FASTEST_MAIN
+	return {
+		...state,
+		preparation,
+		screen: 'FASTEST_MAIN',
+		fastestMainReferenceTypeSelected: true,
+		connectionError: false
+	};
 }
 
 function handleCompleteLoading(state: DeviceState): DeviceState {
@@ -766,12 +769,7 @@ function handleF2Button(state: DeviceState): DeviceState {
 	// F2 на экране FASTEST_SETUP — переход к FasTest Изм. (только при верных настройках)
 	if (state.screen === 'FASTEST_SETUP') {
 		const { fastestSettings } = state.preparation;
-		const isCorrect =
-			fastestSettings.portType === 'SM' &&
-			fastestSettings.lengthUnit === 'm' &&
-			fastestSettings.lossWavelengths.includes(1310) &&
-			fastestSettings.lossWavelengths.includes(1550) &&
-			!fastestSettings.lossWavelengths.includes(1625);
+		const isCorrect = isFastestSettingsCorrect(fastestSettings);
 
 		// Заблокировать переход если настройки некорректны
 		if (!isCorrect) {
@@ -824,15 +822,16 @@ function handleF2Button(state: DeviceState): DeviceState {
 
 function handleToggleFastestPort(state: DeviceState): DeviceState {
 	if (state.screen === 'FASTEST_SETUP') {
-		const newPortType =
-			state.preparation.fastestSettings.portType === 'SM' ? 'MM' : 'SM';
+		const { fastestSettings } = state.preparation;
+		const newPortType = fastestSettings.portType === 'SM' ? 'MM' : 'SM';
 		return {
 			...state,
 			preparation: {
 				...state.preparation,
 				fastestSettings: {
-					...state.preparation.fastestSettings,
-					portType: newPortType
+					...fastestSettings,
+					portType: newPortType,
+					isConfigured: isFastestSettingsCorrect({ ...fastestSettings, portType: newPortType })
 				}
 			}
 		};
@@ -845,8 +844,8 @@ function handleToggleLossWavelength(
 	wavelength: Wavelength
 ): DeviceState {
 	if (state.screen === 'FASTEST_SETUP') {
-		const currentWavelengths =
-			state.preparation.fastestSettings.lossWavelengths;
+		const { fastestSettings } = state.preparation;
+		const currentWavelengths = fastestSettings.lossWavelengths;
 		const isSelected = currentWavelengths.includes(wavelength);
 
 		const newWavelengths = isSelected
@@ -858,13 +857,29 @@ function handleToggleLossWavelength(
 			preparation: {
 				...state.preparation,
 				fastestSettings: {
-					...state.preparation.fastestSettings,
-					lossWavelengths: newWavelengths
+					...fastestSettings,
+					lossWavelengths: newWavelengths,
+					isConfigured: isFastestSettingsCorrect({ ...fastestSettings, lossWavelengths: newWavelengths })
 				}
 			}
 		};
 	}
 	return state;
+}
+
+/**
+ * Проверяет, правильно ли выставлены настройки FasTest
+ */
+function isFastestSettingsCorrect(
+	fastestSettings: PreparationState['fastestSettings']
+): boolean {
+	return (
+		fastestSettings.portType === 'SM' &&
+		fastestSettings.lengthUnit === 'm' &&
+		fastestSettings.lossWavelengths.includes(1310) &&
+		fastestSettings.lossWavelengths.includes(1550) &&
+		!fastestSettings.lossWavelengths.includes(1625)
+	);
 }
 
 /**
