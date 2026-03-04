@@ -468,7 +468,14 @@ function handleEnterButton(state: DeviceState): DeviceState {
 					dropdownIndex: 0,
 					preparation: {
 						...state.preparation,
-						fastestSettings: { ...fastestSettings, portType: newPortType, isConfigured: isFastestSettingsCorrect({ ...fastestSettings, portType: newPortType }) }
+						fastestSettings: {
+							...fastestSettings,
+							portType: newPortType,
+							isConfigured: isFastestSettingsCorrect({
+								...fastestSettings,
+								portType: newPortType
+							})
+						}
 					}
 				};
 			}
@@ -481,7 +488,14 @@ function handleEnterButton(state: DeviceState): DeviceState {
 					dropdownIndex: 0,
 					preparation: {
 						...state.preparation,
-						fastestSettings: { ...fastestSettings, lengthUnit: newLengthUnit, isConfigured: isFastestSettingsCorrect({ ...fastestSettings, lengthUnit: newLengthUnit }) }
+						fastestSettings: {
+							...fastestSettings,
+							lengthUnit: newLengthUnit,
+							isConfigured: isFastestSettingsCorrect({
+								...fastestSettings,
+								lengthUnit: newLengthUnit
+							})
+						}
 					}
 				};
 			}
@@ -526,7 +540,10 @@ function handleEnterButton(state: DeviceState): DeviceState {
 						fastestSettings: {
 							...fastestSettings,
 							lossWavelengths: newWavelengths,
-							isConfigured: isFastestSettingsCorrect({ ...fastestSettings, lossWavelengths: newWavelengths })
+							isConfigured: isFastestSettingsCorrect({
+								...fastestSettings,
+								lossWavelengths: newWavelengths
+							})
 						}
 					}
 				};
@@ -683,7 +700,12 @@ function handleFastestButton(state: DeviceState): DeviceState {
 
 	// С экрана FASTEST_RESULTS повторное нажатие запускает новое измерение волокна
 	if (state.screen === 'FASTEST_RESULTS') {
-		return { ...state, preparation, screen: 'FASTEST_MEASURING', currentMeasurementType: 'FIBER' };
+		return {
+			...state,
+			preparation,
+			screen: 'FASTEST_MEASURING',
+			currentMeasurementType: 'FIBER'
+		};
 	}
 
 	// С экрана FASTEST_MAIN запускаем только если опорное значение уже измерено
@@ -831,7 +853,10 @@ function handleToggleFastestPort(state: DeviceState): DeviceState {
 				fastestSettings: {
 					...fastestSettings,
 					portType: newPortType,
-					isConfigured: isFastestSettingsCorrect({ ...fastestSettings, portType: newPortType })
+					isConfigured: isFastestSettingsCorrect({
+						...fastestSettings,
+						portType: newPortType
+					})
 				}
 			}
 		};
@@ -859,7 +884,10 @@ function handleToggleLossWavelength(
 				fastestSettings: {
 					...fastestSettings,
 					lossWavelengths: newWavelengths,
-					isConfigured: isFastestSettingsCorrect({ ...fastestSettings, lossWavelengths: newWavelengths })
+					isConfigured: isFastestSettingsCorrect({
+						...fastestSettings,
+						lossWavelengths: newWavelengths
+					})
 				}
 			}
 		};

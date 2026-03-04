@@ -362,7 +362,8 @@ export function PreparationStage({
 								) : (
 									<>
 										<div className="text-xs text-blue-600 font-medium mb-2">
-											Нажмите кнопку FasTest на клавиатуре прибора, выберите тип измерения, затем нажмите клавишу F1 на клавиатуре прибора
+											Нажмите кнопку FasTest на клавиатуре прибора, выберите тип
+											измерения, затем нажмите клавишу F1 на клавиатуре прибора
 										</div>
 										<div className="bg-blue-50 border border-blue-200 rounded p-2 text-xs text-gray-700">
 											<div className="font-semibold mb-1">

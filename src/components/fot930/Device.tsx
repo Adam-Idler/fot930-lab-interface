@@ -308,7 +308,13 @@ export function Device({
 
 						<div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 bg-gray-900">
 							<DeviceButton
-								icon={<img src={publicUrl('/images/icons/sun.svg')} width={20} alt="Sun" />}
+								icon={
+									<img
+										src={publicUrl('/images/icons/sun.svg')}
+										width={20}
+										alt="Sun"
+									/>
+								}
 								color="beige"
 								onClick={noop}
 							/>

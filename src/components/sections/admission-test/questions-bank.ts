@@ -54,15 +54,24 @@ export const questions: TestQuestion[] = [
 	{
 		id: 'q6',
 		type: 'single',
-		text: 'Что отражают оптические потери в линии?',
+		text: 'Что физически характеризуют оптические потери в линии передачи?',
 		answers: [
-			{ text: 'Увеличение полосы пропускания', isCorrect: false },
 			{
-				text: 'Снижение уровня оптической мощности при прохождении по линии',
+				text: 'Логарифмическое уменьшение оптической мощности между входом и выходом тракта',
 				isCorrect: true
 			},
-			{ text: 'Повышение дисперсии', isCorrect: false },
-			{ text: 'Количество мод в волокне', isCorrect: false }
+			{
+				text: 'Изменение спектральной ширины сигнала при распространении',
+				isCorrect: false
+			},
+			{
+				text: 'Рост временного уширения импульса из-за дисперсии',
+				isCorrect: false
+			},
+			{
+				text: 'Изменение модового состава излучения',
+				isCorrect: false
+			}
 		]
 	},
 	{
@@ -156,10 +165,16 @@ export const questions: TestQuestion[] = [
 		type: 'single',
 		text: 'Для чего используется эталонный патч-корд?',
 		answers: [
-			{ text: 'Для тестирования на перегрев', isCorrect: false },
+			{
+				text: 'Для согласования спектральных характеристик источника и линии',
+				isCorrect: false
+			},
 			{ text: 'Для установки опорного уровня REF', isCorrect: true },
 			{ text: 'Для проверки уровня дисперсии', isCorrect: false },
-			{ text: 'Для удлинения линии', isCorrect: false }
+			{
+				text: 'Для проверки стабильности излучателя по времени',
+				isCorrect: false
+			}
 		]
 	},
 	{
@@ -167,13 +182,16 @@ export const questions: TestQuestion[] = [
 		type: 'single',
 		text: 'Что происходит при нажатии кнопки REF во время измерения?',
 		answers: [
-			{ text: 'Прибор выключается', isCorrect: false },
+			{
+				text: 'Автоматически пересчитывает длину волны источника',
+				isCorrect: false
+			},
 			{
 				text: 'Прибор устанавливает текущий уровень как 0 дБ потерь',
 				isCorrect: true
 			},
 			{ text: 'Изменяется длина волны', isCorrect: false },
-			{ text: 'Очищается память', isCorrect: false }
+			{ text: 'Сбрасывает результаты предыдущих измерений', isCorrect: false }
 		]
 	},
 	{
@@ -236,13 +254,22 @@ export const questions: TestQuestion[] = [
 		type: 'single',
 		text: 'С какой целью выполняют "нулевое" измерение ORL?',
 		answers: [
-			{ text: 'Калибровка абсолютной мощности излучения источника для повышения динамического диапазона измерений', isCorrect: false },
+			{
+				text: 'Калибровка абсолютной мощности излучения источника для повышения динамического диапазона измерений',
+				isCorrect: false
+			},
 			{
 				text: 'Для исключения паразитных отражений до тестируемого компонента',
 				isCorrect: true
 			},
-			{ text: 'Компенсация температурной нестабильности фотоприёмника измерительного модуля', isCorrect: false },
-			{ text: 'Определение спектрального смещения лазера при выбранной длине волны', isCorrect: false }
+			{
+				text: 'Компенсация температурной нестабильности фотоприёмника измерительного модуля',
+				isCorrect: false
+			},
+			{
+				text: 'Определение спектрального смещения лазера при выбранной длине волны',
+				isCorrect: false
+			}
 		]
 	},
 	{
@@ -319,7 +346,10 @@ export const questions: TestQuestion[] = [
 		type: 'single',
 		text: 'Что собой представляет FOT-930?',
 		answers: [
-			{ text: 'Источник излучения', isCorrect: false },
+			{
+				text: 'Лазерный источник с функцией стабилизации мощности',
+				isCorrect: false
+			},
 			{ text: 'Измеритель потерь', isCorrect: false },
 			{ text: 'Многофункциональный оптический тестер', isCorrect: true },
 			{ text: 'Лазерный анализатор спектра', isCorrect: false }
@@ -330,10 +360,13 @@ export const questions: TestQuestion[] = [
 		type: 'single',
 		text: 'Какие модули могут быть встроены в FOT-930?',
 		answers: [
-			{ text: 'Рефлектометр', isCorrect: false },
+			{
+				text: 'Лазерный источник с функцией стабилизации мощности',
+				isCorrect: false
+			},
 			{ text: 'Источник + измеритель мощности + ORL', isCorrect: true },
 			{ text: 'Измеритель дисперсии', isCorrect: false },
-			{ text: 'Генератор сигналов Ethernet', isCorrect: false }
+			{ text: 'OTDR и анализатор хроматической дисперсии', isCorrect: false }
 		]
 	},
 	{
@@ -343,14 +376,14 @@ export const questions: TestQuestion[] = [
 		answers: [
 			{ text: 'Измерение только мощности', isCorrect: false },
 			{ text: 'Автоматическое измерение потерь/ORL/длины', isCorrect: true },
-			{ text: 'Калибровка REF', isCorrect: false },
+			{ text: 'Генератор Ethernet-трафика и BER-тестер', isCorrect: false },
 			{ text: 'Чистка коннекторов', isCorrect: false }
 		]
 	},
 	{
 		id: 'q32',
 		type: 'text',
-		text: 'Сколько длин волн может измерить FasTesT?',
+		text: 'Сколько максимум длин волн может измерить FasTesT?',
 		validator: (v) => /4|четыре/i.test(v)
 	},
 	{
@@ -391,7 +424,7 @@ export const questions: TestQuestion[] = [
 		type: 'single',
 		text: 'Как отключить источник излучения?',
 		answers: [
-			{ text: 'Выключить прибор', isCorrect: false },
+			{ text: 'Отключением модуля измерения мощности', isCorrect: false },
 			{ text: 'Удерживать REF', isCorrect: false },
 			{ text: 'Переключить длины волн до режима «Выкл»', isCorrect: true },
 			{ text: 'Отключить питание', isCorrect: false }
@@ -402,10 +435,13 @@ export const questions: TestQuestion[] = [
 		type: 'single',
 		text: 'Что такое измерение опорного значения в FasTesT?',
 		answers: [
-			{ text: 'Измерение длины волны', isCorrect: false },
+			{
+				text: 'Калибровку фотоприёмника по абсолютной шкале мощности',
+				isCorrect: false
+			},
 			{ text: 'Сохранение нуля для ORL', isCorrect: false },
 			{ text: 'Вычитание потерь измерительных компонентов', isCorrect: true },
-			{ text: 'Тест батареи', isCorrect: false }
+			{ text: 'Проверку стабильности лазерного источника', isCorrect: false }
 		]
 	},
 	{
@@ -424,10 +460,16 @@ export const questions: TestQuestion[] = [
 		type: 'single',
 		text: 'В каком случае необходимо повторно устанавливать ноль ORL?',
 		answers: [
-			{ text: 'После полной зарядки', isCorrect: false },
+			{
+				text: 'После завершения каждого измерительного цикла',
+				isCorrect: false
+			},
 			{ text: 'После смены патч-корда', isCorrect: true },
 			{ text: 'После выключения дисплея', isCorrect: false },
-			{ text: 'После смены аккумулятора', isCorrect: false }
+			{
+				text: 'После изменения длины волны в режиме мощности',
+				isCorrect: false
+			}
 		]
 	},
 	{
@@ -440,7 +482,10 @@ export const questions: TestQuestion[] = [
 				text: 'Возвращает заводские настройки чувствительности ORL',
 				isCorrect: true
 			},
-			{ text: 'Переводит прибор в спящий режим', isCorrect: false },
+			{
+				text: 'Переключает режим измерения ORL в автоматический',
+				isCorrect: false
+			},
 			{ text: 'Изменяет длину волны', isCorrect: false }
 		]
 	},
@@ -455,9 +500,9 @@ export const questions: TestQuestion[] = [
 		type: 'single',
 		text: 'Что отображает измеритель мощности на экране?',
 		answers: [
-			{ text: 'Только мощность', isCorrect: false },
+			{ text: 'Только уровень мощности в дБм', isCorrect: false },
 			{ text: 'Мощность, длину волны, заряд батареи', isCorrect: true },
-			{ text: 'Температуру', isCorrect: false },
+			{ text: 'Температура фотоприёмника и время измерения', isCorrect: false },
 			{ text: 'Количество измерений', isCorrect: false }
 		]
 	},
@@ -473,24 +518,13 @@ export const questions: TestQuestion[] = [
 		]
 	},
 	{
-		id: 'q44',
-		type: 'single',
-		text: 'Как переключить длину волны источника?',
-		answers: [
-			{ text: 'Через REF', isCorrect: false },
-			{ text: 'Через кнопку Длина волны (F1/F2)', isCorrect: true },
-			{ text: 'Через VFL', isCorrect: false },
-			{ text: 'Через Reset', isCorrect: false }
-		]
-	},
-	{
 		id: 'q45',
 		type: 'single',
 		text: 'Что показывает строка состояния?',
 		answers: [
 			{ text: 'Статус источника', isCorrect: true },
 			{ text: 'Текущую дату', isCorrect: false },
-			{ text: 'Температуру', isCorrect: false },
+			{ text: 'Дату последней калибровки', isCorrect: false },
 			{ text: 'Версию прошивки', isCorrect: false }
 		]
 	},
@@ -509,7 +543,7 @@ export const questions: TestQuestion[] = [
 		id: 'q47',
 		type: 'text',
 		text: 'Что называется разностью между мощностью на входе и выходе волокна, выраженная в дБ?',
-		validator: (v) => /оптические потери/i.test(v)
+		validator: (v) => /(оптические )?потери/i.test(v)
 	},
 	{
 		id: 'q48',
@@ -528,7 +562,9 @@ export const questions: TestQuestion[] = [
 		type: 'text',
 		text: 'Что измеряет параметр ORL?',
 		validator: (v) =>
-			/возвратные потери|уровень отраженного назад сигнала/i.test(v)
+			/обратные потери|возвратные потери|уровень отраженного назад сигнала/i.test(
+				v
+			)
 	},
 	{
 		id: 'q51',

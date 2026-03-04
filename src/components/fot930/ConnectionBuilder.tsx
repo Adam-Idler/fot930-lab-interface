@@ -125,6 +125,8 @@ export function ConnectionBuilder({
 										element={element}
 										onRemove={() => handleRemove(index)}
 										onDrop={() => handleDrop(index)}
+										onDragStart={() => handleDragStart(element)}
+										onDragEnd={handleDragEnd}
 									/>
 									{index < draftSchemeLength - 1 && (
 										<div className="text-gray-400 text-2xl">→</div>
@@ -150,9 +152,18 @@ export function ConnectionBuilder({
 							}`}
 						>
 							{validation.valid ? (
-								<div className="flex items-center gap-2">
-									<span className="text-xl">✓</span>
-									<span>Схема собрана правильно!</span>
+								<div className="space-y-2">
+									<div className="flex items-center gap-2">
+										<span className="text-xl">✓</span>
+										<span>Схема собрана правильно!</span>
+									</div>
+									<div className="text-sm text-green-700 border-t border-green-200 pt-2">
+										Для выполнения измерения: на приборе перейдите на экран
+										измерения FasTest и нажмите кнопку <strong>F2</strong> или{' '}
+										<strong>FasTest</strong> на клавиатуре прибора. После
+										получения результатов перейдите на вкладку{' '}
+										<strong>«Результаты»</strong>.
+									</div>
 								</div>
 							) : (
 								<div className="flex items-center gap-2">

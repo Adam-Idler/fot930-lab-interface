@@ -6,13 +6,32 @@ interface ElementCardProps {
 	element: ConnectionElement;
 	onRemove: () => void;
 	onDrop: () => void;
+	onDragStart: () => void;
+	onDragEnd: () => void;
 }
 
-export function ElementCard({ element, onRemove, onDrop }: ElementCardProps) {
+export function ElementCard({
+	element,
+	onRemove,
+	onDrop,
+	onDragStart,
+	onDragEnd
+}: ElementCardProps) {
 	const [isDragOver, setIsDragOver] = useState(false);
+	const [isDragging, setIsDragging] = useState(false);
 
 	return (
 		<div
+			draggable
+			onDragStart={(e) => {
+				e.dataTransfer.effectAllowed = 'move';
+				setIsDragging(true);
+				onDragStart();
+			}}
+			onDragEnd={() => {
+				setIsDragging(false);
+				onDragEnd();
+			}}
 			onDragOver={(e) => {
 				e.preventDefault();
 				setIsDragOver(true);
@@ -23,9 +42,9 @@ export function ElementCard({ element, onRemove, onDrop }: ElementCardProps) {
 				setIsDragOver(false);
 				onDrop();
 			}}
-			className={`relative bg-white p-3 rounded-lg border-2 ${
+			className={`relative bg-white p-3 rounded-lg border-2 cursor-move ${
 				isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-			} transition group`}
+			} ${isDragging ? 'opacity-40' : ''} transition group`}
 		>
 			<ElementContent element={element} />
 

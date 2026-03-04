@@ -156,10 +156,24 @@ export function Test({ questions, testID }: TestProps) {
 		};
 	}, [handleKeyDown]);
 
+	const handleRestart = useCallback(() => {
+		setIsEnd(false);
+		setIndex(0);
+		setAnswers({});
+		setEvaluations({});
+		setGrade(undefined);
+
+		const updatedStudent = { ...student, [studentTestResultKey]: undefined };
+		setStudent(updatedStudent);
+		window.electronAPI.saveStudent(updatedStudent);
+	}, [student, studentTestResultKey, setStudent]);
+
 	if (isEnd) {
 		return (
-			<section className="text-center h-full flex flex-col justify-center">
-				<h2 className="text-2xl font-bold mb-6">Тест завершён</h2>
+			<section className="text-center p-5 border-2 border-sibguti-main rounded-xl w-1/2 mx-auto flex flex-col justify-center">
+				<h2 className="text-2xl font-bold mb-6 text-sibguti-main">
+					Тест завершён
+				</h2>
 				<p className="text-lg mb-4">
 					Ваш результат:{' '}
 					{student.admissionTestResult?.correctAnswers ??
@@ -169,14 +183,21 @@ export function Test({ questions, testID }: TestProps) {
 				<p className="text-md">
 					Оценка: <b>{grade}</b>
 				</p>
+				<button
+					type="button"
+					className="mt-6 mx-auto px-5 py-2 rounded bg-slate-200 text-slate-800 hover:bg-slate-300 cursor-pointer"
+					onClick={handleRestart}
+				>
+					Начать заново
+				</button>
 			</section>
 		);
 	}
 
 	return (
-		<section className="mx-auto">
+		<section className="py-10 w-full min-h-1/2 mx-auto">
 			<div className="mb-4">
-				<p className="text-sm text-slate-600">
+				<p className="text-sm text-center text-slate-600">
 					Вопрос {index + 1} из {total}
 				</p>
 			</div>
