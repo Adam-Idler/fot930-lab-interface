@@ -13,7 +13,7 @@ import {
 	generateReferenceMeasurement,
 	validateConnectionScheme
 } from '../../lib/fot930/measurementEngine';
-import { noop, publicUrl } from '../../lib/utils';
+import { publicUrl } from '../../lib/utils';
 import type {
 	ConnectionScheme,
 	DeviceAction,
@@ -252,8 +252,7 @@ export function Device({
 								{/* RIGHT */}
 								<button
 									type="button"
-									onClick={noop}
-									className="absolute top-1/2 right-2 -translate-y-1/2 w-6 h-12 hover:cursor-pointer bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-full flex items-center justify-center text-white text-xl transition shadow-md"
+									className="absolute top-1/2 right-2 -translate-y-1/2 w-6 h-12 bg-gray-700 rounded-full flex items-center justify-center text-white text-xl transition shadow-md"
 								>
 									<img
 										src={publicUrl('/images/icons/triangle-filled-right.svg')}
@@ -278,8 +277,7 @@ export function Device({
 								{/* LEFT */}
 								<button
 									type="button"
-									onClick={noop}
-									className="absolute top-1/2 left-2 -translate-y-1/2 w-6 h-12 hover:cursor-pointer bg-gray-700 hover:bg-gray-600 active:bg-gray-500 rounded-full flex items-center justify-center text-white text-xl transition shadow-md"
+									className="absolute top-1/2 left-2 -translate-y-1/2 w-6 h-12 bg-gray-700 rounded-full flex items-center justify-center text-white text-xl transition shadow-md"
 								>
 									<img
 										src={publicUrl('/images/icons/triangle-filled-left.svg')}
@@ -316,7 +314,6 @@ export function Device({
 									/>
 								}
 								color="beige"
-								onClick={noop}
 							/>
 							<DeviceButton
 								icon={
@@ -337,7 +334,6 @@ export function Device({
 									/>
 								}
 								color="beige"
-								onClick={noop}
 							/>
 						</div>
 

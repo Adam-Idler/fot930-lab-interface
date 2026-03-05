@@ -25,6 +25,7 @@ import type {
 import { Device } from '../../fot930';
 import {
 	ConnectionSchemeStage,
+	IntroductionStage,
 	PassiveMeasurementsStage,
 	PreparationStage,
 	ResultsStage,
@@ -82,7 +83,7 @@ const availableComponents: PassiveComponent[] = [
 
 // TODO: Добавить завершение лабораторной работы после всех измерений
 export function LabWork() {
-	const [currentStage, setCurrentStage] = useState<LabStage>('PREPARATION');
+	const [currentStage, setCurrentStage] = useState<LabStage>('INTRODUCTION');
 	const [selectedComponent, setSelectedComponent] = useState<PassiveComponent>(
 		availableComponents[0]
 	);
@@ -266,6 +267,12 @@ export function LabWork() {
 				<div className="bg-white rounded-lg shadow-md p-4">
 					<div className="flex gap-2 overflow-x-auto">
 						<StageButton
+							stage="INTRODUCTION"
+							label="Введение"
+							active={currentStage === 'INTRODUCTION'}
+							onClick={() => handleStageChange('INTRODUCTION')}
+						/>
+						<StageButton
 							stage="PREPARATION"
 							label="Подготовка"
 							active={currentStage === 'PREPARATION'}
@@ -286,8 +293,17 @@ export function LabWork() {
 					</div>
 				</div>
 
-				{/* Содержимое этапа */}
-				<div className="flex flex-wrap xl:flex-nowrap gap-6">
+				{/* Вкладка введения — без прибора, на всю ширину */}
+				{currentStage === 'INTRODUCTION' && <IntroductionStage />}
+
+				{/* Содержимое этапа — прибор всегда в DOM, чтобы не сбрасывалось состояние */}
+				<div
+					className={
+						currentStage === 'INTRODUCTION'
+							? 'hidden'
+							: 'flex flex-wrap xl:flex-nowrap gap-6'
+					}
+				>
 					{/* Левая колонка: Прибор */}
 					<div className="w-full xl:w-auto">
 						<Device
@@ -372,6 +388,7 @@ export function LabWork() {
 
 function getStageTitle(stage: LabStage): string {
 	const titles: Record<LabStage, string> = {
+		INTRODUCTION: '',
 		PREPARATION: '',
 		CONNECTION_SCHEME: 'Сборка измерительной схемы',
 		COMPLEX_SCHEMES: 'Сложные измерительные схемы',
@@ -382,6 +399,7 @@ function getStageTitle(stage: LabStage): string {
 
 function getStageInstructions(stage: LabStage): string {
 	const instructions: Record<LabStage, string> = {
+		INTRODUCTION: '',
 		PREPARATION: '',
 		CONNECTION_SCHEME:
 			'Выберите компонент для измерения и соберите правильную схему подключения, перетаскивая элементы мышью. Проверьте корректность последовательности перед измерениями. Выполните 3 измерения для каждого компонента.',

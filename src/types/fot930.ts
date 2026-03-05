@@ -314,6 +314,7 @@ export interface ConnectionElement {
 
 /** Этапы выполнения лабораторной работы */
 export type LabStage =
+	| 'INTRODUCTION' // Введение и описание этапов
 	| 'PREPARATION' // Подготовка прибора
 	| 'CONNECTION_SCHEME' // Сборка схемы подключения
 	| 'COMPLEX_SCHEMES' // Сложные схемы
