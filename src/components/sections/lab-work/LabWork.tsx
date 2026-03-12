@@ -138,15 +138,7 @@ export function LabWork() {
 	// Обработчик очистки портов
 	const handleCleanPorts = useCallback(() => {
 		if (deviceDispatchRef.current) {
-			// Отправляем действие очистки портов в Device
-			deviceDispatchRef.current({ type: 'CLEAN_PORTS' });
-
-			// Через 3 секунды завершаем очистку
-			setTimeout(() => {
-				if (deviceDispatchRef.current) {
-					deviceDispatchRef.current({ type: 'COMPLETE_PORT_CLEANING' });
-				}
-			}, 3000);
+			deviceDispatchRef.current({ type: 'COMPLETE_PORT_CLEANING' });
 		}
 	}, []);
 

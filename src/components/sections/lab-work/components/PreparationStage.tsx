@@ -1,6 +1,8 @@
 import clsx from 'clsx';
+import { useState } from 'react';
 import { publicUrl } from '../../../../lib/utils';
 import type { DeviceState } from '../../../../types/fot930';
+import { PortCleaningPopup } from './PortCleaningPopup';
 
 interface PreparationStageProps {
 	deviceState: DeviceState;
@@ -12,6 +14,7 @@ export function PreparationStage({
 	onCleanPorts
 }: PreparationStageProps) {
 	const { preparation } = deviceState;
+	const [isCleaningPopupOpen, setIsCleaningPopupOpen] = useState(false);
 
 	// Проверка завершения каждого шага
 	const isStep1Complete = deviceState.isPoweredOn;
@@ -34,6 +37,12 @@ export function PreparationStage({
 
 	return (
 		<div className="flex flex-col gap-6">
+			{isCleaningPopupOpen && (
+				<PortCleaningPopup
+					onClose={() => setIsCleaningPopupOpen(false)}
+					onClean={onCleanPorts}
+				/>
+			)}
 			{/* Заголовок этапа */}
 			<div className="bg-white rounded-lg shadow-md p-6">
 				<h2 className="text-xl font-semibold mb-4">
@@ -171,7 +180,7 @@ export function PreparationStage({
 
 											<button
 												type="button"
-												onClick={onCleanPorts}
+												onClick={() => setIsCleaningPopupOpen(true)}
 												disabled={preparation.portStatus === 'cleaning'}
 												className={clsx(
 													'flex w-full gap-2 justify-center items-center font-semibold py-2 px-4 rounded-lg transition-colors',
