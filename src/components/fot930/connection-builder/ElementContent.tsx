@@ -7,13 +7,15 @@ interface ElementContentProps {
 
 export function ElementContent({ element }: ElementContentProps) {
 	return (
-		<div className="flex flex-col items-center gap-1 text-center select-none">
-			<img
-				className="h-6 pointer-events-none"
-				alt={element.label}
-				src={publicUrl(element.icon)}
-			/>
-			<span className="text-xs font-medium">{element.label}</span>
+		<div className="flex flex-col items-center gap-2 text-center select-none">
+			<div className="flex items-center justify-center w-full h-16">
+				<img
+					className="max-h-full max-w-full object-contain pointer-events-none"
+					alt={element.label}
+					src={publicUrl(element.icon)}
+				/>
+			</div>
+			<span className="text-xs font-medium leading-tight">{element.label}</span>
 		</div>
 	);
 }

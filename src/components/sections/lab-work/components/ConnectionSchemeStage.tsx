@@ -20,7 +20,7 @@ function getConnector(
 	if (connectorType === 'SC_APC') {
 		return {
 			type: 'CONNECTOR' as const,
-			icon: '/images/icons/green-connector.svg',
+			icon: '/images/scheme/sc-apc.png',
 			id: `connector_apc_${index}`,
 			label: `SC/APC ${index}`,
 			connectorType: 'SC_APC' as const
@@ -29,7 +29,7 @@ function getConnector(
 
 	return {
 		type: 'CONNECTOR' as const,
-		icon: '/images/icons/blue-connector.svg',
+		icon: '/images/scheme/sc-upc.png',
 		id: `connector_upc_${index}`,
 		label: `SC/UPC ${index}`,
 		connectorType: 'SC_UPC' as const
@@ -46,7 +46,7 @@ export function ConnectionSchemeStage({
 			type: 'TESTER' as const,
 			id: 'tester',
 			label: 'Тестер FOT-930 (Блок А)',
-			icon: '/images/icons/tester.svg'
+			icon: '/images/instruction/fot-930.png'
 		},
 		getConnector(currentComponent.connectorType, 1),
 		getConnector(currentComponent.connectorType, 2),
@@ -60,7 +60,7 @@ export function ConnectionSchemeStage({
 			type: 'TESTER' as const,
 			id: 'tester_2',
 			label: 'Тестер FOT-930 (Блок Б)',
-			icon: '/images/icons/tester.svg'
+			icon: '/images/instruction/fot-930.png'
 		}
 	];
 

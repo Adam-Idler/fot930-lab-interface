@@ -42,7 +42,7 @@ export function ElementCard({
 				setIsDragOver(false);
 				onDrop();
 			}}
-			className={`relative bg-white p-3 rounded-lg border-2 cursor-move ${
+			className={`relative bg-white p-2 rounded-lg border-2 cursor-move ${
 				isDragOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
 			} ${isDragging ? 'opacity-40' : ''} transition group`}
 		>
