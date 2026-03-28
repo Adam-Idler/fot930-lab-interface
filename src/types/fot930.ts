@@ -239,7 +239,8 @@ export type DeviceAction =
 	| { type: 'SET_CONNECTION_ERROR'; payload: boolean }
 	| { type: 'SET_FOOTER_PAGE'; payload: number }
 	| { type: 'PRESS_LEFT' }
-	| { type: 'PRESS_RIGHT' };
+	| { type: 'PRESS_RIGHT' }
+	| { type: 'SKIP_PREPARATION' };
 
 // ============================================================
 // ЛАБОРАТОРНАЯ РАБОТА
@@ -310,6 +311,12 @@ export interface ConnectionElement {
 
 	/** Тип коннектора (если элемент - коннектор) */
 	connectorType?: ConnectorType;
+
+	/** Тип пассивного компонента (если элемент - компонент) */
+	componentType?: PassiveComponentType;
+
+	/** Выбранный выход сплиттера (1-based, только для сплиттеров) */
+	splitterOutput?: number;
 }
 
 /** Этапы выполнения лабораторной работы */

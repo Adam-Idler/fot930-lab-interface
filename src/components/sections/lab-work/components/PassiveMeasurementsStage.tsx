@@ -1,5 +1,9 @@
 import clsx from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+	getSplitterOutputCount,
+	isSplitterType
+} from '../../../../lib/fot930/splitter';
 import type {
 	PassiveComponent,
 	ResultsTableState
@@ -13,6 +17,35 @@ interface PassiveMeasurementsStageProps {
 	onSelectComponent: (component: PassiveComponent) => void;
 }
 
+/** Возвращает {count, total, isMeasured} для компонента */
+function getMeasurementStatus(
+	component: PassiveComponent,
+	tables: ResultsTableState['tables']
+): { count: number; total: number; isMeasured: boolean } {
+	if (isSplitterType(component.type)) {
+		const outputCount = getSplitterOutputCount(component.type);
+		const measuredOutputs = Array.from(
+			{ length: outputCount },
+			(_, i) => i + 1
+		).filter((i) => tables[`${component.id}_output_${i}`]?.isCompleted).length;
+		return {
+			count: measuredOutputs,
+			total: outputCount,
+			isMeasured: measuredOutputs === outputCount && outputCount > 0
+		};
+	}
+
+	const table = tables[component.id];
+	const isMeasured = table?.isCompleted ?? false;
+	const count = table
+		? Math.max(
+				Math.min(table.currentMeasurementNumber - (isMeasured ? 0 : 1), 3),
+				0
+			)
+		: 0;
+	return { count, total: 3, isMeasured };
+}
+
 export function PassiveMeasurementsStage({
 	components,
 	selectedComponent,
@@ -24,35 +57,19 @@ export function PassiveMeasurementsStage({
 	const [showLeftFade, setShowLeftFade] = useState(false);
 	const [showRightFade, setShowRightFade] = useState(false);
 
-	// Получаем количество выполненных измерений для компонента
-	const getMeasurementCountForComponent = (componentId: string) => {
-		const table = resultsTableState.tables[componentId];
-		if (!table) return 0;
-		return table.currentMeasurementNumber > 3
-			? 3
-			: table.currentMeasurementNumber;
-	};
-
-	// Функция для проверки позиции скролла
 	const checkScrollPosition = useCallback(() => {
 		const container = scrollContainerRef.current;
 		if (!container) return;
 
 		const { scrollLeft, scrollWidth, clientWidth } = container;
-
-		// Показываем левый градиент если проскроллили вправо
 		setShowLeftFade(scrollLeft > 0);
-
-		// Показываем правый градиент если есть контент справа
 		setShowRightFade(scrollLeft < scrollWidth - clientWidth - 1);
 	}, []);
 
-	// Проверяем позицию при монтировании и изменении компонентов
 	useEffect(() => {
 		checkScrollPosition();
 	}, [checkScrollPosition]);
 
-	// Добавляем слушатель скролла
 	useEffect(() => {
 		const container = scrollContainerRef.current;
 		if (!container) return;
@@ -79,15 +96,12 @@ export function PassiveMeasurementsStage({
 							Выберите компонент для измерения:
 						</div>
 						<div className="relative">
-							{/* Левый градиент затухания */}
 							<div
 								className={clsx(
 									'absolute left-0 top-0 bottom-2 w-8 bg-linear-to-r from-white to-transparent pointer-events-none z-10 transition-opacity duration-300',
 									showLeftFade ? 'opacity-100' : 'opacity-0'
 								)}
 							/>
-
-							{/* Правый градиент затухания */}
 							<div
 								className={clsx(
 									'absolute right-0 top-0 bottom-2 w-8 bg-linear-to-l from-white to-transparent pointer-events-none z-10 transition-opacity duration-300',
@@ -95,7 +109,6 @@ export function PassiveMeasurementsStage({
 								)}
 							/>
 
-							{/* Контейнер со скроллом */}
 							<div
 								ref={scrollContainerRef}
 								className="flex gap-3 pb-2 overflow-x-scroll custom-scrollbar"
@@ -105,18 +118,17 @@ export function PassiveMeasurementsStage({
 								}}
 							>
 								{components.map((component) => {
-									const measurementCount = getMeasurementCountForComponent(
-										component.id
+									const { count, total, isMeasured } = getMeasurementStatus(
+										component,
+										resultsTableState.tables
 									);
-									const isMeasured = measurementCount >= 3;
+									const isSplitter = isSplitterType(component.type);
 
 									return (
 										<button
 											type="button"
 											key={component.id}
-											onClick={() => {
-												onSelectComponent(component);
-											}}
+											onClick={() => onSelectComponent(component)}
 											className={clsx(
 												'p-3 rounded-lg border-2 text-left transition shrink-0',
 												selectedComponent?.id === component.id
@@ -134,10 +146,14 @@ export function PassiveMeasurementsStage({
 												)}
 											>
 												{isMeasured
-													? 'Измерение выполнено'
-													: measurementCount === 0
+													? isSplitter
+														? `Все ${total} выхода измерены`
+														: 'Измерение выполнено'
+													: count === 0
 														? 'Измерение не выполнено'
-														: `Выполнено ${measurementCount} из 3 измерений`}
+														: isSplitter
+															? `Измерено ${count} из ${total} выходов`
+															: `Выполнено ${count} из ${total} измерений`}
 											</div>
 										</button>
 									);
@@ -148,7 +164,6 @@ export function PassiveMeasurementsStage({
 				</div>
 			</div>
 
-			{/* Индикатор блокировки измерения */}
 			{!canStartNextMeasurement && selectedComponent && (
 				<div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg shadow-md">
 					<div className="flex items-start gap-3">

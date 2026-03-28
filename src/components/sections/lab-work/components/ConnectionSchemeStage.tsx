@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'react';
+import {
+	getSplitterOutputCount,
+	isSplitterType
+} from '../../../../lib/fot930/splitter';
 import { shuffleArray } from '../../../../lib/utils';
 import type {
 	ConnectionElement,
@@ -11,6 +15,8 @@ interface ConnectionSchemeStageProps {
 	scheme: ConnectionScheme;
 	currentComponent: PassiveComponent;
 	onSchemeChange: (scheme: ConnectionScheme) => void;
+	/** Номера выходов сплиттера, по которым измерение завершено */
+	measuredSplitterOutputs?: number[];
 }
 
 function getConnector(
@@ -39,8 +45,14 @@ function getConnector(
 export function ConnectionSchemeStage({
 	scheme,
 	currentComponent,
-	onSchemeChange
+	onSchemeChange,
+	measuredSplitterOutputs = []
 }: ConnectionSchemeStageProps) {
+	const isSplitter = isSplitterType(currentComponent.type);
+	const splitterOutputCount = isSplitter
+		? getSplitterOutputCount(currentComponent.type)
+		: 0;
+
 	const baseElements = [
 		{
 			type: 'TESTER' as const,
@@ -54,7 +66,9 @@ export function ConnectionSchemeStage({
 			type: 'COMPONENT' as const,
 			id: currentComponent.id,
 			label: currentComponent.label,
-			icon: currentComponent.icon
+			icon: currentComponent.icon,
+			componentType: currentComponent.type,
+			splitterOutput: isSplitter ? 1 : undefined
 		},
 		{
 			type: 'TESTER' as const,
@@ -82,10 +96,25 @@ export function ConnectionSchemeStage({
 				Этап 3. Сборка схемы подключения
 			</h2>
 
+			{/* Подсказка для сплиттера */}
+			{isSplitter && (
+				<div className="mb-4 flex items-start gap-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+					<span className="shrink-0 mt-0.5 text-gray-400">ℹ</span>
+					<span>
+						Для полного измерения сплиттера 1:{splitterOutputCount} необходимо
+						выполнить измерение каждого из {splitterOutputCount} выходов.
+						Выбирайте активный выход с помощью точек на элементе в схеме.
+					</span>
+				</div>
+			)}
+
 			<ConnectionBuilder
 				scheme={scheme}
 				onChange={onSchemeChange}
 				availableElements={availableElements}
+				elementMeasuredOutputs={
+					isSplitter ? { [currentComponent.id]: measuredSplitterOutputs } : {}
+				}
 			/>
 		</div>
 	);

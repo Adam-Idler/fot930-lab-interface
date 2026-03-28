@@ -20,12 +20,15 @@ interface ConnectionBuilderProps {
 	onChange: (scheme: ConnectionScheme) => void;
 	/** Доступные элементы для сборки */
 	availableElements: ConnectionElement[];
+	/** Измеренные выходы для элементов схемы: ключ — ID элемента, значение — список измеренных выходов */
+	elementMeasuredOutputs?: Record<string, number[]>;
 }
 
 export function ConnectionBuilder({
 	scheme,
 	onChange,
-	availableElements
+	availableElements,
+	elementMeasuredOutputs = {}
 }: ConnectionBuilderProps) {
 	const [draggedElement, setDraggedElement] =
 		useState<ConnectionElement | null>(null);
@@ -92,6 +95,15 @@ export function ConnectionBuilder({
 		});
 	};
 
+	const handleSplitterOutputChange = (elementIndex: number, output: number) => {
+		const newSequence = draftScheme.sequence.map((el, i) =>
+			i === elementIndex ? { ...el, splitterOutput: output } : el
+		);
+		const newDraft = { ...draftScheme, sequence: newSequence };
+		setDraftScheme(newDraft);
+		onChange(newDraft);
+	};
+
 	const handleReset = () => {
 		setDraftScheme({
 			...draftScheme,
@@ -127,6 +139,10 @@ export function ConnectionBuilder({
 										onDrop={() => handleDrop(index)}
 										onDragStart={() => handleDragStart(element)}
 										onDragEnd={handleDragEnd}
+										onSplitterOutputChange={(output) =>
+											handleSplitterOutputChange(index, output)
+										}
+										measuredOutputs={elementMeasuredOutputs[element.id]}
 									/>
 									{index < draftSchemeLength - 1 && (
 										<div className="text-gray-400 text-2xl">→</div>

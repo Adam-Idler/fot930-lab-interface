@@ -13,6 +13,10 @@ import {
 } from 'react';
 import { initialDeviceState } from '../../../lib/fot930/deviceReducer';
 import { COMPONENT_LOSS_DB } from '../../../lib/fot930/measurementEngine';
+import {
+	getSplitterOutputCount,
+	isSplitterType
+} from '../../../lib/fot930/splitter';
 import { useResultsTable } from '../../../lib/fot930/useResultsTable';
 import type {
 	ConnectionScheme,
@@ -89,11 +93,11 @@ const availableComponents: PassiveComponent[] = [
 		fiberLength: 2
 	},
 	{
-		id: 'splitter_1_16',
-		icon: '/images/scheme/splitter-sc-upc-1-16.png',
-		type: 'SPLITTER_1_16',
-		label: 'Сплиттер 1:16 SC/UPC',
-		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_16,
+		id: 'splitter_1_8',
+		icon: '/images/scheme/splitter-sc-upc-1-8.png',
+		type: 'SPLITTER_1_8',
+		label: 'Сплиттер 1:8 SC/UPC',
+		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_8,
 		connectorType: 'SC_UPC',
 		fiberLength: 3
 	}
@@ -123,7 +127,6 @@ export function LabWork() {
 	const [deviceState, setDeviceState] =
 		useState<DeviceState>(initialDeviceState);
 
-	// Хук управления таблицами результатов
 	const {
 		state: resultsTableState,
 		createTableForComponent,
@@ -150,17 +153,41 @@ export function LabWork() {
 		}));
 	}, [selectedComponent]);
 
-	// Ссылка на dispatch для отправки действий в Device
 	const deviceDispatchRef = useRef<Dispatch<DeviceAction> | null>(null);
 
-	// Обработчик очистки портов
 	const handleCleanPorts = useCallback(() => {
 		if (deviceDispatchRef.current) {
 			deviceDispatchRef.current({ type: 'COMPLETE_PORT_CLEANING' });
 		}
 	}, []);
 
-	// Ссылка для отслеживания последнего обработанного результата
+	// Текущий выбранный выход сплиттера (из схемы)
+	const currentSplitterOutput = useMemo(() => {
+		const schemeElement = connectionScheme.sequence.find(
+			(el) => el.id === selectedComponent.id
+		);
+		return schemeElement?.splitterOutput ?? 1;
+	}, [connectionScheme.sequence, selectedComponent.id]);
+
+	// Эффективный ID таблицы: для сплиттеров — с суффиксом выхода
+	const effectiveComponentId = useMemo(() => {
+		if (isSplitterType(selectedComponent.type)) {
+			return `${selectedComponent.id}_output_${currentSplitterOutput}`;
+		}
+		return selectedComponent.id;
+	}, [selectedComponent.id, selectedComponent.type, currentSplitterOutput]);
+
+	// Номера выходов сплиттера, по которым измерение завершено
+	const measuredSplitterOutputs = useMemo(() => {
+		if (!isSplitterType(selectedComponent.type)) return [];
+		const count = getSplitterOutputCount(selectedComponent.type);
+		return Array.from({ length: count }, (_, i) => i + 1).filter(
+			(i) =>
+				resultsTableState.tables[`${selectedComponent.id}_output_${i}`]
+					?.isCompleted
+		);
+	}, [selectedComponent, resultsTableState.tables]);
+
 	const lastProcessedResultRef = useRef<{
 		componentId: string;
 		timestamp: number;
@@ -174,38 +201,43 @@ export function LabWork() {
 			deviceState.currentFiberResult &&
 			selectedComponent
 		) {
-			const componentId = selectedComponent.id;
 			const resultTimestamp = deviceState.currentFiberResult.timestamp;
 
-			// Проверяем, был ли этот результат уже обработан
-			// Если timestamp совпадает, это старый результат (не важно для какого компонента)
 			const isAlreadyProcessed =
 				lastProcessedResultRef.current?.timestamp === resultTimestamp;
 
 			if (isAlreadyProcessed) {
-				return; // Результат уже обработан, пропускаем
+				return;
 			}
 
-			const existingTable = resultsTableState.tables[componentId];
+			// Для сплиттеров — создаём "виртуальный" компонент под конкретный выход
+			const tableComponent: PassiveComponent = isSplitterType(
+				selectedComponent.type
+			)
+				? {
+						...selectedComponent,
+						id: effectiveComponentId,
+						label: `${selectedComponent.label} (Выход ${currentSplitterOutput})`
+					}
+				: selectedComponent;
 
-			// Таблица должна существовать (создается при выборе компонента)
+			const existingTable = resultsTableState.tables[effectiveComponentId];
+
 			if (!existingTable) {
 				createTableForComponent(
-					selectedComponent,
+					tableComponent,
 					deviceState.preparation.fastestSettings.lossWavelengths
 				);
 			}
 
-			// Добавляем результат измерения
 			addDeviceMeasurement(
-				componentId,
-				1, // Этот параметр игнорируется, хук использует внутреннее состояние
+				effectiveComponentId,
+				1,
 				deviceState.currentFiberResult
 			);
 
-			// Запоминаем, что обработали этот результат
 			lastProcessedResultRef.current = {
-				componentId,
+				componentId: effectiveComponentId,
 				timestamp: resultTimestamp
 			};
 		}
@@ -216,26 +248,21 @@ export function LabWork() {
 		deviceState.screen,
 		deviceState.currentFiberResult,
 		selectedComponent,
-		addDeviceMeasurement
+		addDeviceMeasurement,
+		effectiveComponentId,
+		currentSplitterOutput
 	]);
 
-	// Вывод предупреждения при попытке начать следующее измерение без ввода данных текущего
 	const canStartNextMeasurement = useMemo(() => {
-		if (!selectedComponent) return false;
-
-		const table = resultsTableState.tables[selectedComponent.id];
-		if (!table) return true; // Первое измерение всегда доступно
-
-		// Проверяем, можно ли начать следующее измерение
-		// (все данные текущего измерения введены)
-		return canProceedToNextMeasurement(selectedComponent.id);
+		const table = resultsTableState.tables[effectiveComponentId];
+		if (!table) return true;
+		return canProceedToNextMeasurement(effectiveComponentId);
 	}, [
-		selectedComponent,
+		effectiveComponentId,
 		resultsTableState.tables,
 		canProceedToNextMeasurement
 	]);
 
-	// Обработчик ввода значений
 	const handleValueChange = useCallback(
 		(
 			componentId: string,
@@ -255,7 +282,6 @@ export function LabWork() {
 		[enterStudentValue]
 	);
 
-	// Переключение между этапами
 	const handleStageChange = (stage: LabStage) => {
 		setCurrentStage(stage);
 	};
@@ -263,7 +289,6 @@ export function LabWork() {
 	return (
 		<div className="h-full overflow-auto bg-gray-50">
 			<div className="mx-auto py-6 space-y-6">
-				{/* Заголовок */}
 				<div className="bg-white rounded-lg shadow-md p-6">
 					<h1 className="text-3xl font-bold text-gray-900">
 						Выполнение лабораторной работы
@@ -273,9 +298,8 @@ export function LabWork() {
 					</p>
 				</div>
 
-				{/* Навигация по этапам */}
 				<div className="bg-white rounded-lg shadow-md p-4">
-					<div className="flex gap-2 overflow-x-auto">
+					<div className="flex gap-2 overflow-x-auto items-center">
 						<StageButton
 							stage="INTRODUCTION"
 							label="Введение"
@@ -300,13 +324,26 @@ export function LabWork() {
 							active={currentStage === 'RESULTS_ANALYSIS'}
 							onClick={() => handleStageChange('RESULTS_ANALYSIS')}
 						/>
+						{import.meta.env.DEV &&
+							!deviceState.preparation.isReadyForMeasurements && (
+								<button
+									type="button"
+									className="ml-auto shrink-0 text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2"
+									onClick={() => {
+										if (deviceDispatchRef.current) {
+											deviceDispatchRef.current({ type: 'SKIP_PREPARATION' });
+										}
+										handleStageChange('CONNECTION_SCHEME');
+									}}
+								>
+									Пропустить подготовку
+								</button>
+							)}
 					</div>
 				</div>
 
-				{/* Вкладка введения — без прибора, на всю ширину */}
 				{currentStage === 'INTRODUCTION' && <IntroductionStage />}
 
-				{/* Содержимое этапа — прибор всегда в DOM, чтобы не сбрасывалось состояние */}
 				<div
 					className={
 						currentStage === 'INTRODUCTION'
@@ -314,7 +351,6 @@ export function LabWork() {
 							: 'flex flex-wrap xl:flex-nowrap gap-6'
 					}
 				>
-					{/* Левая колонка: Прибор */}
 					<div className="w-full xl:w-auto">
 						<Device
 							onDeviceStateChange={setDeviceState}
@@ -326,7 +362,6 @@ export function LabWork() {
 						/>
 					</div>
 
-					{/* Правая колонка: Контент этапа */}
 					<div className="space-y-6 grow min-w-0">
 						{currentStage === 'PREPARATION' && (
 							<PreparationStage
@@ -349,6 +384,7 @@ export function LabWork() {
 									scheme={connectionScheme}
 									currentComponent={selectedComponent}
 									onSchemeChange={setConnectionScheme}
+									measuredSplitterOutputs={measuredSplitterOutputs}
 								/>
 							</>
 						)}
@@ -356,7 +392,7 @@ export function LabWork() {
 						{currentStage === 'RESULTS_ANALYSIS' && (
 							<ResultsStage
 								resultsTableState={resultsTableState}
-								selectedComponentId={selectedComponent.id}
+								selectedComponent={selectedComponent}
 								onValueChange={handleValueChange}
 								isCellEditable={(
 									componentId,
@@ -374,7 +410,6 @@ export function LabWork() {
 							/>
 						)}
 
-						{/* Инструкции по текущему этапу */}
 						{currentStage !== 'PREPARATION' && (
 							<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
 								<h3 className="font-semibold text-blue-900 mb-2">

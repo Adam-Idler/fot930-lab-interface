@@ -3,15 +3,23 @@
  * Позволяет студенту вводить результаты измерений и валидирует их
  */
 
-import type { ResultsTableState, Wavelength } from '../../../../types/fot930';
+import {
+	getSplitterOutputCount,
+	isSplitterType
+} from '../../../../lib/fot930/splitter';
+import type {
+	PassiveComponent,
+	ResultsTableState,
+	Wavelength
+} from '../../../../types/fot930';
 import { InteractiveMeasurementTable } from './InteractiveMeasurementTable';
 
 interface ResultsStageProps {
 	/** Состояние таблиц результатов */
 	resultsTableState: ResultsTableState;
 
-	/** ID текущего выбранного компонента */
-	selectedComponentId: string;
+	/** Выбранный компонент */
+	selectedComponent: PassiveComponent;
 
 	/** Callback при изменении значения */
 	onValueChange: (
@@ -33,21 +41,40 @@ interface ResultsStageProps {
 
 export function ResultsStage({
 	resultsTableState,
-	selectedComponentId,
+	selectedComponent,
 	onValueChange,
 	isCellEditable
 }: ResultsStageProps) {
 	const { tables, pendingInputComponentId } = resultsTableState;
 
-	// Показываем только таблицу для текущего выбранного компонента
-	const currentTable = tables[selectedComponentId];
+	const isSplitter = isSplitterType(selectedComponent.type);
+	const splitterOutputCount = isSplitter
+		? getSplitterOutputCount(selectedComponent.type)
+		: 0;
+
 	const pendingTable = pendingInputComponentId
 		? tables[pendingInputComponentId]
 		: null;
 
+	// Для обычных компонентов — одна таблица, для сплиттеров — по одной на каждый выход
+	const tablesToShow = isSplitter
+		? Array.from({ length: splitterOutputCount }, (_, i) => ({
+				key: `${selectedComponent.id}_output_${i + 1}`,
+				outputNum: i + 1,
+				table: tables[`${selectedComponent.id}_output_${i + 1}`] ?? null
+			}))
+		: [
+				{
+					key: selectedComponent.id,
+					outputNum: null,
+					table: tables[selectedComponent.id] ?? null
+				}
+			];
+
+	const hasAnyTable = tablesToShow.some((t) => t.table !== null);
+
 	return (
 		<div className="space-y-6">
-			{/* Заголовок */}
 			<div className="bg-white rounded-lg shadow-md p-6">
 				<h2 className="text-xl font-semibold mb-4">
 					Этап 5. Ведение таблицы результатов и анализ
@@ -58,7 +85,6 @@ export function ResultsStage({
 				</p>
 			</div>
 
-			{/* Уведомление о необходимости ввода */}
 			{pendingTable && (
 				<div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg shadow-md animate-pulse">
 					<div className="flex items-start gap-3">
@@ -76,33 +102,57 @@ export function ResultsStage({
 				</div>
 			)}
 
-			{/* Таблица результатов текущего компонента */}
-			{currentTable && (
-				<InteractiveMeasurementTable
-					key={currentTable.componentId}
-					table={currentTable}
-					onValueChange={(wavelength, field, measurementIndex, value) =>
-						onValueChange(
-							currentTable.componentId,
-							wavelength,
-							field,
-							measurementIndex,
-							value
-						)
-					}
-					isCellEditable={(wavelength, field, measurementIndex) =>
-						isCellEditable(
-							currentTable.componentId,
-							wavelength,
-							field,
-							measurementIndex
-						)
-					}
-				/>
-			)}
+			{/* Таблицы результатов */}
+			{hasAnyTable ? (
+				<div className="space-y-4">
+					{tablesToShow.map(({ key, outputNum, table }) => (
+						<div key={key}>
+							{isSplitter && (
+								<div className="flex items-center gap-2 mb-2">
+									<span
+										className={`text-sm font-semibold px-2 py-0.5 rounded ${
+											table?.isCompleted
+												? 'bg-green-100 text-green-800'
+												: 'bg-gray-100 text-gray-700'
+										}`}
+									>
+										Выход {outputNum} из {splitterOutputCount}
+										{table?.isCompleted ? ' ✓' : ''}
+									</span>
+								</div>
+							)}
 
-			{/* Пустое состояние */}
-			{!currentTable && (
+							{table ? (
+								<InteractiveMeasurementTable
+									key={table.componentId}
+									table={table}
+									onValueChange={(wavelength, field, measurementIndex, value) =>
+										onValueChange(
+											table.componentId,
+											wavelength,
+											field,
+											measurementIndex,
+											value
+										)
+									}
+									isCellEditable={(wavelength, field, measurementIndex) =>
+										isCellEditable(
+											table.componentId,
+											wavelength,
+											field,
+											measurementIndex
+										)
+									}
+								/>
+							) : (
+								<div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-500">
+									Измерение для этого выхода ещё не выполнено
+								</div>
+							)}
+						</div>
+					))}
+				</div>
+			) : (
 				<div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
 					<div className="text-blue-600 text-4xl mb-3">📊</div>
 					<p className="text-blue-900 font-medium text-lg mb-2">
@@ -115,8 +165,7 @@ export function ResultsStage({
 				</div>
 			)}
 
-			{/* Информация */}
-			{currentTable && (
+			{hasAnyTable && (
 				<div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
 					<h3 className="font-semibold text-gray-900 mb-2">ℹ️ Информация</h3>
 					<ul className="text-sm marker:• text-gray-700 space-y-1">

@@ -207,6 +207,28 @@ function innerDeviceReducer(
 				footerPageIndex: action.payload
 			};
 
+		case 'SKIP_PREPARATION':
+			return {
+				...initialDeviceState,
+				screen: 'FASTEST_MAIN',
+				isPoweredOn: true,
+				preparation: {
+					portStatus: 'clean',
+					fastestSettings: {
+						portType: 'SM',
+						lengthUnit: 'm',
+						lossWavelengths: [1310, 1550],
+						isConfigured: true
+					},
+					referenceResults: [
+						{ wavelength: 1310, value: -7.2, timestamp: 0 },
+						{ wavelength: 1550, value: -7.5, timestamp: 0 }
+					],
+					referenceType: 'LOOPBACK',
+					isReadyForMeasurements: true
+				}
+			};
+
 		default:
 			return state;
 	}
