@@ -20,18 +20,18 @@ function getConnector(
 	if (connectorType === 'SC_APC') {
 		return {
 			type: 'CONNECTOR' as const,
-			icon: '/images/scheme/sc-apc.png',
+			icon: '/images/scheme/reference-sc-apc.png',
 			id: `connector_apc_${index}`,
-			label: `SC/APC ${index}`,
+			label: `Эталонный SC/APC ${index}`,
 			connectorType: 'SC_APC' as const
 		};
 	}
 
 	return {
 		type: 'CONNECTOR' as const,
-		icon: '/images/scheme/sc-upc.png',
+		icon: '/images/scheme/reference-sc-upc.png',
 		id: `connector_upc_${index}`,
-		label: `SC/UPC ${index}`,
+		label: `Эталонный SC/UPC ${index}`,
 		connectorType: 'SC_UPC' as const
 	};
 }

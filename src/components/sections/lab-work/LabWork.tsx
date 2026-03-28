@@ -36,48 +36,66 @@ import {
 const availableComponents: PassiveComponent[] = [
 	{
 		id: 'optical_cable_1',
-		icon: '/images/icons/coil.png',
+		icon: '/images/scheme/sc-apc-g-652.png',
 		type: 'OPTICAL_CABLE',
-		label: 'Оптический шнур 1',
+		label: 'Оптический шнур simplex SC/APC G.652 (2 м)',
 		typicalLoss: COMPONENT_LOSS_DB.OPTICAL_CABLE,
 		connectorType: 'SC_APC',
 		fiberLength: 2
 	},
 	{
-		id: 'fiber_coil_1',
-		icon: '/images/icons/cable-reel.png',
-		type: 'FIBER_COIL',
-		label: 'Катушка ОВ (500м)',
-		typicalLoss: COMPONENT_LOSS_DB.FIBER_COIL,
+		id: 'optical_cable_2',
+		icon: '/images/scheme/sc-upc-g-657.png',
+		type: 'OPTICAL_CABLE',
+		label: 'Оптический шнур simplex SC/UPC G.657 (3 м)',
+		typicalLoss: COMPONENT_LOSS_DB.OPTICAL_CABLE,
 		connectorType: 'SC_UPC',
-		fiberLength: 500
+		fiberLength: 3
+	},
+	{
+		id: 'fiber_coil_1',
+		icon: '/images/scheme/optic-fiber-coil.png',
+		type: 'FIBER_COIL',
+		label: 'Оптический кабель ОКСН-48хG.652D-10кН (2 км)',
+		typicalLoss: COMPONENT_LOSS_DB.FIBER_COIL,
+		connectorType: 'SC_APC',
+		fiberLength: 2000
+	},
+	{
+		id: 'fiber_coil_2',
+		icon: '/images/scheme/optic-fiber-coil.png',
+		type: 'FIBER_COIL',
+		label: 'Оптический кабель ОКСН-24хG.652D-10кН (10 км)',
+		typicalLoss: COMPONENT_LOSS_DB.FIBER_COIL,
+		connectorType: 'SC_APC',
+		fiberLength: 10000
 	},
 	{
 		id: 'splitter_1_2',
-		icon: '/images/icons/splitter.png',
+		icon: '/images/scheme/splitter-1-2.png',
 		type: 'SPLITTER_1_2',
-		label: 'Сплиттер 1:2',
+		label: 'Сплиттер 1:2 SC/APC',
 		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_2,
 		connectorType: 'SC_APC',
-		fiberLength: 1
+		fiberLength: 2
 	},
 	{
 		id: 'splitter_1_4',
-		icon: '/images/icons/splitter.png',
+		icon: '/images/scheme/splitter-1-4.png',
 		type: 'SPLITTER_1_4',
-		label: 'Сплиттер 1:4',
+		label: 'Сплиттер 1:4 SC/APC',
 		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_4,
 		connectorType: 'SC_APC',
-		fiberLength: 1
+		fiberLength: 2
 	},
 	{
-		id: 'splitter_1_8',
-		icon: '/images/icons/splitter.png',
-		type: 'SPLITTER_1_8',
-		label: 'Сплиттер 1:8',
-		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_8,
+		id: 'splitter_1_16',
+		icon: '/images/scheme/splitter-sc-upc-1-16.png',
+		type: 'SPLITTER_1_16',
+		label: 'Сплиттер 1:16 SC/UPC',
+		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_16,
 		connectorType: 'SC_UPC',
-		fiberLength: 2
+		fiberLength: 3
 	}
 ];
 
@@ -309,7 +327,7 @@ export function LabWork() {
 					</div>
 
 					{/* Правая колонка: Контент этапа */}
-					<div className="space-y-6 grow">
+					<div className="space-y-6 grow min-w-0">
 						{currentStage === 'PREPARATION' && (
 							<PreparationStage
 								deviceState={deviceState}
