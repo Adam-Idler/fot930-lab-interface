@@ -12,6 +12,7 @@ import type {
 	PortStatus,
 	Wavelength
 } from '../../types/fot930';
+import { getSplitterOutputCount, isSplitterType } from './splitter';
 
 /**
  * Базовые параметры для генерации измерений
@@ -224,6 +225,135 @@ export function validateConnectionScheme(scheme: ConnectionScheme): {
 	}
 
 	return { valid: true };
+}
+
+/**
+ * Вычисляет детерминированное смещение потерь для конкретного выхода сплиттера.
+ * Имитирует физическую неравномерность деления мощности между выходами.
+ * Диапазон: ±(N-1)/2 * 0.15 dB, где N — число выходов.
+ */
+function getSplitterOutputOffset(
+	outputIndex: number,
+	totalOutputs: number
+): number {
+	const center = (totalOutputs + 1) / 2;
+	return (outputIndex - center) * 0.15;
+}
+
+/**
+ * Вычисляет суммарные потери комплексной цепи компонентов для одной длины волны.
+ * Для сплиттера добавляет детерминированное смещение по номеру выхода.
+ */
+function calculateComplexChainLoss(
+	chainComponents: PassiveComponent[],
+	wavelength: Wavelength,
+	splitterOutput: number
+): { value: number } | { error: string } {
+	let totalLoss = 0;
+
+	for (const component of chainComponents) {
+		const baseLoss = COMPONENT_LOSS_DB[component.type]?.[wavelength] ?? 1.0;
+		const variation = gaussianRandom() * MEASUREMENT_CONFIG.MEASUREMENT_STD_DEV;
+		let componentLoss = baseLoss + variation;
+
+		if (isSplitterType(component.type)) {
+			const outputCount = getSplitterOutputCount(component.type);
+			componentLoss += getSplitterOutputOffset(splitterOutput, outputCount);
+		}
+
+		totalLoss += componentLoss;
+	}
+
+	// Два коннектора на концах цепи
+	totalLoss += MEASUREMENT_CONFIG.CONNECTOR_LOSS * 2;
+
+	if (totalLoss > MEASUREMENT_CONFIG.MAX_MEASURABLE_LOSS) {
+		return { error: 'Loss exceeds measurement range' };
+	}
+
+	return { value: parseFloat(totalLoss.toFixed(2)) };
+}
+
+/**
+ * Генерирует двунаправленное FASTEST измерение для комплексной схемы
+ * (несколько компонентов в цепи).
+ *
+ * Суммирует потери всех компонентов в цепи. Для сплиттера добавляет
+ * детерминированное смещение по номеру выхода, имитируя физическую
+ * неравномерность реального сплиттера (±0.5 dB для 1:8).
+ *
+ * @param chainComponents - Компоненты цепи в порядке подключения
+ * @param wavelengths - Длины волн для измерения
+ * @param fiberCounter - Счётчик волокна (для имени BCFiberNNN)
+ * @param splitterOutput - Номер выхода сплиттера (1-based)
+ * @param previousResult - Предыдущий результат этого выхода (для стабильности повторных измерений)
+ */
+export function generateComplexFiberMeasurement(
+	chainComponents: PassiveComponent[],
+	wavelengths: Wavelength[],
+	fiberCounter: number,
+	splitterOutput: number,
+	previousResult?: FiberMeasurementResult
+): FiberMeasurementResult | { error: string } {
+	const bidirectionalResults: BidirectionalMeasurementResult[] = [];
+
+	for (const wavelength of wavelengths) {
+		if (previousResult) {
+			const prevWavelengthResult = previousResult.wavelengths.find(
+				(w) => w.wavelength === wavelength
+			);
+
+			if (prevWavelengthResult) {
+				// Повторное измерение того же выхода: минимальная вариация для стабильности
+				const minimalVariation = gaussianRandom() * 0.015;
+				const aToB = prevWavelengthResult.aToB + minimalVariation;
+				const bToA = prevWavelengthResult.bToA + minimalVariation;
+				const average = (aToB + bToA) / 2;
+
+				bidirectionalResults.push({
+					wavelength,
+					aToB: parseFloat(aToB.toFixed(2)),
+					bToA: parseFloat(bToA.toFixed(2)),
+					average: parseFloat(average.toFixed(2))
+				});
+				continue;
+			}
+		}
+
+		// Первое измерение данного выхода: генерируем с учётом цепи
+		const lossResult = calculateComplexChainLoss(
+			chainComponents,
+			wavelength,
+			splitterOutput
+		);
+		if ('error' in lossResult) return lossResult;
+
+		const aToB = lossResult.value;
+		const asymmetry = gaussianRandom() * 0.15;
+		const bToA = parseFloat((aToB + asymmetry).toFixed(2));
+		const average = parseFloat(((aToB + bToA) / 2).toFixed(2));
+
+		bidirectionalResults.push({ wavelength, aToB, bToA, average });
+	}
+
+	const splitterComponent = chainComponents.find((c) => isSplitterType(c.type));
+	const totalLength = chainComponents.reduce(
+		(sum, c) => sum + c.fiberLength,
+		0
+	);
+	const fiberNumber = fiberCounter.toString().padStart(3, '0');
+
+	return {
+		fiberName: `BCFiber${fiberNumber}`,
+		cableName: 'BigCable',
+		componentId: splitterComponent?.id ?? chainComponents[0].id,
+		componentLabel: splitterComponent
+			? `${splitterComponent.label} (Выход ${splitterOutput})`
+			: chainComponents[0].label,
+		fiberLength: totalLength,
+		wavelengths: bidirectionalResults,
+		timestamp: Date.now()
+	};
 }
 
 /**

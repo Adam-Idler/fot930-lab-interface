@@ -35,8 +35,12 @@ import {
 	ResultsStage,
 	StageButton
 } from './components';
+import type { ComplexScenario } from './components/PassiveMeasurementsStage';
 
-// Доступные компоненты для измерений
+// ============================================================
+// КОМПОНЕНТЫ ДЛЯ ОДИНОЧНЫХ ИЗМЕРЕНИЙ
+// ============================================================
+
 const availableComponents: PassiveComponent[] = [
 	{
 		id: 'optical_cable_1',
@@ -103,11 +107,58 @@ const availableComponents: PassiveComponent[] = [
 	}
 ];
 
+// ============================================================
+// КОМПОНЕНТЫ ДЛЯ КОМПЛЕКСНОГО СЦЕНАРИЯ
+// ============================================================
+
+const SCENARIO_MAGISTRAL: PassiveComponent = {
+	id: 'scenario_magistral_10km',
+	icon: '/images/scheme/optic-fiber-coil.png',
+	type: 'FIBER_COIL',
+	label: 'Магистральный кабель ОКСН-G.652D (10 км)',
+	typicalLoss: COMPONENT_LOSS_DB.FIBER_COIL,
+	connectorType: 'SC_APC',
+	fiberLength: 10000
+};
+
+const SCENARIO_SPLITTER: PassiveComponent = {
+	id: 'scenario_splitter_1_8',
+	icon: '/images/scheme/splitter-sc-upc-1-8.png',
+	type: 'SPLITTER_1_8',
+	label: 'Сплиттер 1:8 SC/APC (распределительный)',
+	typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_8,
+	connectorType: 'SC_APC',
+	fiberLength: 2
+};
+
+const SCENARIO_SUBSCRIBER: PassiveComponent = {
+	id: 'scenario_subscriber_2km',
+	icon: '/images/scheme/optic-fiber-coil.png',
+	type: 'FIBER_COIL',
+	label: 'Абонентский кабель ОККС-G.652D (2 км)',
+	typicalLoss: COMPONENT_LOSS_DB.FIBER_COIL,
+	connectorType: 'SC_APC',
+	fiberLength: 2000
+};
+
+const PROVIDER_SCENARIO: ComplexScenario = {
+	id: 'provider_scenario',
+	label: 'Комбинация элементов',
+	description:
+		'Магистральный кабель (10 км) → Сплиттер 1:8 → Абонентский кабель (2 км)',
+	chain: [SCENARIO_MAGISTRAL, SCENARIO_SPLITTER, SCENARIO_SUBSCRIBER]
+};
+
+const complexScenarios: ComplexScenario[] = [PROVIDER_SCENARIO];
+
 // TODO: Добавить завершение лабораторной работы после всех измерений
 export function LabWork() {
 	const [currentStage, setCurrentStage] = useState<LabStage>('INTRODUCTION');
 	const [selectedComponent, setSelectedComponent] = useState<PassiveComponent>(
 		availableComponents[0]
+	);
+	const [activeScenario, setActiveScenario] = useState<ComplexScenario | null>(
+		null
 	);
 	const [connectionScheme, setConnectionScheme] = useState<ConnectionScheme>({
 		sequence: [],
@@ -136,22 +187,40 @@ export function LabWork() {
 		canProceedToNextMeasurement
 	} = useResultsTable();
 
+	// Обновляем correctSequence при смене компонента или сценария
 	useEffect(() => {
-		setConnectionScheme((prev) => ({
-			...prev,
-			correctSequence: [
-				'tester',
-				selectedComponent.connectorType === 'SC_APC'
-					? 'connector_apc_1'
-					: 'connector_upc_1',
-				selectedComponent.id,
-				selectedComponent.connectorType === 'SC_APC'
-					? 'connector_apc_2'
-					: 'connector_upc_2',
-				'tester_2'
-			]
-		}));
-	}, [selectedComponent]);
+		if (activeScenario) {
+			// Комплексный сценарий: все компоненты цепи в схеме
+			setConnectionScheme((prev) => ({
+				...prev,
+				sequence: [],
+				correctSequence: [
+					'tester',
+					'connector_apc_1',
+					...activeScenario.chain.map((c) => c.id),
+					'connector_apc_2',
+					'tester_2'
+				]
+			}));
+		} else {
+			// Одиночный компонент
+			setConnectionScheme((prev) => ({
+				...prev,
+				sequence: [],
+				correctSequence: [
+					'tester',
+					selectedComponent.connectorType === 'SC_APC'
+						? 'connector_apc_1'
+						: 'connector_upc_1',
+					selectedComponent.id,
+					selectedComponent.connectorType === 'SC_APC'
+						? 'connector_apc_2'
+						: 'connector_upc_2',
+					'tester_2'
+				]
+			}));
+		}
+	}, [selectedComponent, activeScenario]);
 
 	const deviceDispatchRef = useRef<Dispatch<DeviceAction> | null>(null);
 
@@ -210,14 +279,21 @@ export function LabWork() {
 				return;
 			}
 
-			// Для сплиттеров — создаём "виртуальный" компонент под конкретный выход
+			// Для сплиттеров — создаём «виртуальный» компонент под конкретный выход.
+			// При комплексном сценарии используем суммарную длину цепи, чтобы
+			// таблица отображала колонку километрического затухания.
 			const tableComponent: PassiveComponent = isSplitterType(
 				selectedComponent.type
 			)
 				? {
 						...selectedComponent,
 						id: effectiveComponentId,
-						label: `${selectedComponent.label} (Выход ${currentSplitterOutput})`
+						fiberLength: activeScenario
+							? activeScenario.chain.reduce((sum, c) => sum + c.fiberLength, 0)
+							: selectedComponent.fiberLength,
+						label: activeScenario
+							? `${activeScenario.label} — вых. ${currentSplitterOutput} (${activeScenario.description})`
+							: `${selectedComponent.label} (Выход ${currentSplitterOutput})`
 					}
 				: selectedComponent;
 
@@ -250,7 +326,8 @@ export function LabWork() {
 		selectedComponent,
 		addDeviceMeasurement,
 		effectiveComponentId,
-		currentSplitterOutput
+		currentSplitterOutput,
+		activeScenario
 	]);
 
 	const canStartNextMeasurement = useMemo(() => {
@@ -281,6 +358,18 @@ export function LabWork() {
 		},
 		[enterStudentValue]
 	);
+
+	const handleSelectComponent = useCallback((component: PassiveComponent) => {
+		setSelectedComponent(component);
+		setActiveScenario(null);
+	}, []);
+
+	const handleSelectScenario = useCallback((scenario: ComplexScenario) => {
+		setActiveScenario(scenario);
+		// selectedComponent становится сплиттером сценария для отслеживания выходов
+		const splitter = scenario.chain.find((c) => isSplitterType(c.type));
+		if (splitter) setSelectedComponent(splitter);
+	}, []);
 
 	const handleStageChange = (stage: LabStage) => {
 		setCurrentStage(stage);
@@ -359,6 +448,9 @@ export function LabWork() {
 							}}
 							selectedComponent={selectedComponent}
 							connectionScheme={connectionScheme}
+							chainComponents={activeScenario?.chain}
+							measurementHistoryKey={effectiveComponentId}
+							splitterOutput={currentSplitterOutput}
 						/>
 					</div>
 
@@ -375,9 +467,12 @@ export function LabWork() {
 								<PassiveMeasurementsStage
 									components={availableComponents}
 									selectedComponent={selectedComponent}
+									activeScenario={activeScenario}
+									complexScenarios={complexScenarios}
 									resultsTableState={resultsTableState}
 									canStartNextMeasurement={canStartNextMeasurement}
-									onSelectComponent={setSelectedComponent}
+									onSelectComponent={handleSelectComponent}
+									onSelectScenario={handleSelectScenario}
 								/>
 
 								<ConnectionSchemeStage
@@ -385,6 +480,7 @@ export function LabWork() {
 									currentComponent={selectedComponent}
 									onSchemeChange={setConnectionScheme}
 									measuredSplitterOutputs={measuredSplitterOutputs}
+									scenarioChain={activeScenario?.chain}
 								/>
 							</>
 						)}
@@ -447,7 +543,7 @@ function getStageInstructions(stage: LabStage): string {
 		INTRODUCTION: '',
 		PREPARATION: '',
 		CONNECTION_SCHEME:
-			'Выберите компонент для измерения и соберите правильную схему подключения, перетаскивая элементы мышью. Проверьте корректность последовательности перед измерениями. Выполните 3 измерения для каждого компонента.',
+			'Выберите компонент или комплексную схему для измерения. Соберите схему подключения, перетаскивая элементы мышью. Для сплиттеров выполните измерение каждого выхода — нажимайте на точки элемента в схеме для переключения выходов.',
 		COMPLEX_SCHEMES:
 			'Выполните измерения для сложных схем с последовательным соединением нескольких компонентов.',
 		RESULTS_ANALYSIS:

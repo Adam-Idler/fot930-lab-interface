@@ -17,6 +17,11 @@ interface ConnectionSchemeStageProps {
 	onSchemeChange: (scheme: ConnectionScheme) => void;
 	/** Номера выходов сплиттера, по которым измерение завершено */
 	measuredSplitterOutputs?: number[];
+	/**
+	 * Цепочка компонентов для комплексного сценария.
+	 * Если задана — схема строится для всей цепи вместо одиночного currentComponent.
+	 */
+	scenarioChain?: PassiveComponent[];
 }
 
 function getConnector(
@@ -46,49 +51,99 @@ export function ConnectionSchemeStage({
 	scheme,
 	currentComponent,
 	onSchemeChange,
-	measuredSplitterOutputs = []
+	measuredSplitterOutputs = [],
+	scenarioChain
 }: ConnectionSchemeStageProps) {
-	const isSplitter = isSplitterType(currentComponent.type);
+	const isScenario = scenarioChain && scenarioChain.length > 0;
+
+	// Для сплиттера в одиночном режиме
+	const isSplitter = !isScenario && isSplitterType(currentComponent.type);
 	const splitterOutputCount = isSplitter
 		? getSplitterOutputCount(currentComponent.type)
 		: 0;
 
-	const baseElements = [
-		{
-			type: 'TESTER' as const,
-			id: 'tester',
-			label: 'Тестер FOT-930 (Блок А)',
-			icon: '/images/instruction/fot-930.png'
-		},
-		getConnector(currentComponent.connectorType, 1),
-		getConnector(currentComponent.connectorType, 2),
-		{
-			type: 'COMPONENT' as const,
-			id: currentComponent.id,
-			label: currentComponent.label,
-			icon: currentComponent.icon,
-			componentType: currentComponent.type,
-			splitterOutput: isSplitter ? 1 : undefined
-		},
-		{
-			type: 'TESTER' as const,
-			id: 'tester_2',
-			label: 'Тестер FOT-930 (Блок Б)',
-			icon: '/images/instruction/fot-930.png'
-		}
-	];
+	// Для сплиттера в цепи (сценарий)
+	const scenarioSplitter = isScenario
+		? scenarioChain.find((c) => isSplitterType(c.type))
+		: null;
+	const scenarioSplitterOutputCount = scenarioSplitter
+		? getSplitterOutputCount(scenarioSplitter.type)
+		: 0;
+
+	// Определяем тип коннектора для концов схемы
+	const endConnectorType = isScenario
+		? (scenarioChain[0]?.connectorType ?? 'SC_APC')
+		: currentComponent.connectorType;
+
+	const baseElements: ConnectionElement[] = isScenario
+		? [
+				{
+					type: 'TESTER' as const,
+					id: 'tester',
+					label: 'Тестер FOT-930 (Блок А)',
+					icon: '/images/instruction/fot-930.png'
+				},
+				getConnector(endConnectorType, 1),
+				...scenarioChain.map((c) => ({
+					type: 'COMPONENT' as const,
+					id: c.id,
+					label: c.label,
+					icon: c.icon,
+					componentType: c.type,
+					splitterOutput: isSplitterType(c.type) ? 1 : undefined
+				})),
+				getConnector(endConnectorType, 2),
+				{
+					type: 'TESTER' as const,
+					id: 'tester_2',
+					label: 'Тестер FOT-930 (Блок Б)',
+					icon: '/images/instruction/fot-930.png'
+				}
+			]
+		: [
+				{
+					type: 'TESTER' as const,
+					id: 'tester',
+					label: 'Тестер FOT-930 (Блок А)',
+					icon: '/images/instruction/fot-930.png'
+				},
+				getConnector(currentComponent.connectorType, 1),
+				getConnector(currentComponent.connectorType, 2),
+				{
+					type: 'COMPONENT' as const,
+					id: currentComponent.id,
+					label: currentComponent.label,
+					icon: currentComponent.icon,
+					componentType: currentComponent.type,
+					splitterOutput: isSplitter ? 1 : undefined
+				},
+				{
+					type: 'TESTER' as const,
+					id: 'tester_2',
+					label: 'Тестер FOT-930 (Блок Б)',
+					icon: '/images/instruction/fot-930.png'
+				}
+			];
 
 	const [availableElements, setAvailableElements] = useState(() =>
 		shuffleArray(baseElements)
 	);
 
-	// Перемешивать элементы при изменении currentComponent
+	// Перемешивать элементы при изменении currentComponent или scenarioChain
 	// biome-ignore lint/correctness/useExhaustiveDependencies(currentComponent): При его изменении необходимо запускать перемешивание
+	// biome-ignore lint/correctness/useExhaustiveDependencies(scenarioChain): При его изменении необходимо запускать перемешивание
 	// biome-ignore lint/correctness/useExhaustiveDependencies(baseElements): Будет вызывать постоянный ререндер
 	useEffect(() => {
 		setAvailableElements(shuffleArray(baseElements));
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [currentComponent]);
+	}, [currentComponent, scenarioChain]);
+
+	// Сплиттер, для которого показываем elementMeasuredOutputs
+	const splitterForOutputs = isScenario ? scenarioSplitter : currentComponent;
+	const hasSplitter = isScenario ? !!scenarioSplitter : isSplitter;
+	const splitterOutputCountForHint = isScenario
+		? scenarioSplitterOutputCount
+		: splitterOutputCount;
 
 	return (
 		<div className="bg-white rounded-lg shadow-md p-6">
@@ -96,14 +151,32 @@ export function ConnectionSchemeStage({
 				Этап 3. Сборка схемы подключения
 			</h2>
 
-			{/* Подсказка для сплиттера */}
-			{isSplitter && (
+			{/* Подсказка для сплиттера (одиночный режим) */}
+			{hasSplitter && !isScenario && (
 				<div className="mb-4 flex items-start gap-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
 					<span className="shrink-0 mt-0.5 text-gray-400">ℹ</span>
 					<span>
-						Для полного измерения сплиттера 1:{splitterOutputCount} необходимо
-						выполнить измерение каждого из {splitterOutputCount} выходов.
-						Выбирайте активный выход с помощью точек на элементе в схеме.
+						Для полного измерения сплиттера 1:{splitterOutputCountForHint}{' '}
+						необходимо выполнить измерение каждого из{' '}
+						{splitterOutputCountForHint} выходов. Выбирайте активный выход с
+						помощью точек на элементе в схеме.
+					</span>
+				</div>
+			)}
+
+			{/* Подсказка для комплексного сценария */}
+			{isScenario && (
+				<div className="mb-4 flex items-start gap-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
+					<span className="shrink-0 mt-0.5 text-gray-400">ℹ</span>
+					<span>
+						Соберите цепь из всех {scenarioChain.length} компонентов сценария.
+						{hasSplitter && (
+							<>
+								{' '}
+								Для сплиттера 1:{splitterOutputCountForHint} измерьте каждый из{' '}
+								{splitterOutputCountForHint} выходов.
+							</>
+						)}
 					</span>
 				</div>
 			)}
@@ -113,7 +186,9 @@ export function ConnectionSchemeStage({
 				onChange={onSchemeChange}
 				availableElements={availableElements}
 				elementMeasuredOutputs={
-					isSplitter ? { [currentComponent.id]: measuredSplitterOutputs } : {}
+					hasSplitter && splitterForOutputs
+						? { [splitterForOutputs.id]: measuredSplitterOutputs }
+						: {}
 				}
 			/>
 		</div>

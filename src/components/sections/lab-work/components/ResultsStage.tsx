@@ -94,8 +94,17 @@ export function ResultsStage({
 								Требуется ввод результатов
 							</p>
 							<p className="text-sm text-yellow-800 mt-1">
-								Внесите средние значения из прибора для компонента "
-								<strong>{pendingTable.componentLabel}</strong>" в таблицу ниже.
+								{pendingTable.componentLabel.startsWith(
+									'Комбинация элементов'
+								) ? (
+									'Внесите средние значения из прибора для комплексной схемы в таблицу ниже.'
+								) : (
+									<>
+										Внесите средние значения из прибора для компонента "
+										<strong>{pendingTable.componentLabel}</strong>" в таблицу
+										ниже.
+									</>
+								)}
 							</p>
 						</div>
 					</div>
@@ -179,7 +188,7 @@ export function ResultsStage({
 						</li>
 						<li>
 							• <strong>Км. затухание:</strong> Рассчитывается как Среднее /
-							(Длина в км), доступно только для волокон ≥500 м
+							(Длина в км), доступно только для волокон ≥1 км
 						</li>
 						<li>
 							•{' '}

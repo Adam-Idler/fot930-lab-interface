@@ -9,6 +9,7 @@ import {
 	initialDeviceState
 } from '../../lib/fot930/deviceReducer';
 import {
+	generateComplexFiberMeasurement,
 	generateFiberMeasurement,
 	generateReferenceMeasurement,
 	validateConnectionScheme
@@ -33,13 +34,22 @@ interface DeviceProps {
 	selectedComponent?: PassiveComponent | null;
 	/** Схема подключения для проверки перед измерениями */
 	connectionScheme?: ConnectionScheme | null;
+	/** Цепочка компонентов для комплексного сценария (если задана — используется вместо одиночного компонента) */
+	chainComponents?: PassiveComponent[];
+	/** Ключ истории измерений (переопределяет selectedComponent.id; нужен для per-output кеширования сплиттеров) */
+	measurementHistoryKey?: string;
+	/** Номер выхода сплиттера для комплексного измерения (1-based) */
+	splitterOutput?: number;
 }
 
 export function Device({
 	onDeviceStateChange,
 	onDispatchReady,
 	selectedComponent,
-	connectionScheme
+	connectionScheme,
+	chainComponents,
+	measurementHistoryKey,
+	splitterOutput
 }: DeviceProps) {
 	const [state, dispatch] = useReducer(deviceReducer, initialDeviceState);
 
@@ -108,42 +118,46 @@ export function Device({
 				if (connectionScheme) {
 					const validation = validateConnectionScheme(connectionScheme);
 					if (!validation.valid) {
-						// Показываем ошибку схемы и возвращаемся на главный экран
-						dispatch({
-							type: 'SET_CONNECTION_ERROR',
-							payload: true
-						});
+						dispatch({ type: 'SET_CONNECTION_ERROR', payload: true });
 						return;
 					}
 				} else {
-					// Если схема не задана, показываем ошибку
-					dispatch({
-						type: 'SET_CONNECTION_ERROR',
-						payload: true
-					});
+					dispatch({ type: 'SET_CONNECTION_ERROR', payload: true });
 					return;
 				}
-				// Проверяем, есть ли предыдущее измерение для этого компонента
-				const previousResult =
-					state.fiberMeasurementsHistory[selectedComponent.id];
 
-				// Генерируем двунаправленное измерение с кешированием
-				const result = generateFiberMeasurement(
-					selectedComponent,
-					state.preparation.fastestSettings.lossWavelengths,
-					state.fiberCounter,
-					previousResult
-				);
+				// Ключ для кеша истории: позволяет кешировать per-output для сплиттеров
+				const historyKey = measurementHistoryKey ?? selectedComponent.id;
+				const previousResult = state.fiberMeasurementsHistory[historyKey];
 
-				if ('error' in result) {
-					// Ошибка - возврат на FASTEST_MAIN
+				// Генерируем измерение: комплексное (цепочка) или одиночное
+				const rawResult =
+					chainComponents &&
+					chainComponents.length > 0 &&
+					splitterOutput != null
+						? generateComplexFiberMeasurement(
+								chainComponents,
+								state.preparation.fastestSettings.lossWavelengths,
+								state.fiberCounter,
+								splitterOutput,
+								previousResult
+							)
+						: generateFiberMeasurement(
+								selectedComponent,
+								state.preparation.fastestSettings.lossWavelengths,
+								state.fiberCounter,
+								previousResult
+							);
+
+				if ('error' in rawResult) {
 					dispatch({ type: 'PRESS_BACK' });
 					return;
 				}
 
+				// Перезаписываем componentId историческим ключом для правильного кеширования
 				dispatch({
 					type: 'COMPLETE_FIBER_MEASUREMENT',
-					payload: result
+					payload: { ...rawResult, componentId: historyKey }
 				});
 			};
 
@@ -157,7 +171,10 @@ export function Device({
 		selectedComponent,
 		state.fiberCounter,
 		state.fiberMeasurementsHistory,
-		connectionScheme
+		connectionScheme,
+		chainComponents,
+		measurementHistoryKey,
+		splitterOutput
 	]);
 
 	const handleButtonPress = (button: DeviceButtonType) => {
