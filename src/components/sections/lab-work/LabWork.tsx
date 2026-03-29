@@ -433,6 +433,7 @@ export function LabWork() {
 
 				{currentStage === 'INTRODUCTION' && <IntroductionStage />}
 
+				{/* Двухколоночный блок: прибор + контент этапа */}
 				<div
 					className={
 						currentStage === 'INTRODUCTION'
@@ -463,26 +464,16 @@ export function LabWork() {
 						)}
 
 						{currentStage === 'CONNECTION_SCHEME' && (
-							<>
-								<PassiveMeasurementsStage
-									components={availableComponents}
-									selectedComponent={selectedComponent}
-									activeScenario={activeScenario}
-									complexScenarios={complexScenarios}
-									resultsTableState={resultsTableState}
-									canStartNextMeasurement={canStartNextMeasurement}
-									onSelectComponent={handleSelectComponent}
-									onSelectScenario={handleSelectScenario}
-								/>
-
-								<ConnectionSchemeStage
-									scheme={connectionScheme}
-									currentComponent={selectedComponent}
-									onSchemeChange={setConnectionScheme}
-									measuredSplitterOutputs={measuredSplitterOutputs}
-									scenarioChain={activeScenario?.chain}
-								/>
-							</>
+							<PassiveMeasurementsStage
+								components={availableComponents}
+								selectedComponent={selectedComponent}
+								activeScenario={activeScenario}
+								complexScenarios={complexScenarios}
+								resultsTableState={resultsTableState}
+								canStartNextMeasurement={canStartNextMeasurement}
+								onSelectComponent={handleSelectComponent}
+								onSelectScenario={handleSelectScenario}
+							/>
 						)}
 
 						{currentStage === 'RESULTS_ANALYSIS' && (
@@ -518,6 +509,17 @@ export function LabWork() {
 						)}
 					</div>
 				</div>
+
+				{/* Сборка схемы — на всю ширину, под двухколоночным блоком */}
+				{currentStage === 'CONNECTION_SCHEME' && (
+					<ConnectionSchemeStage
+						scheme={connectionScheme}
+						currentComponent={selectedComponent}
+						onSchemeChange={setConnectionScheme}
+						measuredSplitterOutputs={measuredSplitterOutputs}
+						scenarioChain={activeScenario?.chain}
+					/>
+				)}
 			</div>
 		</div>
 	);
