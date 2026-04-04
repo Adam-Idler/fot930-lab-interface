@@ -519,6 +519,175 @@ export function TheoryContent() {
 					повреждений. Регулярно проводить поверку прибора в аккредитованной
 					метрологической лаборатории для гарантии точности измерений.
 				</p>
+
+				<h2 className={headingClassNames}>
+					7. Справочные таблицы типовых потерь
+				</h2>
+
+				<p className={paragraphClassNames}>
+					При анализе результатов измерений используйте приведённые ниже
+					справочные таблицы для оценки исправности компонентов. Если
+					измеренное значение потерь выходит за границы допустимого диапазона,
+					компонент требует проверки или замены.
+				</p>
+
+				<h3 className="mb-3 font-semibold">
+					Таблица 1. Оптическое волокно (одномодовое, G.652 / G.657)
+				</h3>
+				<table className="w-full mb-6 border-collapse text-sm table-fixed">
+					<colgroup>
+						<col className="w-2/3" />
+						<col className="w-1/3" />
+					</colgroup>
+					<thead>
+						<tr className="bg-sibguti-main text-white">
+							<th className="border border-gray-300 px-4 py-2 text-left">Длина волны</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">Затухание, дБ/км</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr className="bg-white">
+							<td className="border border-gray-300 px-4 py-2">1310 нм</td>
+							<td className="border border-gray-300 px-4 py-2">0.33 – 0.36</td>
+						</tr>
+						<tr className="bg-gray-50">
+							<td className="border border-gray-300 px-4 py-2">1490 нм</td>
+							<td className="border border-gray-300 px-4 py-2">0.22 – 0.26</td>
+						</tr>
+						<tr className="bg-white">
+							<td className="border border-gray-300 px-4 py-2">1550 нм</td>
+							<td className="border border-gray-300 px-4 py-2">0.18 – 0.22</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<h3 className="mb-3 font-semibold">
+					Таблица 2. Оптические шнуры (patchcord, 1–5 м)
+				</h3>
+				<table className="w-full mb-2 border-collapse text-sm table-fixed">
+					<colgroup>
+						<col className="w-2/3" />
+						<col className="w-1/3" />
+					</colgroup>
+					<thead>
+						<tr className="bg-sibguti-main text-white">
+							<th className="border border-gray-300 px-4 py-2 text-left">Тип соединения</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">Потери, дБ (на шнур)</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr className="bg-white">
+							<td className="border border-gray-300 px-4 py-2">SC/APC ↔ SC/APC</td>
+							<td className="border border-gray-300 px-4 py-2">0.10 – 0.25</td>
+						</tr>
+						<tr className="bg-gray-50">
+							<td className="border border-gray-300 px-4 py-2">SC/UPC ↔ SC/UPC</td>
+							<td className="border border-gray-300 px-4 py-2">0.10 – 0.30</td>
+						</tr>
+						<tr className="bg-white">
+							<td className="border border-gray-300 px-4 py-2">SC/APC ↔ SC/UPC</td>
+							<td className="border border-gray-300 px-4 py-2">0.30 – 0.50</td>
+						</tr>
+					</tbody>
+				</table>
+				<p className={clsx(paragraphClassNames, 'text-sm text-gray-600 italic')}>
+					Примечание: потери слабо зависят от длины волны, но могут незначительно
+					увеличиваться на 1310 нм.
+				</p>
+
+				<h3 className="mb-3 font-semibold">
+					Таблица 3. Оптические разъёмы (одно соединение)
+				</h3>
+				<table className="w-full mb-6 border-collapse text-sm table-fixed">
+					<colgroup>
+						<col className="w-2/3" />
+						<col className="w-1/3" />
+					</colgroup>
+					<thead>
+						<tr className="bg-sibguti-main text-white">
+							<th className="border border-gray-300 px-4 py-2 text-left">Тип соединения</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">Потери, дБ</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr className="bg-white">
+							<td className="border border-gray-300 px-4 py-2">Качественное соединение</td>
+							<td className="border border-gray-300 px-4 py-2">0.10 – 0.20</td>
+						</tr>
+						<tr className="bg-gray-50">
+							<td className="border border-gray-300 px-4 py-2">Допустимое (эксплуатационное)</td>
+							<td className="border border-gray-300 px-4 py-2">до 0.30</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<h3 className="mb-3 font-semibold">
+					Таблица 4. Оптические сплиттеры (PLC)
+				</h3>
+				<table className="w-full mb-2 border-collapse text-sm table-fixed">
+					<colgroup>
+						<col className="w-2/3" />
+						<col className="w-1/3" />
+					</colgroup>
+					<thead>
+						<tr className="bg-sibguti-main text-white">
+							<th className="border border-gray-300 px-4 py-2 text-left">Тип сплиттера</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">Потери, дБ (1310/1490/1550 нм)</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr className="bg-white">
+							<td className="border border-gray-300 px-4 py-2">1:2</td>
+							<td className="border border-gray-300 px-4 py-2">3.4 – 4.0</td>
+						</tr>
+						<tr className="bg-gray-50">
+							<td className="border border-gray-300 px-4 py-2">1:4</td>
+							<td className="border border-gray-300 px-4 py-2">7.0 – 7.5</td>
+						</tr>
+						<tr className="bg-white">
+							<td className="border border-gray-300 px-4 py-2">1:8</td>
+							<td className="border border-gray-300 px-4 py-2">10.5 – 11.0</td>
+						</tr>
+						<tr className="bg-gray-50">
+							<td className="border border-gray-300 px-4 py-2">1:16</td>
+							<td className="border border-gray-300 px-4 py-2">13.0 – 14.0</td>
+						</tr>
+					</tbody>
+				</table>
+				<p className={clsx(paragraphClassNames, 'text-sm text-gray-600 italic')}>
+					Примечание: потери примерно одинаковы для всех длин волн в диапазоне
+					1310–1550 нм.
+				</p>
+
+				<h3 className="mb-3 font-semibold">
+					Таблица 5. Дополнительные потери (рекомендуется учитывать)
+				</h3>
+				<table className="w-full mb-6 border-collapse text-sm table-fixed">
+					<colgroup>
+						<col className="w-2/3" />
+						<col className="w-1/3" />
+					</colgroup>
+					<thead>
+						<tr className="bg-sibguti-main text-white">
+							<th className="border border-gray-300 px-4 py-2 text-left">Источник</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">Потери, дБ</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr className="bg-white">
+							<td className="border border-gray-300 px-4 py-2">Загрязнение коннектора</td>
+							<td className="border border-gray-300 px-4 py-2">0.2 – 1.0+</td>
+						</tr>
+						<tr className="bg-gray-50">
+							<td className="border border-gray-300 px-4 py-2">Микроизгибы</td>
+							<td className="border border-gray-300 px-4 py-2">0.1 – 0.5</td>
+						</tr>
+						<tr className="bg-white">
+							<td className="border border-gray-300 px-4 py-2">Несовместимость (APC ↔ UPC)</td>
+							<td className="border border-gray-300 px-4 py-2">до 0.5</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
 	);

@@ -37,7 +37,11 @@ export function useResultsTable() {
 	 * Создает новую таблицу результатов для компонента после первого измерения
 	 */
 	const createTableForComponent = useCallback(
-		(component: PassiveComponent, wavelengths: Wavelength[]) => {
+		(
+			component: PassiveComponent,
+			wavelengths: Wavelength[],
+			isActuallyFaulty: boolean
+		) => {
 			setState((prev) => {
 				// Проверяем, не существует ли уже таблица для этого компонента
 				if (prev.tables[component.id]) {
@@ -59,7 +63,11 @@ export function useResultsTable() {
 					fiberLength: component.fiberLength,
 					rows,
 					currentMeasurementNumber: 1,
-					isCompleted: false
+					measurementsCompleted: false,
+					isCompleted: false,
+					isActuallyFaulty,
+					studentFaultyChoice: null,
+					faultyChoiceIsCorrect: null
 				};
 
 				return {
@@ -111,21 +119,18 @@ export function useResultsTable() {
 					: table.currentMeasurementNumber;
 
 				// Проверяем, не добавлено ли уже это измерение (дедупликация)
-				// Достаточно проверить, существует ли entry в целевом индексе
 				const targetIndex = targetMeasurementNumber - 1;
 				const measurementAlreadyAdded = table.rows.every((row) => {
 					const entry = row.measurements[targetIndex];
-					return entry !== null; // Если entry существует, измерение уже добавлено
+					return entry !== null;
 				});
 
-				// Если измерение уже добавлено, не добавляем повторно
 				if (measurementAlreadyAdded) {
 					return prev;
 				}
 
 				// Обновляем строки таблицы с фактическими значениями
 				const updatedRows = table.rows.map((row) => {
-					// Находим результат для этой длины волны
 					const wavelengthResult = result.wavelengths.find(
 						(wl) => wl.wavelength === row.wavelength
 					);
@@ -134,15 +139,13 @@ export function useResultsTable() {
 						return row;
 					}
 
-					// Создаем entry с фактическим значением (пока пустой, студент должен ввести)
 					const measurementEntry: StudentMeasurementEntry = {
 						value: null,
-						actualValue: wavelengthResult.average, // Среднее значение из прибора
+						actualValue: wavelengthResult.average,
 						status: 'empty',
 						errorMessage: undefined
 					};
 
-					// Обновляем соответствующий индекс измерения
 					const updatedMeasurements = [...row.measurements];
 					updatedMeasurements[targetMeasurementNumber - 1] = measurementEntry;
 
@@ -190,7 +193,6 @@ export function useResultsTable() {
 					return prev;
 				}
 
-				// Находим строку для этой длины волны
 				const rowIndex = table.rows.findIndex(
 					(r) => r.wavelength === wavelength
 				);
@@ -201,7 +203,6 @@ export function useResultsTable() {
 				const row = table.rows[rowIndex];
 				let updatedRow: WavelengthTableRow;
 
-				// Валидация в зависимости от типа поля
 				if (field === 'measurement') {
 					if (
 						measurementIndex === null ||
@@ -225,24 +226,26 @@ export function useResultsTable() {
 					return prev;
 				}
 
-				// Обновляем строку в таблице
 				const updatedRows = [...table.rows];
 				updatedRows[rowIndex] = updatedRow;
 
-				// Проверяем, завершена ли таблица
-				const isCompleted = checkIfTableCompleted({
+				// Проверяем, заполнены ли все числовые ячейки
+				const measurementsCompleted = checkIfTableCompleted({
 					...table,
 					rows: updatedRows
 				});
 
-				// Обновляем состояние таблицы
+				// Полностью завершено только когда числа заполнены И сделан вывод об исправности
+				const isCompleted =
+					measurementsCompleted && table.studentFaultyChoice !== null;
+
 				const updatedTable: ComponentResultsTable = {
 					...table,
 					rows: updatedRows,
+					measurementsCompleted,
 					isCompleted
 				};
 
-				// Проверяем, можно ли перейти к следующему измерению
 				const canProceed = checkCanProceedToNextMeasurement(updatedTable);
 
 				return {
@@ -251,10 +254,47 @@ export function useResultsTable() {
 						...prev.tables,
 						[componentId]: updatedTable
 					},
-					// Убираем pending если текущее измерение завершено
 					pendingInputComponentId: canProceed
 						? null
 						: prev.pendingInputComponentId
+				};
+			});
+		},
+		[]
+	);
+
+	/**
+	 * Фиксирует выбор студента об исправности компонента.
+	 * Доступно только после заполнения всех числовых ячеек.
+	 * После первого выбора изменение заблокировано.
+	 */
+	const enterFaultyChoice = useCallback(
+		(componentId: string, studentThinksFaulty: boolean): void => {
+			setState((prev) => {
+				const table = prev.tables[componentId];
+				if (!table) {
+					return prev;
+				}
+
+				// Блокируем: числа не заполнены или выбор уже зафиксирован
+				if (!table.measurementsCompleted || table.studentFaultyChoice !== null) {
+					return prev;
+				}
+
+				const faultyChoiceIsCorrect =
+					studentThinksFaulty === table.isActuallyFaulty;
+
+				return {
+					...prev,
+					tables: {
+						...prev.tables,
+						[componentId]: {
+							...table,
+							studentFaultyChoice: studentThinksFaulty,
+							faultyChoiceIsCorrect,
+							isCompleted: true
+						}
+					}
 				};
 			});
 		},
@@ -292,25 +332,21 @@ export function useResultsTable() {
 
 				const entry = row.measurements[measurementIndex];
 
-				// Если entry не существует, не можем редактировать
 				if (entry === null) {
 					return false;
 				}
 
-				// Если ячейка уже валидна, блокируем редактирование
 				if (entry.status === 'valid') {
 					return false;
 				}
 
-				// Если все три измерения уже введены и валидны, блокируем редактирование
 				const allMeasurementsComplete = row.measurements.every(
 					(m) => m !== null && m.value !== null && m.status === 'valid'
 				);
 				if (allMeasurementsComplete) {
-					return false; // Все измерения завершены, переходим к среднему
+					return false;
 				}
 
-				// Можно редактировать только ячейку текущего измерения
 				const isCurrent =
 					measurementIndex === table.currentMeasurementNumber - 1;
 
@@ -318,16 +354,14 @@ export function useResultsTable() {
 			}
 
 			if (field === 'average') {
-				// Если среднее уже введено и валидно, блокируем редактирование
 				const averageAlreadyValid =
 					row.average !== null &&
 					row.average.value !== null &&
 					row.average.status === 'valid';
 				if (averageAlreadyValid) {
-					return false; // Среднее уже введено, переходим к км. затуханию
+					return false;
 				}
 
-				// Среднее доступно только после всех трех измерений
 				const allMeasurementsValid = row.measurements.every(
 					(m) => m !== null && m.value !== null && m.status === 'valid'
 				);
@@ -335,16 +369,14 @@ export function useResultsTable() {
 			}
 
 			if (field === 'kilometricAttenuation') {
-				// Если км. затухание уже введено и валидно, блокируем редактирование
 				const kmAttenuationAlreadyValid =
 					row.kilometricAttenuation !== null &&
 					row.kilometricAttenuation.value !== null &&
 					row.kilometricAttenuation.status === 'valid';
 				if (kmAttenuationAlreadyValid) {
-					return false; // Км. затухание уже введено
+					return false;
 				}
 
-				// Км. затухание доступно только для длинных волокон и после ввода среднего
 				const requiresKmAttenuation =
 					table.fiberLength >= MIN_FIBER_LENGTH_FOR_KM_ATTENUATION;
 				const averageValid =
@@ -361,7 +393,6 @@ export function useResultsTable() {
 
 	/**
 	 * Проверяет, готов ли компонент к следующему измерению
-	 * (все поля текущего измерения заполнены и валидны)
 	 */
 	const canProceedToNextMeasurement = useCallback(
 		(componentId: string): boolean => {
@@ -380,6 +411,7 @@ export function useResultsTable() {
 		createTableForComponent,
 		addDeviceMeasurement,
 		enterStudentValue,
+		enterFaultyChoice,
 		isCellEditable,
 		canProceedToNextMeasurement
 	};

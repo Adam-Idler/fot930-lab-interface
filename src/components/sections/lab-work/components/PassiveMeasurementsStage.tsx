@@ -27,43 +27,65 @@ interface PassiveMeasurementsStageProps {
 	onSelectScenario: (scenario: ComplexScenario) => void;
 }
 
-/** Возвращает {count, total, isMeasured} для компонента */
+interface MeasurementStatus {
+	count: number;
+	total: number;
+	isMeasured: boolean;
+	/** Числа заполнены, но вывод об исправности ещё не сделан */
+	needsFaultyChoice: boolean;
+}
+
+/** Возвращает статус измерений для одиночного компонента */
 function getMeasurementStatus(
 	component: PassiveComponent,
 	tables: ResultsTableState['tables']
-): { count: number; total: number; isMeasured: boolean } {
+): MeasurementStatus {
 	if (isSplitterType(component.type)) {
 		const outputCount = getSplitterOutputCount(component.type);
-		const measuredOutputs = Array.from(
-			{ length: outputCount },
-			(_, i) => i + 1
-		).filter((i) => tables[`${component.id}_output_${i}`]?.isCompleted).length;
+		const outputStatuses = Array.from({ length: outputCount }, (_, i) => {
+			const t = tables[`${component.id}_output_${i + 1}`];
+			return {
+				isCompleted: t?.isCompleted ?? false,
+				measurementsCompleted: t?.measurementsCompleted ?? false
+			};
+		});
+		const completedOutputs = outputStatuses.filter((s) => s.isCompleted).length;
+		const needsFaultyChoice =
+			completedOutputs < outputCount &&
+			outputStatuses.some((s) => s.measurementsCompleted && !s.isCompleted);
 		return {
-			count: measuredOutputs,
+			count: completedOutputs,
 			total: outputCount,
-			isMeasured: measuredOutputs === outputCount && outputCount > 0
+			isMeasured: completedOutputs === outputCount && outputCount > 0,
+			needsFaultyChoice
 		};
 	}
 
 	const table = tables[component.id];
 	const isMeasured = table?.isCompleted ?? false;
+	const measurementsCompleted = table?.measurementsCompleted ?? false;
+	const needsFaultyChoice = measurementsCompleted && !isMeasured;
+
 	const count = table
 		? Math.max(
-				Math.min(table.currentMeasurementNumber - (isMeasured ? 0 : 1), 3),
+				Math.min(
+					table.currentMeasurementNumber - (measurementsCompleted ? 0 : 1),
+					3
+				),
 				0
 			)
 		: 0;
-	return { count, total: 3, isMeasured };
+	return { count, total: 3, isMeasured, needsFaultyChoice };
 }
 
 /** Возвращает статус измерений для комплексного сценария (по его сплиттеру) */
 function getScenarioMeasurementStatus(
 	scenario: ComplexScenario,
 	tables: ResultsTableState['tables']
-): { count: number; total: number; isMeasured: boolean } {
+): MeasurementStatus {
 	const splitter = scenario.chain.find((c) => isSplitterType(c.type));
 	if (!splitter) {
-		return { count: 0, total: 1, isMeasured: false };
+		return { count: 0, total: 1, isMeasured: false, needsFaultyChoice: false };
 	}
 	return getMeasurementStatus(splitter, tables);
 }
@@ -92,10 +114,8 @@ export function PassiveMeasurementsStage({
 				<div className="flex flex-col gap-2">
 					{/* Одиночные компоненты */}
 					{components.map((component) => {
-						const { count, total, isMeasured } = getMeasurementStatus(
-							component,
-							resultsTableState.tables
-						);
+						const { count, total, isMeasured, needsFaultyChoice } =
+							getMeasurementStatus(component, resultsTableState.tables);
 						const isSplitter = isSplitterType(component.type);
 						const isSelected =
 							!activeScenario && selectedComponent?.id === component.id;
@@ -111,25 +131,35 @@ export function PassiveMeasurementsStage({
 										? 'border-blue-600 bg-blue-50'
 										: isMeasured
 											? 'border-green-500 bg-green-50 hover:border-green-600 hover:cursor-pointer'
-											: 'border-gray-200 hover:border-gray-300 hover:cursor-pointer'
+											: needsFaultyChoice
+												? 'border-yellow-400 bg-yellow-50 hover:border-yellow-500 hover:cursor-pointer'
+												: 'border-gray-200 hover:border-gray-300 hover:cursor-pointer'
 								)}
 							>
 								<div className="font-medium text-sm">{component.label}</div>
 								<div
 									className={clsx(
 										'text-xs mt-1 font-medium',
-										isMeasured ? 'text-green-600' : 'text-gray-500'
+										isMeasured
+											? 'text-green-600'
+											: needsFaultyChoice
+												? 'text-yellow-700'
+												: 'text-gray-500'
 									)}
 								>
 									{isMeasured
 										? isSplitter
 											? `Все ${total} выхода измерены`
 											: 'Измерение выполнено'
-										: count === 0
-											? 'Измерение не выполнено'
-											: isSplitter
-												? `Измерено ${count} из ${total} выходов`
-												: `Выполнено ${count} из ${total} измерений`}
+										: needsFaultyChoice
+											? isSplitter
+												? 'Требуется вывод об исправности выходов'
+												: 'Требуется вывод об исправности'
+											: count === 0
+												? 'Измерение не выполнено'
+												: isSplitter
+													? `Измерено ${count} из ${total} выходов`
+													: `Выполнено ${count} из ${total} измерений`}
 								</div>
 							</button>
 						);
@@ -137,10 +167,8 @@ export function PassiveMeasurementsStage({
 
 					{/* Комплексные сценарии */}
 					{complexScenarios.map((scenario) => {
-						const { count, total, isMeasured } = getScenarioMeasurementStatus(
-							scenario,
-							resultsTableState.tables
-						);
+						const { count, total, isMeasured, needsFaultyChoice } =
+							getScenarioMeasurementStatus(scenario, resultsTableState.tables);
 						const isSelected = activeScenario?.id === scenario.id;
 
 						return (
@@ -154,7 +182,9 @@ export function PassiveMeasurementsStage({
 										? 'border-blue-600 bg-blue-50'
 										: isMeasured
 											? 'border-green-500 bg-green-50 hover:border-green-600 hover:cursor-pointer'
-											: 'border-gray-200 hover:border-gray-300 hover:cursor-pointer'
+											: needsFaultyChoice
+												? 'border-yellow-400 bg-yellow-50 hover:border-yellow-500 hover:cursor-pointer'
+												: 'border-gray-200 hover:border-gray-300 hover:cursor-pointer'
 								)}
 							>
 								<div className="font-medium text-sm">{scenario.label}</div>
@@ -164,14 +194,20 @@ export function PassiveMeasurementsStage({
 								<div
 									className={clsx(
 										'text-xs mt-1 font-medium',
-										isMeasured ? 'text-green-600' : 'text-gray-500'
+										isMeasured
+											? 'text-green-600'
+											: needsFaultyChoice
+												? 'text-yellow-700'
+												: 'text-gray-500'
 									)}
 								>
 									{isMeasured
 										? `Все ${total} выхода сплиттера измерены`
-										: count === 0
-											? 'Измерение не выполнено'
-											: `Измерено ${count} из ${total} выходов сплиттера`}
+										: needsFaultyChoice
+											? 'Требуется вывод об исправности'
+											: count === 0
+												? 'Измерение не выполнено'
+												: `Измерено ${count} из ${total} выходов сплиттера`}
 								</div>
 							</button>
 						);

@@ -53,12 +53,13 @@ const availableComponents: PassiveComponent[] = [
 	},
 	{
 		id: 'optical_cable_2',
-		icon: '/images/scheme/sc-upc-g-657.png',
+		icon: '/images/scheme/sc-upc-g-657.jpg',
 		type: 'OPTICAL_CABLE',
 		label: 'Оптический шнур simplex SC/UPC G.657 (3 м)',
 		typicalLoss: COMPONENT_LOSS_DB.OPTICAL_CABLE,
 		connectorType: 'SC_UPC',
-		fiberLength: 3
+		fiberLength: 3,
+		faulty: true
 	},
 	{
 		id: 'fiber_coil_1',
@@ -94,7 +95,8 @@ const availableComponents: PassiveComponent[] = [
 		label: 'Сплиттер 1:4 SC/APC',
 		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_4,
 		connectorType: 'SC_APC',
-		fiberLength: 2
+		fiberLength: 2,
+		faultyPort: 2
 	},
 	{
 		id: 'splitter_1_8',
@@ -182,6 +184,7 @@ export function LabWork() {
 		createTableForComponent,
 		addDeviceMeasurement,
 		enterStudentValue,
+		enterFaultyChoice,
 		isCellEditable,
 		canProceedToNextMeasurement
 	} = useResultsTable();
@@ -299,9 +302,15 @@ export function LabWork() {
 			const existingTable = resultsTableState.tables[effectiveComponentId];
 
 			if (!existingTable) {
+				const isActuallyFaulty =
+					selectedComponent.faulty === true ||
+					(selectedComponent.faultyPort !== undefined &&
+						selectedComponent.faultyPort === currentSplitterOutput);
+
 				createTableForComponent(
 					tableComponent,
-					deviceState.preparation.fastestSettings.lossWavelengths
+					deviceState.preparation.fastestSettings.lossWavelengths,
+					isActuallyFaulty
 				);
 			}
 
@@ -493,6 +502,7 @@ export function LabWork() {
 										measurementIndex
 									)
 								}
+								onFaultyChoiceChange={enterFaultyChoice}
 							/>
 						)}
 

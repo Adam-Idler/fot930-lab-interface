@@ -17,8 +17,8 @@ export function Layout() {
 				</div>
 			</div>
 
-			<main className="flex-1 overflow-auto">
-				<div className="h-full max-w-400 mx-auto sm:px-6 lg:px-8">
+			<main id="main-scroll" className="flex-1 overflow-auto">
+				<div className="h-full max-w-400 mx-auto px-4 sm:px-6 lg:px-8 py-6">
 					<TabContent active={activeTab === 'theory'}>
 						<Theory />
 					</TabContent>

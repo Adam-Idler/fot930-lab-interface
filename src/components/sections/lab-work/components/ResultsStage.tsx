@@ -37,13 +37,17 @@ interface ResultsStageProps {
 		field: 'measurement' | 'average' | 'kilometricAttenuation',
 		measurementIndex: number | null
 	) => boolean;
+
+	/** Callback при выборе студентом варианта исправности компонента */
+	onFaultyChoiceChange: (componentId: string, studentThinksFaulty: boolean) => void;
 }
 
 export function ResultsStage({
 	resultsTableState,
 	selectedComponent,
 	onValueChange,
-	isCellEditable
+	isCellEditable,
+	onFaultyChoiceChange
 }: ResultsStageProps) {
 	const { tables, pendingInputComponentId } = resultsTableState;
 
@@ -152,6 +156,9 @@ export function ResultsStage({
 											measurementIndex
 										)
 									}
+									onFaultyChoiceChange={(studentThinksFaulty) =>
+										onFaultyChoiceChange(table.componentId, studentThinksFaulty)
+									}
 								/>
 							) : (
 								<div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-500">
@@ -189,6 +196,10 @@ export function ResultsStage({
 						<li>
 							• <strong>Км. затухание:</strong> Рассчитывается как Среднее /
 							(Длина в км), доступно только для волокон ≥1 км
+						</li>
+						<li>
+							• <strong>Исправность:</strong> Оцените, является ли компонент
+							исправным на основе полученных результатов измерений
 						</li>
 						<li>
 							•{' '}

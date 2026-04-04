@@ -9,11 +9,16 @@ export type ContentType = 'theory' | 'instruction';
 export function Theory() {
 	const [currentContent, setCurrentContent] = useState<ContentType>('theory');
 
+	function handleContentChange(content: ContentType) {
+		document.getElementById('main-scroll')?.scrollTo({ top: 0, behavior: 'instant' });
+		setCurrentContent(content);
+	}
+
 	return (
-		<div className="flex flex-col gap-5">
+		<div className="flex flex-col gap-5 pb-6">
 			<Pagination
 				currentContent={currentContent}
-				setCurrentContent={setCurrentContent}
+				setCurrentContent={handleContentChange}
 			/>
 
 			<Show when={currentContent === 'theory'}>
@@ -26,7 +31,7 @@ export function Theory() {
 
 			<Pagination
 				currentContent={currentContent}
-				setCurrentContent={setCurrentContent}
+				setCurrentContent={handleContentChange}
 			/>
 		</div>
 	);

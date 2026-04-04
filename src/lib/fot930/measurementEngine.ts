@@ -15,6 +15,18 @@ import type {
 import { getSplitterOutputCount, isSplitterType } from './splitter';
 
 /**
+ * Удельное затухание оптического волокна (дБ/км)
+ * Используется для расчёта потерь катушки ОВ с учётом её длины
+ */
+const FIBER_ATTENUATION_DB_PER_KM: Record<Wavelength, number> = {
+	850: 2.5, // многомодовое волокно 50/125 мкм (типично 2.5–3.5 дБ/км)
+	1300: 0.5, // многомодовое волокно 50/125 мкм (типично 0.7–1.5 дБ/км)
+	1310: 0.34, // одномодовое G.652/G.657: 0.33–0.36 дБ/км
+	1550: 0.20, // одномодовое G.652/G.657: 0.18–0.22 дБ/км
+	1625: 0.22 // L-диапазон, немного выше 1550 нм
+};
+
+/**
  * Базовые параметры для генерации измерений
  */
 const MEASUREMENT_CONFIG = {
@@ -41,66 +53,195 @@ const MEASUREMENT_CONFIG = {
 };
 
 /**
- * Типичные значения затухания компонентов (dB)
+ * Фиксированные избыточные потери для неисправных компонентов (dB).
+ * Прибавляются к типичным потерям — результат стабильно превышает норму.
+ */
+const FAULTY_EXCESS_LOSS_DB = 5.0;
+
+/**
+ * Типичные значения затухания компонентов (дБ).
+ * Для FIBER_COIL значения приведены для справки (typicalLoss);
+ * в расчётах используется FIBER_ATTENUATION_DB_PER_KM × длина.
+ * Значения сплиттеров соответствуют Таблице 4 теоретического раздела.
+ * Значения OPTICAL_CABLE соответствуют Таблице 2 (SC/APC ↔ SC/APC, 1–5 м).
  */
 export const COMPONENT_LOSS_DB: Record<string, Record<Wavelength, number>> = {
 	OPTICAL_CABLE: {
-		850: 0.5,
-		1300: 0.4,
-		1310: 0.35,
-		1550: 0.3,
-		1625: 0.32
+		850: 0.45, // многомодовый патч-корд, нет таблицы в теории
+		1300: 0.20, // в диапазоне 0.10–0.25 дБ (Таблица 2)
+		1310: 0.20, // в диапазоне 0.10–0.25 дБ (Таблица 2)
+		1550: 0.18, // немного ниже 1310 нм (Таблица 2)
+		1625: 0.19
 	},
 	FIBER_COIL: {
+		// Типичные значения для эталонной 5 км катушки СМВ (справочно)
 		850: 2.5,
 		1300: 2.0,
-		1310: 1.8,
-		1550: 1.5,
-		1625: 1.6
+		1310: 1.7, // 5 км × 0.34 дБ/км
+		1550: 1.0, // 5 км × 0.20 дБ/км
+		1625: 1.1
 	},
 	SPLITTER_1_2: {
 		850: 3.5,
-		1300: 3.3,
-		1310: 3.2,
-		1550: 3.0,
-		1625: 3.1
+		1300: 3.7, // Таблица 4: 3.4–4.0 дБ
+		1310: 3.7, // Таблица 4: 3.4–4.0 дБ
+		1550: 3.7, // Таблица 4: ~одинаково 1310–1550 нм
+		1625: 3.8
 	},
 	SPLITTER_1_4: {
 		850: 7.0,
-		1300: 6.8,
-		1310: 6.5,
-		1550: 6.2,
-		1625: 6.3
+		1300: 7.2, // Таблица 4: 7.0–7.5 дБ
+		1310: 7.2, // Таблица 4: 7.0–7.5 дБ
+		1550: 7.2, // Таблица 4: ~одинаково 1310–1550 нм
+		1625: 7.3
 	},
 	SPLITTER_1_8: {
 		850: 10.5,
-		1300: 10.2,
-		1310: 10.0,
-		1550: 9.5,
-		1625: 9.7
+		1300: 10.7, // Таблица 4: 10.5–11.0 дБ
+		1310: 10.7, // Таблица 4: 10.5–11.0 дБ
+		1550: 10.7, // Таблица 4: ~одинаково 1310–1550 нм
+		1625: 10.8
 	},
 	SPLITTER_1_16: {
 		850: 14.0,
-		1300: 13.5,
-		1310: 13.2,
-		1550: 12.8,
-		1625: 13.0
+		1300: 13.5, // Таблица 4: 13.0–14.0 дБ
+		1310: 13.5, // Таблица 4: 13.0–14.0 дБ
+		1550: 13.5, // Таблица 4: ~одинаково 1310–1550 нм
+		1625: 13.7
 	},
 	SPLITTER_1_32: {
 		850: 17.5,
-		1300: 17.0,
-		1310: 16.8,
-		1550: 16.2,
-		1625: 16.5
+		1300: 17.0, // ~13.5 + 3.5 дБ (каждое удвоение ≈ +3.5 дБ)
+		1310: 17.0,
+		1550: 17.0,
+		1625: 17.2
 	},
 	SPLITTER_1_64: {
 		850: 21.0,
-		1300: 20.5,
-		1310: 20.2,
-		1550: 19.5,
-		1625: 19.8
+		1300: 20.5, // ~17.0 + 3.5 дБ
+		1310: 20.5,
+		1550: 20.5,
+		1625: 20.7
 	}
 };
+
+/**
+ * Возвращает потери компонента на заданной длине волны (дБ).
+ * Для FIBER_COIL вычисляет потери на основе длины волокна (дБ/км × длина),
+ * для остальных компонентов берёт значение из COMPONENT_LOSS_DB.
+ */
+function getComponentLoss(component: PassiveComponent, wavelength: Wavelength): number {
+	if (component.type === 'FIBER_COIL') {
+		const attenuationPerKm = FIBER_ATTENUATION_DB_PER_KM[wavelength];
+		const lengthKm = component.fiberLength / 1000;
+		return attenuationPerKm * lengthKm;
+	}
+	return COMPONENT_LOSS_DB[component.type]?.[wavelength] ?? 1.0;
+}
+
+/**
+ * Верхние границы допустимых потерь компонентов (дБ).
+ * Соответствуют максимальным значениям из справочных таблиц в теоретическом разделе.
+ */
+const COMPONENT_LOSS_UPPER_BOUND: Record<string, Record<Wavelength, number>> = {
+	OPTICAL_CABLE: {
+		850: 1.0,
+		1300: 0.30, // Таблица 2: SC/UPC ↔ SC/UPC до 0.30 дБ
+		1310: 0.30,
+		1550: 0.30,
+		1625: 0.30
+	},
+	SPLITTER_1_2: {
+		850: 4.5,
+		1300: 4.0, // Таблица 4: 3.4–4.0 дБ
+		1310: 4.0,
+		1550: 4.0,
+		1625: 4.1
+	},
+	SPLITTER_1_4: {
+		850: 8.0,
+		1300: 7.5, // Таблица 4: 7.0–7.5 дБ
+		1310: 7.5,
+		1550: 7.5,
+		1625: 7.6
+	},
+	SPLITTER_1_8: {
+		850: 12.0,
+		1300: 11.0, // Таблица 4: 10.5–11.0 дБ
+		1310: 11.0,
+		1550: 11.0,
+		1625: 11.1
+	},
+	SPLITTER_1_16: {
+		850: 15.0,
+		1300: 14.0, // Таблица 4: 13.0–14.0 дБ
+		1310: 14.0,
+		1550: 14.0,
+		1625: 14.2
+	},
+	SPLITTER_1_32: {
+		850: 19.0,
+		1300: 17.5, // ~14.0 + 3.5 дБ
+		1310: 17.5,
+		1550: 17.5,
+		1625: 17.7
+	},
+	SPLITTER_1_64: {
+		850: 23.0,
+		1300: 21.0, // ~17.5 + 3.5 дБ
+		1310: 21.0,
+		1550: 21.0,
+		1625: 21.2
+	}
+};
+
+/**
+ * Верхняя граница удельного затухания оптического волокна (дБ/км).
+ * Используется для проверки FIBER_COIL: если измеренное затухание/км
+ * превышает этот порог — волокно или соединение неисправно.
+ */
+const FIBER_ATTENUATION_UPPER_BOUND_DB_PER_KM: Record<Wavelength, number> = {
+	850: 3.5, // MMF 50/125 мкм: верхняя граница
+	1300: 1.5, // MMF 50/125 мкм: верхняя граница
+	1310: 0.40, // SMF G.652: немного выше максимума 0.36 дБ/км
+	1550: 0.25, // SMF G.652: немного выше максимума 0.22 дБ/км
+	1625: 0.28
+};
+
+/**
+ * Возвращает верхнюю допустимую границу потерь компонента (дБ).
+ * Для FIBER_COIL учитывает длину волокна.
+ */
+function getComponentLossUpperBound(
+	component: PassiveComponent,
+	wavelength: Wavelength
+): number {
+	if (component.type === 'FIBER_COIL') {
+		const upperPerKm = FIBER_ATTENUATION_UPPER_BOUND_DB_PER_KM[wavelength];
+		const lengthKm = component.fiberLength / 1000;
+		return upperPerKm * lengthKm;
+	}
+	return (
+		COMPONENT_LOSS_UPPER_BOUND[component.type]?.[wavelength] ??
+		(COMPONENT_LOSS_DB[component.type]?.[wavelength] ?? 1.0) * 2
+	);
+}
+
+/**
+ * Проверяет, является ли измерение неисправным для данного компонента и выхода.
+ * — component.faulty === true: неисправен полностью (любой выход).
+ * — component.faultyPort === splitterOutput: неисправен только конкретный выход сплиттера.
+ */
+function isFaultyMeasurement(
+	component: PassiveComponent,
+	splitterOutput?: number
+): boolean {
+	if (component.faulty) return true;
+	if (component.faultyPort != null && splitterOutput != null) {
+		return component.faultyPort === splitterOutput;
+	}
+	return false;
+}
 
 /**
  * Генерирует реалистичное измерение для одиночного компонента
@@ -111,7 +252,7 @@ export function generateSingleComponentMeasurement(
 	wavelength: Wavelength
 ): { value: number; unit: 'dBm' | 'dB' } | { error: string } {
 	// Получаем типичное затухание компонента
-	const componentLoss = COMPONENT_LOSS_DB[component.type]?.[wavelength] ?? 1.0;
+	const componentLoss = getComponentLoss(component, wavelength);
 
 	// Добавляем вариацию (нормальное распределение)
 	const variation = gaussianRandom() * MEASUREMENT_CONFIG.MEASUREMENT_STD_DEV;
@@ -161,8 +302,7 @@ export function generateComplexSchemeMeasurement(
 		if (element.type === 'COMPONENT') {
 			const component = components.find((c) => c.id === element.id);
 			if (component) {
-				const componentLoss =
-					COMPONENT_LOSS_DB[component.type]?.[wavelength] ?? 1.0;
+				const componentLoss = getComponentLoss(component, wavelength);
 				const variation =
 					gaussianRandom() * MEASUREMENT_CONFIG.MEASUREMENT_STD_DEV;
 				totalLoss += componentLoss + variation;
@@ -243,16 +383,18 @@ function getSplitterOutputOffset(
 /**
  * Вычисляет суммарные потери комплексной цепи компонентов для одной длины волны.
  * Для сплиттера добавляет детерминированное смещение по номеру выхода.
+ * Для неисправных компонентов (faulty/faultyPort) добавляет фиксированные избыточные потери.
  */
 function calculateComplexChainLoss(
 	chainComponents: PassiveComponent[],
 	wavelength: Wavelength,
 	splitterOutput: number
-): { value: number } | { error: string } {
+): { value: number; isExcessive: boolean } | { error: string } {
 	let totalLoss = 0;
+	let upperBoundTotal = 0;
 
 	for (const component of chainComponents) {
-		const baseLoss = COMPONENT_LOSS_DB[component.type]?.[wavelength] ?? 1.0;
+		const baseLoss = getComponentLoss(component, wavelength);
 		const variation = gaussianRandom() * MEASUREMENT_CONFIG.MEASUREMENT_STD_DEV;
 		let componentLoss = baseLoss + variation;
 
@@ -261,17 +403,27 @@ function calculateComplexChainLoss(
 			componentLoss += getSplitterOutputOffset(splitterOutput, outputCount);
 		}
 
+		// Фиксированные избыточные потери для неисправных компонентов
+		if (isFaultyMeasurement(component, isSplitterType(component.type) ? splitterOutput : undefined)) {
+			componentLoss += FAULTY_EXCESS_LOSS_DB;
+		}
+
 		totalLoss += componentLoss;
+		upperBoundTotal += getComponentLossUpperBound(component, wavelength);
 	}
 
 	// Два коннектора на концах цепи
 	totalLoss += MEASUREMENT_CONFIG.CONNECTOR_LOSS * 2;
+	upperBoundTotal += MEASUREMENT_CONFIG.CONNECTOR_LOSS * 2;
 
 	if (totalLoss > MEASUREMENT_CONFIG.MAX_MEASURABLE_LOSS) {
 		return { error: 'Loss exceeds measurement range' };
 	}
 
-	return { value: parseFloat(totalLoss.toFixed(2)) };
+	return {
+		value: parseFloat(totalLoss.toFixed(2)),
+		isExcessive: totalLoss > upperBoundTotal
+	};
 }
 
 /**
@@ -314,7 +466,8 @@ export function generateComplexFiberMeasurement(
 					wavelength,
 					aToB: parseFloat(aToB.toFixed(2)),
 					bToA: parseFloat(bToA.toFixed(2)),
-					average: parseFloat(average.toFixed(2))
+					average: parseFloat(average.toFixed(2)),
+					isExcessive: prevWavelengthResult.isExcessive ?? false
 				});
 				continue;
 			}
@@ -333,7 +486,13 @@ export function generateComplexFiberMeasurement(
 		const bToA = parseFloat((aToB + asymmetry).toFixed(2));
 		const average = parseFloat(((aToB + bToA) / 2).toFixed(2));
 
-		bidirectionalResults.push({ wavelength, aToB, bToA, average });
+		bidirectionalResults.push({
+			wavelength,
+			aToB,
+			bToA,
+			average,
+			isExcessive: lossResult.isExcessive
+		});
 	}
 
 	const splitterComponent = chainComponents.find((c) => isSplitterType(c.type));
@@ -376,13 +535,15 @@ function gaussianRandom(): number {
  * @param wavelengths - Длины волн для измерения
  * @param fiberCounter - Текущий номер измерения (для имени волокна)
  * @param previousResult - Предыдущий результат измерения этого компонента (если есть)
+ * @param splitterOutput - Номер выхода сплиттера (1-based); используется для определения неисправного порта
  * @returns Результат измерения волокна или ошибка
  */
 export function generateFiberMeasurement(
 	component: PassiveComponent,
 	wavelengths: Wavelength[],
 	fiberCounter: number,
-	previousResult?: FiberMeasurementResult
+	previousResult?: FiberMeasurementResult,
+	splitterOutput?: number
 ): FiberMeasurementResult | { error: string } {
 	if (!component.fiberLength) {
 		return { error: 'Component has no fiber length specified' };
@@ -408,64 +569,22 @@ export function generateFiberMeasurement(
 					wavelength,
 					aToB: parseFloat(aToB.toFixed(2)),
 					bToA: parseFloat(bToA.toFixed(2)),
-					average: parseFloat(average.toFixed(2))
+					average: parseFloat(average.toFixed(2)),
+					isExcessive: prevWavelengthResult.isExcessive ?? false
 				});
 			} else {
 				// Если длины волны нет в предыдущем результате, генерируем новое
-				const baseResult = generateSingleComponentMeasurement(
-					component,
-					'LOSS',
-					wavelength
-				);
-
-				if ('error' in baseResult) {
-					return baseResult;
-				}
-
-				const aToB = baseResult.value;
-				const asymmetry = gaussianRandom() * 0.15;
-				const bToA = aToB + asymmetry;
-				const average = (aToB + bToA) / 2;
-
-				bidirectionalResults.push({
-					wavelength,
-					aToB: parseFloat(aToB.toFixed(2)),
-					bToA: parseFloat(bToA.toFixed(2)),
-					average: parseFloat(average.toFixed(2))
-				});
+				const result = generateFreshMeasurement(component, wavelength, splitterOutput);
+				if ('error' in result) return result;
+				bidirectionalResults.push(result);
 			}
 		}
 	} else {
 		// Нет предыдущего результата - генерируем новые измерения
 		for (const wavelength of wavelengths) {
-			// Генерируем базовое измерение потерь (A→B)
-			const baseResult = generateSingleComponentMeasurement(
-				component,
-				'LOSS',
-				wavelength
-			);
-
-			if ('error' in baseResult) {
-				return baseResult;
-			}
-
-			// A→B: используем базовый результат
-			const aToB = baseResult.value;
-
-			// B→A: добавляем небольшую асимметрию (±0.1-0.2 dB)
-			// Реальные волокна имеют небольшую асимметрию из-за неоднородности
-			const asymmetry = gaussianRandom() * 0.15;
-			const bToA = aToB + asymmetry;
-
-			// Среднее значение
-			const average = (aToB + bToA) / 2;
-
-			bidirectionalResults.push({
-				wavelength,
-				aToB: parseFloat(aToB.toFixed(2)),
-				bToA: parseFloat(bToA.toFixed(2)),
-				average: parseFloat(average.toFixed(2))
-			});
+			const result = generateFreshMeasurement(component, wavelength, splitterOutput);
+			if ('error' in result) return result;
+			bidirectionalResults.push(result);
 		}
 	}
 
@@ -480,6 +599,49 @@ export function generateFiberMeasurement(
 		fiberLength: component.fiberLength,
 		wavelengths: bidirectionalResults,
 		timestamp: Date.now()
+	};
+}
+
+/**
+ * Генерирует одно свежее двунаправленное измерение для компонента и длины волны.
+ * Для неисправных компонентов/портов добавляет фиксированные избыточные потери
+ * с минимальной вариацией — имитируя стабильный дефект.
+ */
+function generateFreshMeasurement(
+	component: PassiveComponent,
+	wavelength: Wavelength,
+	splitterOutput?: number
+): BidirectionalMeasurementResult | { error: string } {
+	const connectorLoss = MEASUREMENT_CONFIG.CONNECTOR_LOSS * 2;
+	const faulty = isFaultyMeasurement(component, splitterOutput);
+
+	if (faulty) {
+		// Неисправный компонент: базовые потери + фиксированный избыток, минимальная вариация
+		const baseLoss = getComponentLoss(component, wavelength) + FAULTY_EXCESS_LOSS_DB;
+		const variation = gaussianRandom() * 0.05;
+		const aToB = parseFloat((baseLoss + variation + connectorLoss).toFixed(2));
+		const asymmetry = gaussianRandom() * 0.05;
+		const bToA = parseFloat((aToB + asymmetry).toFixed(2));
+		const average = parseFloat(((aToB + bToA) / 2).toFixed(2));
+		return { wavelength, aToB, bToA, average, isExcessive: true };
+	}
+
+	// Нормальный компонент: стандартная генерация
+	const baseResult = generateSingleComponentMeasurement(component, 'LOSS', wavelength);
+	if ('error' in baseResult) return baseResult;
+
+	const aToB = baseResult.value;
+	const asymmetry = gaussianRandom() * 0.15;
+	const bToA = aToB + asymmetry;
+	const average = (aToB + bToA) / 2;
+	const upperBound = getComponentLossUpperBound(component, wavelength) + connectorLoss;
+
+	return {
+		wavelength,
+		aToB: parseFloat(aToB.toFixed(2)),
+		bToA: parseFloat(bToA.toFixed(2)),
+		average: parseFloat(average.toFixed(2)),
+		isExcessive: average > upperBound
 	};
 }
 

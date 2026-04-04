@@ -3,6 +3,7 @@
  * Позволяет студенту вводить значения и валидирует их
  */
 
+import clsx from 'clsx';
 import type {
 	ComponentResultsTable,
 	Wavelength
@@ -27,14 +28,17 @@ interface InteractiveMeasurementTableProps {
 		field: 'measurement' | 'average' | 'kilometricAttenuation',
 		measurementIndex: number | null
 	) => boolean;
+
+	/** Callback при выборе студентом варианта исправности */
+	onFaultyChoiceChange: (studentThinksFaulty: boolean) => void;
 }
 
 export function InteractiveMeasurementTable({
 	table,
 	onValueChange,
-	isCellEditable
+	isCellEditable,
+	onFaultyChoiceChange
 }: InteractiveMeasurementTableProps) {
-	// Проверяем, требуется ли километрическое затухание
 	const requiresKilometricAttenuation = table.fiberLength >= 500;
 
 	return (
@@ -84,12 +88,10 @@ export function InteractiveMeasurementTable({
 					<tbody className="divide-y divide-gray-200">
 						{table.rows.map((row) => (
 							<tr key={row.wavelength} className="hover:bg-gray-50">
-								{/* Длина волны */}
 								<td className="px-4 py-3 font-medium whitespace-nowrap">
 									{row.wavelength} нм
 								</td>
 
-								{/* Три измерения */}
 								{row.measurements.map((entry, idx) => (
 									<EditableCell
 										key={`${idx}-${row.wavelength}`}
@@ -108,7 +110,6 @@ export function InteractiveMeasurementTable({
 									/>
 								))}
 
-								{/* Среднее */}
 								<EditableCell
 									value={row.average?.value ?? null}
 									actualValue={row.average?.actualValue ?? 0}
@@ -120,7 +121,6 @@ export function InteractiveMeasurementTable({
 									errorMessage={row.average?.errorMessage}
 								/>
 
-								{/* Километрическое затухание (если требуется) */}
 								{requiresKilometricAttenuation && (
 									<EditableCell
 										value={row.kilometricAttenuation?.value ?? null}
@@ -146,6 +146,79 @@ export function InteractiveMeasurementTable({
 						))}
 					</tbody>
 				</table>
+			</div>
+
+			{/* Вывод об исправности компонента */}
+			<div className="px-4 py-3 border-t bg-gray-50">
+				<div className="flex flex-wrap items-center gap-3">
+					<span
+						className={clsx(
+							'text-sm font-semibold',
+							table.measurementsCompleted ? 'text-gray-700' : 'text-gray-400'
+						)}
+					>
+						Исправен ли компонент?
+					</span>
+					<button
+						type="button"
+						disabled={
+							!table.measurementsCompleted ||
+							table.studentFaultyChoice !== null
+						}
+						onClick={() => onFaultyChoiceChange(false)}
+						className={clsx(
+							'px-4 py-1.5 text-sm rounded-md border-2 font-medium transition-colors',
+							!table.measurementsCompleted ||
+								(table.studentFaultyChoice !== null &&
+									table.studentFaultyChoice !== false)
+								? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+								: table.studentFaultyChoice === false
+									? table.faultyChoiceIsCorrect === true
+										? 'bg-green-100 border-green-500 text-green-800'
+										: 'bg-red-100 border-red-500 text-red-800'
+									: 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
+						)}
+					>
+						Да, исправен
+					</button>
+					<button
+						type="button"
+						disabled={
+							!table.measurementsCompleted ||
+							table.studentFaultyChoice !== null
+						}
+						onClick={() => onFaultyChoiceChange(true)}
+						className={clsx(
+							'px-4 py-1.5 text-sm rounded-md border-2 font-medium transition-colors',
+							!table.measurementsCompleted ||
+								(table.studentFaultyChoice !== null &&
+									table.studentFaultyChoice !== true)
+								? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+								: table.studentFaultyChoice === true
+									? table.faultyChoiceIsCorrect === true
+										? 'bg-green-100 border-green-500 text-green-800'
+										: 'bg-red-100 border-red-500 text-red-800'
+									: 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
+						)}
+					>
+						Нет, неисправен
+					</button>
+					{!table.measurementsCompleted && (
+						<span className="text-xs text-gray-400 italic">
+							Доступно после заполнения таблицы
+						</span>
+					)}
+					{table.faultyChoiceIsCorrect !== null && (
+						<span
+							className={clsx(
+								'text-sm font-semibold',
+								table.faultyChoiceIsCorrect ? 'text-green-700' : 'text-red-700'
+							)}
+						>
+							{table.faultyChoiceIsCorrect ? '✓ Правильно!' : '✗ Неверно'}
+						</span>
+					)}
+				</div>
 			</div>
 		</div>
 	);

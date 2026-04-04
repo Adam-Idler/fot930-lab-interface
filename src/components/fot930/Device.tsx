@@ -146,7 +146,8 @@ export function Device({
 								selectedComponent,
 								state.preparation.fastestSettings.lossWavelengths,
 								state.fiberCounter,
-								previousResult
+								previousResult,
+								splitterOutput
 							);
 
 				if ('error' in rawResult) {
@@ -196,7 +197,7 @@ export function Device({
 	};
 
 	return (
-		<div className="flex flex-col gap-4 min-w-xl max-w-xl mx-auto">
+		<div className="flex flex-col gap-4 min-w-xl max-w-xl mx-auto select-none">
 			<div className="bg-fot930-blue p-8 rounded-3xl">
 				{/* Основная область */}
 				<div className="bg-gray-900 rounded-2xl p-4 shadow-inner">

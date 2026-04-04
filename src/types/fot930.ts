@@ -95,6 +95,13 @@ export interface BidirectionalMeasurementResult {
 
 	/** Среднее значение потерь (dB) */
 	average: number;
+
+	/**
+	 * Признак превышения типовых потерь.
+	 * true — потери выше допустимого предела для данного компонента и длины волны,
+	 * что может указывать на неисправность компонента.
+	 */
+	isExcessive?: boolean;
 }
 
 /** Результат FASTEST измерения волокна */
@@ -284,6 +291,12 @@ export interface PassiveComponent {
 
 	/** Длина волокна (метры) */
 	fiberLength: number;
+
+	/** Компонент неисправен — всегда выдаёт завышенные потери */
+	faulty?: boolean;
+
+	/** Неисправный выход сплиттера (1-based); только для сплиттеров */
+	faultyPort?: number;
 }
 
 /** Схема подключения */
@@ -385,8 +398,20 @@ export interface ComponentResultsTable {
 	/** Номер текущего измерения (1-3) */
 	currentMeasurementNumber: number;
 
-	/** Все измерения завершены и введены */
+	/** Все числовые ячейки заполнены и валидны (измерения, среднее, км. затухание) */
+	measurementsCompleted: boolean;
+
+	/** Компонент полностью завершён: числа заполнены и вывод об исправности сделан */
 	isCompleted: boolean;
+
+	/** Является ли компонент фактически неисправным */
+	isActuallyFaulty: boolean;
+
+	/** Выбор студента об исправности (true = студент считает неисправным, false = исправным, null = не выбрано) */
+	studentFaultyChoice: boolean | null;
+
+	/** Правильно ли ответил студент об исправности */
+	faultyChoiceIsCorrect: boolean | null;
 }
 
 /** Состояние всех таблиц результатов */
