@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Show } from '../../../lib/components';
 import { publicUrl } from '../../../lib/utils';
 import type { DeviceState } from '../../../types/fot930';
@@ -11,6 +12,9 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 	const { referenceResults, referenceType, fastestSettings } =
 		state.preparation;
 	const { fiberCounter } = state;
+
+	const [showConnectionError, setShowConnectionError] = useState(false);
+
 	const hasReference = referenceResults.length > 0;
 	const isReferenceTypeSelected = state.fastestMainReferenceTypeSelected;
 
@@ -34,6 +38,16 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 			: referenceType === 'POINT_TO_POINT'
 				? 'Точка-точка'
 				: 'Нет этл';
+
+	useEffect(() => {
+		if (state.connectionError) {
+			setShowConnectionError(true);
+			const timer = setTimeout(() => setShowConnectionError(false), 5000);
+			return () => clearTimeout(timer);
+		} else {
+			setShowConnectionError(false);
+		}
+	}, [state.connectionError]);
 
 	return (
 		<div className="flex flex-col w-full h-full text-xs relative">
@@ -145,9 +159,8 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 				)}
 			</div>
 
-			{/* TODO: Сделать вывод ошибки временным */}
 			{/* Overlay для ошибки подключения */}
-			<Show when={state.connectionError}>
+			<Show when={showConnectionError}>
 				<div className="absolute -inset-8 bg-black/15 bg-opacity-20 flex justify-center items-center z-10">
 					<div className="bg-red-50 border-2 border-red-300 px-4 py-3 text-[11px] text-red-800 rounded-lg shadow-lg max-w-xs text-center">
 						<div className="font-semibold text-red-600 mb-1">

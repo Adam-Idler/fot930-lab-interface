@@ -9,8 +9,7 @@ import type {
 } from '../../../types/fot930';
 import {
 	CALCULATION_TOLERANCE,
-	MEASUREMENT_TOLERANCE,
-	MIN_FIBER_LENGTH_FOR_KM_ATTENUATION
+	MEASUREMENT_TOLERANCE
 } from './constants';
 
 export interface ValidationResult {
@@ -115,74 +114,50 @@ export function validateKilometricAttenuation(
 	table: ComponentResultsTable,
 	value: number
 ): ValidationResult {
-	const requiresKmAttenuation =
-		table.fiberLength >= MIN_FIBER_LENGTH_FOR_KM_ATTENUATION;
-
 	let isValid = false;
 	let errorMessage: string | undefined;
 	let updatedRow: WavelengthTableRow;
 
-	// TODO: Проверить надобность. По идеи километрическое затухание не выводится для элементов где оно не требуется
-	if (!requiresKmAttenuation) {
-		// Километрическое затухание не требуется
-		if (value !== 0) {
-			errorMessage = `Не требуется для длины ${table.fiberLength} м`;
-			isValid = false;
-		} else {
-			isValid = true;
-		}
+	// Проверяем, введено ли среднее
+	if (
+		!row.average ||
+		row.average.value === null ||
+		row.average.status !== 'valid'
+	) {
+		errorMessage = 'Сначала введите среднее значение';
+		isValid = false;
 
 		updatedRow = {
 			...row,
 			kilometricAttenuation: {
 				value: value,
 				actualValue: 0,
+				status: 'error',
+				errorMessage: errorMessage
+			}
+		};
+	} else {
+		// Вычисляем фактическое километрическое затухание
+		const fiberLengthKm = table.fiberLength / 1000;
+		const calculatedKmAttenuation = row.average.value / fiberLengthKm;
+
+		// Валидация
+		const diff = Math.abs(value - calculatedKmAttenuation);
+		isValid = diff <= CALCULATION_TOLERANCE;
+
+		if (!isValid) {
+			errorMessage = `Неверное километрическое затухание`;
+		}
+
+		updatedRow = {
+			...row,
+			kilometricAttenuation: {
+				value: value,
+				actualValue: calculatedKmAttenuation,
 				status: isValid ? 'valid' : 'error',
 				errorMessage: isValid ? undefined : errorMessage
 			}
 		};
-	} else {
-		// Проверяем, введено ли среднее
-		if (
-			!row.average ||
-			row.average.value === null ||
-			row.average.status !== 'valid'
-		) {
-			errorMessage = 'Сначала введите среднее значение';
-			isValid = false;
-
-			updatedRow = {
-				...row,
-				kilometricAttenuation: {
-					value: value,
-					actualValue: 0,
-					status: 'error',
-					errorMessage: errorMessage
-				}
-			};
-		} else {
-			// Вычисляем фактическое километрическое затухание
-			const fiberLengthKm = table.fiberLength / 1000;
-			const calculatedKmAttenuation = row.average.value / fiberLengthKm;
-
-			// Валидация
-			const diff = Math.abs(value - calculatedKmAttenuation);
-			isValid = diff <= CALCULATION_TOLERANCE;
-
-			if (!isValid) {
-				errorMessage = `Неверное километрическое затухание`;
-			}
-
-			updatedRow = {
-				...row,
-				kilometricAttenuation: {
-					value: value,
-					actualValue: calculatedKmAttenuation,
-					status: isValid ? 'valid' : 'error',
-					errorMessage: isValid ? undefined : errorMessage
-				}
-			};
-		}
 	}
 
 	return { updatedRow, isValid, errorMessage };

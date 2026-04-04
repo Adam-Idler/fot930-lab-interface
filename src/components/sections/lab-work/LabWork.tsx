@@ -151,7 +151,6 @@ const PROVIDER_SCENARIO: ComplexScenario = {
 
 const complexScenarios: ComplexScenario[] = [PROVIDER_SCENARIO];
 
-// TODO: Добавить завершение лабораторной работы после всех измерений
 export function LabWork() {
 	const [currentStage, setCurrentStage] = useState<LabStage>('INTRODUCTION');
 	const [selectedComponent, setSelectedComponent] = useState<PassiveComponent>(
