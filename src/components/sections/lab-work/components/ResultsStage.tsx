@@ -39,7 +39,10 @@ interface ResultsStageProps {
 	) => boolean;
 
 	/** Callback при выборе студентом варианта исправности компонента */
-	onFaultyChoiceChange: (componentId: string, studentThinksFaulty: boolean) => void;
+	onFaultyChoiceChange: (
+		componentId: string,
+		studentThinksFaulty: boolean
+	) => void;
 }
 
 export function ResultsStage({

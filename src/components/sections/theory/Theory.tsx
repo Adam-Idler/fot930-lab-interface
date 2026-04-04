@@ -10,7 +10,9 @@ export function Theory() {
 	const [currentContent, setCurrentContent] = useState<ContentType>('theory');
 
 	function handleContentChange(content: ContentType) {
-		document.getElementById('main-scroll')?.scrollTo({ top: 0, behavior: 'instant' });
+		document
+			.getElementById('main-scroll')
+			?.scrollTo({ top: 0, behavior: 'instant' });
 		setCurrentContent(content);
 	}
 

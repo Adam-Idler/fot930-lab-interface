@@ -162,8 +162,7 @@ export function InteractiveMeasurementTable({
 					<button
 						type="button"
 						disabled={
-							!table.measurementsCompleted ||
-							table.studentFaultyChoice !== null
+							!table.measurementsCompleted || table.studentFaultyChoice !== null
 						}
 						onClick={() => onFaultyChoiceChange(false)}
 						className={clsx(
@@ -184,8 +183,7 @@ export function InteractiveMeasurementTable({
 					<button
 						type="button"
 						disabled={
-							!table.measurementsCompleted ||
-							table.studentFaultyChoice !== null
+							!table.measurementsCompleted || table.studentFaultyChoice !== null
 						}
 						onClick={() => onFaultyChoiceChange(true)}
 						className={clsx(

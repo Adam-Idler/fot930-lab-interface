@@ -526,9 +526,9 @@ export function TheoryContent() {
 
 				<p className={paragraphClassNames}>
 					При анализе результатов измерений используйте приведённые ниже
-					справочные таблицы для оценки исправности компонентов. Если
-					измеренное значение потерь выходит за границы допустимого диапазона,
-					компонент требует проверки или замены.
+					справочные таблицы для оценки исправности компонентов. Если измеренное
+					значение потерь выходит за границы допустимого диапазона, компонент
+					требует проверки или замены.
 				</p>
 
 				<h3 className="mb-3 font-semibold">
@@ -541,8 +541,12 @@ export function TheoryContent() {
 					</colgroup>
 					<thead>
 						<tr className="bg-sibguti-main text-white">
-							<th className="border border-gray-300 px-4 py-2 text-left">Длина волны</th>
-							<th className="border border-gray-300 px-4 py-2 text-left">Затухание, дБ/км</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">
+								Длина волны
+							</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">
+								Затухание, дБ/км
+							</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -571,28 +575,40 @@ export function TheoryContent() {
 					</colgroup>
 					<thead>
 						<tr className="bg-sibguti-main text-white">
-							<th className="border border-gray-300 px-4 py-2 text-left">Тип соединения</th>
-							<th className="border border-gray-300 px-4 py-2 text-left">Потери, дБ (на шнур)</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">
+								Тип соединения
+							</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">
+								Потери, дБ (на шнур)
+							</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr className="bg-white">
-							<td className="border border-gray-300 px-4 py-2">SC/APC ↔ SC/APC</td>
+							<td className="border border-gray-300 px-4 py-2">
+								SC/APC ↔ SC/APC
+							</td>
 							<td className="border border-gray-300 px-4 py-2">0.10 – 0.25</td>
 						</tr>
 						<tr className="bg-gray-50">
-							<td className="border border-gray-300 px-4 py-2">SC/UPC ↔ SC/UPC</td>
+							<td className="border border-gray-300 px-4 py-2">
+								SC/UPC ↔ SC/UPC
+							</td>
 							<td className="border border-gray-300 px-4 py-2">0.10 – 0.30</td>
 						</tr>
 						<tr className="bg-white">
-							<td className="border border-gray-300 px-4 py-2">SC/APC ↔ SC/UPC</td>
+							<td className="border border-gray-300 px-4 py-2">
+								SC/APC ↔ SC/UPC
+							</td>
 							<td className="border border-gray-300 px-4 py-2">0.30 – 0.50</td>
 						</tr>
 					</tbody>
 				</table>
-				<p className={clsx(paragraphClassNames, 'text-sm text-gray-600 italic')}>
-					Примечание: потери слабо зависят от длины волны, но могут незначительно
-					увеличиваться на 1310 нм.
+				<p
+					className={clsx(paragraphClassNames, 'text-sm text-gray-600 italic')}
+				>
+					Примечание: потери слабо зависят от длины волны, но могут
+					незначительно увеличиваться на 1310 нм.
 				</p>
 
 				<h3 className="mb-3 font-semibold">
@@ -605,17 +621,25 @@ export function TheoryContent() {
 					</colgroup>
 					<thead>
 						<tr className="bg-sibguti-main text-white">
-							<th className="border border-gray-300 px-4 py-2 text-left">Тип соединения</th>
-							<th className="border border-gray-300 px-4 py-2 text-left">Потери, дБ</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">
+								Тип соединения
+							</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">
+								Потери, дБ
+							</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr className="bg-white">
-							<td className="border border-gray-300 px-4 py-2">Качественное соединение</td>
+							<td className="border border-gray-300 px-4 py-2">
+								Качественное соединение
+							</td>
 							<td className="border border-gray-300 px-4 py-2">0.10 – 0.20</td>
 						</tr>
 						<tr className="bg-gray-50">
-							<td className="border border-gray-300 px-4 py-2">Допустимое (эксплуатационное)</td>
+							<td className="border border-gray-300 px-4 py-2">
+								Допустимое (эксплуатационное)
+							</td>
 							<td className="border border-gray-300 px-4 py-2">до 0.30</td>
 						</tr>
 					</tbody>
@@ -631,8 +655,12 @@ export function TheoryContent() {
 					</colgroup>
 					<thead>
 						<tr className="bg-sibguti-main text-white">
-							<th className="border border-gray-300 px-4 py-2 text-left">Тип сплиттера</th>
-							<th className="border border-gray-300 px-4 py-2 text-left">Потери, дБ (1310/1490/1550 нм)</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">
+								Тип сплиттера
+							</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">
+								Потери, дБ (1310/1490/1550 нм)
+							</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -654,7 +682,9 @@ export function TheoryContent() {
 						</tr>
 					</tbody>
 				</table>
-				<p className={clsx(paragraphClassNames, 'text-sm text-gray-600 italic')}>
+				<p
+					className={clsx(paragraphClassNames, 'text-sm text-gray-600 italic')}
+				>
 					Примечание: потери примерно одинаковы для всех длин волн в диапазоне
 					1310–1550 нм.
 				</p>
@@ -669,13 +699,19 @@ export function TheoryContent() {
 					</colgroup>
 					<thead>
 						<tr className="bg-sibguti-main text-white">
-							<th className="border border-gray-300 px-4 py-2 text-left">Источник</th>
-							<th className="border border-gray-300 px-4 py-2 text-left">Потери, дБ</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">
+								Источник
+							</th>
+							<th className="border border-gray-300 px-4 py-2 text-left">
+								Потери, дБ
+							</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr className="bg-white">
-							<td className="border border-gray-300 px-4 py-2">Загрязнение коннектора</td>
+							<td className="border border-gray-300 px-4 py-2">
+								Загрязнение коннектора
+							</td>
 							<td className="border border-gray-300 px-4 py-2">0.2 – 1.0+</td>
 						</tr>
 						<tr className="bg-gray-50">
@@ -683,7 +719,9 @@ export function TheoryContent() {
 							<td className="border border-gray-300 px-4 py-2">0.1 – 0.5</td>
 						</tr>
 						<tr className="bg-white">
-							<td className="border border-gray-300 px-4 py-2">Несовместимость (APC ↔ UPC)</td>
+							<td className="border border-gray-300 px-4 py-2">
+								Несовместимость (APC ↔ UPC)
+							</td>
 							<td className="border border-gray-300 px-4 py-2">до 0.5</td>
 						</tr>
 					</tbody>

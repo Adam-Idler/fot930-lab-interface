@@ -277,7 +277,10 @@ export function useResultsTable() {
 				}
 
 				// Блокируем: числа не заполнены или выбор уже зафиксирован
-				if (!table.measurementsCompleted || table.studentFaultyChoice !== null) {
+				if (
+					!table.measurementsCompleted ||
+					table.studentFaultyChoice !== null
+				) {
 					return prev;
 				}
 

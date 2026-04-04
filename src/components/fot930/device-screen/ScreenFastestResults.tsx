@@ -79,16 +79,36 @@ export function ScreenFastestResults({ state }: ScreenFastestResultsProps) {
 									result.isExcessive && 'bg-red-100'
 								)}
 							>
-								<div className={clsx('p-1 text-[10px] border-r border-gray-300', result.isExcessive && 'text-red-700 font-semibold')}>
+								<div
+									className={clsx(
+										'p-1 text-[10px] border-r border-gray-300',
+										result.isExcessive && 'text-red-700 font-semibold'
+									)}
+								>
 									{result.wavelength}
 								</div>
-								<div className={clsx('p-1 text-[10px] text-center border-r border-gray-300', result.isExcessive && 'text-red-700')}>
+								<div
+									className={clsx(
+										'p-1 text-[10px] text-center border-r border-gray-300',
+										result.isExcessive && 'text-red-700'
+									)}
+								>
 									{result.aToB.toFixed(2)}
 								</div>
-								<div className={clsx('p-1 text-[10px] text-center border-r border-gray-300', result.isExcessive && 'text-red-700')}>
+								<div
+									className={clsx(
+										'p-1 text-[10px] text-center border-r border-gray-300',
+										result.isExcessive && 'text-red-700'
+									)}
+								>
 									{result.bToA.toFixed(2)}
 								</div>
-								<div className={clsx('p-1 text-[10px] text-center font-semibold', result.isExcessive && 'text-red-700')}>
+								<div
+									className={clsx(
+										'p-1 text-[10px] text-center font-semibold',
+										result.isExcessive && 'text-red-700'
+									)}
+								>
 									{result.average.toFixed(2)}
 								</div>
 							</div>

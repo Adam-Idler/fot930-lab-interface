@@ -7,10 +7,7 @@ import type {
 	StudentMeasurementEntry,
 	WavelengthTableRow
 } from '../../../types/fot930';
-import {
-	CALCULATION_TOLERANCE,
-	MEASUREMENT_TOLERANCE
-} from './constants';
+import { CALCULATION_TOLERANCE, MEASUREMENT_TOLERANCE } from './constants';
 
 export interface ValidationResult {
 	updatedRow: WavelengthTableRow;

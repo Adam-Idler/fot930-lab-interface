@@ -22,7 +22,7 @@ const FIBER_ATTENUATION_DB_PER_KM: Record<Wavelength, number> = {
 	850: 2.5, // многомодовое волокно 50/125 мкм (типично 2.5–3.5 дБ/км)
 	1300: 0.5, // многомодовое волокно 50/125 мкм (типично 0.7–1.5 дБ/км)
 	1310: 0.34, // одномодовое G.652/G.657: 0.33–0.36 дБ/км
-	1550: 0.20, // одномодовое G.652/G.657: 0.18–0.22 дБ/км
+	1550: 0.2, // одномодовое G.652/G.657: 0.18–0.22 дБ/км
 	1625: 0.22 // L-диапазон, немного выше 1550 нм
 };
 
@@ -68,8 +68,8 @@ const FAULTY_EXCESS_LOSS_DB = 5.0;
 export const COMPONENT_LOSS_DB: Record<string, Record<Wavelength, number>> = {
 	OPTICAL_CABLE: {
 		850: 0.45, // многомодовый патч-корд, нет таблицы в теории
-		1300: 0.20, // в диапазоне 0.10–0.25 дБ (Таблица 2)
-		1310: 0.20, // в диапазоне 0.10–0.25 дБ (Таблица 2)
+		1300: 0.2, // в диапазоне 0.10–0.25 дБ (Таблица 2)
+		1310: 0.2, // в диапазоне 0.10–0.25 дБ (Таблица 2)
 		1550: 0.18, // немного ниже 1310 нм (Таблица 2)
 		1625: 0.19
 	},
@@ -130,7 +130,10 @@ export const COMPONENT_LOSS_DB: Record<string, Record<Wavelength, number>> = {
  * Для FIBER_COIL вычисляет потери на основе длины волокна (дБ/км × длина),
  * для остальных компонентов берёт значение из COMPONENT_LOSS_DB.
  */
-function getComponentLoss(component: PassiveComponent, wavelength: Wavelength): number {
+function getComponentLoss(
+	component: PassiveComponent,
+	wavelength: Wavelength
+): number {
 	if (component.type === 'FIBER_COIL') {
 		const attenuationPerKm = FIBER_ATTENUATION_DB_PER_KM[wavelength];
 		const lengthKm = component.fiberLength / 1000;
@@ -146,10 +149,10 @@ function getComponentLoss(component: PassiveComponent, wavelength: Wavelength): 
 const COMPONENT_LOSS_UPPER_BOUND: Record<string, Record<Wavelength, number>> = {
 	OPTICAL_CABLE: {
 		850: 1.0,
-		1300: 0.30, // Таблица 2: SC/UPC ↔ SC/UPC до 0.30 дБ
-		1310: 0.30,
-		1550: 0.30,
-		1625: 0.30
+		1300: 0.3, // Таблица 2: SC/UPC ↔ SC/UPC до 0.30 дБ
+		1310: 0.3,
+		1550: 0.3,
+		1625: 0.3
 	},
 	SPLITTER_1_2: {
 		850: 4.5,
@@ -203,7 +206,7 @@ const COMPONENT_LOSS_UPPER_BOUND: Record<string, Record<Wavelength, number>> = {
 const FIBER_ATTENUATION_UPPER_BOUND_DB_PER_KM: Record<Wavelength, number> = {
 	850: 3.5, // MMF 50/125 мкм: верхняя граница
 	1300: 1.5, // MMF 50/125 мкм: верхняя граница
-	1310: 0.40, // SMF G.652: немного выше максимума 0.36 дБ/км
+	1310: 0.4, // SMF G.652: немного выше максимума 0.36 дБ/км
 	1550: 0.25, // SMF G.652: немного выше максимума 0.22 дБ/км
 	1625: 0.28
 };
@@ -404,7 +407,12 @@ function calculateComplexChainLoss(
 		}
 
 		// Фиксированные избыточные потери для неисправных компонентов
-		if (isFaultyMeasurement(component, isSplitterType(component.type) ? splitterOutput : undefined)) {
+		if (
+			isFaultyMeasurement(
+				component,
+				isSplitterType(component.type) ? splitterOutput : undefined
+			)
+		) {
 			componentLoss += FAULTY_EXCESS_LOSS_DB;
 		}
 
@@ -574,7 +582,11 @@ export function generateFiberMeasurement(
 				});
 			} else {
 				// Если длины волны нет в предыдущем результате, генерируем новое
-				const result = generateFreshMeasurement(component, wavelength, splitterOutput);
+				const result = generateFreshMeasurement(
+					component,
+					wavelength,
+					splitterOutput
+				);
 				if ('error' in result) return result;
 				bidirectionalResults.push(result);
 			}
@@ -582,7 +594,11 @@ export function generateFiberMeasurement(
 	} else {
 		// Нет предыдущего результата - генерируем новые измерения
 		for (const wavelength of wavelengths) {
-			const result = generateFreshMeasurement(component, wavelength, splitterOutput);
+			const result = generateFreshMeasurement(
+				component,
+				wavelength,
+				splitterOutput
+			);
 			if ('error' in result) return result;
 			bidirectionalResults.push(result);
 		}
@@ -617,7 +633,8 @@ function generateFreshMeasurement(
 
 	if (faulty) {
 		// Неисправный компонент: базовые потери + фиксированный избыток, минимальная вариация
-		const baseLoss = getComponentLoss(component, wavelength) + FAULTY_EXCESS_LOSS_DB;
+		const baseLoss =
+			getComponentLoss(component, wavelength) + FAULTY_EXCESS_LOSS_DB;
 		const variation = gaussianRandom() * 0.05;
 		const aToB = parseFloat((baseLoss + variation + connectorLoss).toFixed(2));
 		const asymmetry = gaussianRandom() * 0.05;
@@ -627,14 +644,19 @@ function generateFreshMeasurement(
 	}
 
 	// Нормальный компонент: стандартная генерация
-	const baseResult = generateSingleComponentMeasurement(component, 'LOSS', wavelength);
+	const baseResult = generateSingleComponentMeasurement(
+		component,
+		'LOSS',
+		wavelength
+	);
 	if ('error' in baseResult) return baseResult;
 
 	const aToB = baseResult.value;
 	const asymmetry = gaussianRandom() * 0.15;
 	const bToA = aToB + asymmetry;
 	const average = (aToB + bToA) / 2;
-	const upperBound = getComponentLossUpperBound(component, wavelength) + connectorLoss;
+	const upperBound =
+		getComponentLossUpperBound(component, wavelength) + connectorLoss;
 
 	return {
 		wavelength,
