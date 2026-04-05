@@ -7,19 +7,34 @@
 	"main": "dist-electron/main.js",
 	"build": {
 		"appId": "com.fot930.lab.interface",
+		"asar": true,
+		"electronLanguages": [
+			"ru",
+			"en-US"
+		],
 		"win": {
-			"target": {
-				"target": "nsis",
-				"arch": [
-					"x64",
-					"ia32"
-				]
-			},
+			"target": [
+				{
+					"target": "nsis",
+					"arch": ["x64"]
+				},
+				{
+					"target": "portable",
+					"arch": ["x64"]
+				}
+			],
 			"icon": "icon.png"
+		},
+		"compression": "maximum",
+		"nsis": {
+			"oneClick": true,
+			"perMachine": false
 		},
 		"files": [
 			"dist/**/*",
-			"dist-electron/*"
+			"dist-electron/*",
+			"!dist/win-unpacked/**/*",
+			"!dist/win-ia32-unpacked/**/*"
 		]
 	},
 	"scripts": {
@@ -54,6 +69,7 @@
 		"eslint-plugin-react-hooks": "^5.2.0",
 		"eslint-plugin-react-refresh": "^0.4.22",
 		"globals": "^16.4.0",
+		"terser": "^5.46.1",
 		"typescript": "~5.9.3",
 		"typescript-eslint": "^8.45.0",
 		"vite": "^7.1.7",

@@ -24,5 +24,21 @@ export default defineConfig({
 	server: {
 		host: '0.0.0.0',
 		port: 1420
+	},
+	build: {
+		minify: 'terser',
+		terserOptions: {
+			compress: {
+				drop_console: true,
+				drop_debugger: true
+			}
+		},
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					react: ['react', 'react-dom']
+				}
+			}
+		}
 	}
 });
