@@ -417,7 +417,7 @@ export function LabWork() {
 						/>
 						<StageButton
 							stage="RESULTS_ANALYSIS"
-							label="Результаты"
+							label="Анализ результатов"
 							active={currentStage === 'RESULTS_ANALYSIS'}
 							onClick={() => handleStageChange('RESULTS_ANALYSIS')}
 						/>
