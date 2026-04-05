@@ -30,11 +30,12 @@
 			"oneClick": true,
 			"perMachine": false
 		},
+		"directories": {
+			"output": "release"
+		},
 		"files": [
 			"dist/**/*",
-			"dist-electron/*",
-			"!dist/win-unpacked/**/*",
-			"!dist/win-ia32-unpacked/**/*"
+			"dist-electron/*"
 		]
 	},
 	"scripts": {
