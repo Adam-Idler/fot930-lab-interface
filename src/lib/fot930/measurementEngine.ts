@@ -344,7 +344,19 @@ export function generateComplexSchemeMeasurement(
 }
 
 /**
- * Проверяет корректность схемы подключения
+ * Нормализует ID взаимозаменяемых элементов схемы (эталонных шнуров и адаптеров),
+ * отрезая числовой суффикс. Это позволяет не различать, например,
+ * connector_apc_1 и connector_apc_2 при сравнении позиций.
+ * ID приборов (tester, tester_2) и компонентов остаются без изменений.
+ */
+function normalizeElementId(id: string): string {
+	return id.replace(/^(connector|adapter)_(apc|upc)_\d+$/, '$1_$2');
+}
+
+/**
+ * Проверяет корректность схемы подключения.
+ * Для эталонных шнуров и адаптеров порядок номеров не важен —
+ * достаточно, чтобы в каждой позиции стоял элемент правильного типа.
  */
 export function validateConnectionScheme(scheme: ConnectionScheme): {
 	valid: boolean;
@@ -360,9 +372,12 @@ export function validateConnectionScheme(scheme: ConnectionScheme): {
 		};
 	}
 
-	// Проверяем порядок элементов
+	// Проверяем порядок элементов, нормализуя взаимозаменяемые ID
 	for (let i = 0; i < sequence.length; i++) {
-		if (sequence[i].id !== correctSequence[i]) {
+		if (
+			normalizeElementId(sequence[i].id) !==
+			normalizeElementId(correctSequence[i])
+		) {
 			return {
 				valid: false,
 				error: `Неверный элемент на ${i + 1} позиции`

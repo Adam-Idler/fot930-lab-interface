@@ -114,7 +114,7 @@ const availableComponents: PassiveComponent[] = [
 // ============================================================
 
 const SCENARIO_MAGISTRAL: PassiveComponent = {
-	id: 'scenario_magistral_10km',
+	id: 'scenario_magistral',
 	icon: '/images/scheme/optic-fiber-coil.png',
 	type: 'FIBER_COIL',
 	label: 'Магистральный кабель ОКСН-G.652D (10 км)',
@@ -125,30 +125,45 @@ const SCENARIO_MAGISTRAL: PassiveComponent = {
 
 const SCENARIO_SPLITTER: PassiveComponent = {
 	id: 'scenario_splitter_1_8',
-	icon: '/images/scheme/splitter-sc-upc-1-8.png',
+	icon: '/images/scheme/splitter-sc-apc-1-8.png',
 	type: 'SPLITTER_1_8',
-	label: 'Сплиттер 1:8 SC/APC (распределительный)',
+	label: 'Сплиттер 1:8 SC/APC',
 	typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_8,
 	connectorType: 'SC_APC',
 	fiberLength: 2
 };
 
-const SCENARIO_SUBSCRIBER: PassiveComponent = {
-	id: 'scenario_subscriber_2km',
-	icon: '/images/scheme/optic-fiber-coil.png',
+const SCENARIO_BUILDING_CABLE: PassiveComponent = {
+	id: 'scenario_building_cable',
+	icon: '/images/scheme/optic-fiber-50m.png',
 	type: 'FIBER_COIL',
-	label: 'Абонентский кабель ОККС-G.652D (2 км)',
+	label: 'Внутридомовой оптический кабель G.652 (50 м)',
 	typicalLoss: COMPONENT_LOSS_DB.FIBER_COIL,
 	connectorType: 'SC_APC',
-	fiberLength: 2000
+	fiberLength: 50
+};
+
+const SCENARIO_SUBSCRIBER_CORD: PassiveComponent = {
+	id: 'scenario_subscriber_cord',
+	icon: '/images/scheme/sc-apc-g-652.png',
+	type: 'OPTICAL_CABLE',
+	label: 'Абонентский оптический шнур SC/APC G.652 (5 м)',
+	typicalLoss: COMPONENT_LOSS_DB.OPTICAL_CABLE,
+	connectorType: 'SC_APC',
+	fiberLength: 5
 };
 
 const PROVIDER_SCENARIO: ComplexScenario = {
 	id: 'provider_scenario',
 	label: 'Комбинация элементов',
 	description:
-		'Магистральный кабель (10 км) → Сплиттер 1:8 → Абонентский кабель (2 км)',
-	chain: [SCENARIO_MAGISTRAL, SCENARIO_SPLITTER, SCENARIO_SUBSCRIBER]
+		'Магистральный кабель (10 км) → Сплиттер 1:8 → Внутридомовой кабель (50 м) → Абонентский шнур (5 м)',
+	chain: [
+		SCENARIO_MAGISTRAL,
+		SCENARIO_SPLITTER,
+		SCENARIO_BUILDING_CABLE,
+		SCENARIO_SUBSCRIBER_CORD
+	]
 };
 
 const complexScenarios: ComplexScenario[] = [PROVIDER_SCENARIO];
@@ -163,17 +178,7 @@ export function LabWork() {
 	);
 	const [connectionScheme, setConnectionScheme] = useState<ConnectionScheme>({
 		sequence: [],
-		correctSequence: [
-			'tester',
-			selectedComponent.connectorType === 'SC_APC'
-				? 'connector_apc_1'
-				: 'connector_upc_1',
-			selectedComponent.id,
-			selectedComponent.connectorType === 'SC_APC'
-				? 'connector_apc_2'
-				: 'connector_upc_2',
-			'tester_2'
-		]
+		correctSequence: buildSingleComponentSequence(selectedComponent)
 	});
 
 	const [deviceState, setDeviceState] =
@@ -192,34 +197,18 @@ export function LabWork() {
 	// Обновляем correctSequence при смене компонента или сценария
 	useEffect(() => {
 		if (activeScenario) {
-			// Комплексный сценарий: все компоненты цепи в схеме
+			// Комплексный сценарий: компоненты цепи с адаптерами между каждым
 			setConnectionScheme((prev) => ({
 				...prev,
 				sequence: [],
-				correctSequence: [
-					'tester',
-					'connector_apc_1',
-					...activeScenario.chain.map((c) => c.id),
-					'connector_apc_2',
-					'tester_2'
-				]
+				correctSequence: buildScenarioSequence(activeScenario.chain)
 			}));
 		} else {
-			// Одиночный компонент
+			// Одиночный компонент: с адаптерами на обоих концах
 			setConnectionScheme((prev) => ({
 				...prev,
 				sequence: [],
-				correctSequence: [
-					'tester',
-					selectedComponent.connectorType === 'SC_APC'
-						? 'connector_apc_1'
-						: 'connector_upc_1',
-					selectedComponent.id,
-					selectedComponent.connectorType === 'SC_APC'
-						? 'connector_apc_2'
-						: 'connector_upc_2',
-					'tester_2'
-				]
+				correctSequence: buildSingleComponentSequence(selectedComponent)
 			}));
 		}
 	}, [selectedComponent, activeScenario]);
@@ -548,6 +537,39 @@ function getStageTitle(stage: LabStage): string {
 		RESULTS_ANALYSIS: 'Анализ результатов'
 	};
 	return titles[stage];
+}
+
+/**
+ * Строит correctSequence для одиночного компонента с адаптерами:
+ * tester → ref_cord_1 → adapter_1 → component → adapter_2 → ref_cord_2 → tester_2
+ */
+function buildSingleComponentSequence(component: PassiveComponent): string[] {
+	const isApc = component.connectorType === 'SC_APC';
+	return [
+		'tester',
+		isApc ? 'connector_apc_1' : 'connector_upc_1',
+		isApc ? 'adapter_apc_1' : 'adapter_upc_1',
+		component.id,
+		isApc ? 'adapter_apc_2' : 'adapter_upc_2',
+		isApc ? 'connector_apc_2' : 'connector_upc_2',
+		'tester_2'
+	];
+}
+
+/**
+ * Строит correctSequence для сценария с адаптерами между каждым компонентом:
+ * tester → ref_1 → adapter_1 → c1 → adapter_2 → c2 → ... → adapter_N+1 → ref_2 → tester_2
+ */
+function buildScenarioSequence(chain: PassiveComponent[]): string[] {
+	const result: string[] = ['tester', 'connector_apc_1'];
+	for (let i = 0; i < chain.length; i++) {
+		result.push(`adapter_apc_${i + 1}`);
+		result.push(chain[i].id);
+	}
+	result.push(`adapter_apc_${chain.length + 1}`);
+	result.push('connector_apc_2');
+	result.push('tester_2');
+	return result;
 }
 
 function getStageInstructions(stage: LabStage): string {

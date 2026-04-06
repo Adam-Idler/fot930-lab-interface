@@ -33,7 +33,7 @@ function getConnector(
 			type: 'CONNECTOR' as const,
 			icon: '/images/scheme/reference-sc-apc.png',
 			id: `connector_apc_${index}`,
-			label: `Эталонный SC/APC ${index}`,
+			label: `Эталонный шнур SC/APC`,
 			connectorType: 'SC_APC' as const
 		};
 	}
@@ -42,7 +42,32 @@ function getConnector(
 		type: 'CONNECTOR' as const,
 		icon: '/images/scheme/reference-sc-upc.png',
 		id: `connector_upc_${index}`,
-		label: `Эталонный SC/UPC ${index}`,
+		label: `Эталонный шнур SC/UPC`,
+		connectorType: 'SC_UPC' as const
+	};
+}
+
+function getAdapter(
+	connectorType: PassiveComponent['connectorType'],
+	index: number
+): ConnectionElement {
+	if (connectorType === 'SC_APC') {
+		return {
+			type: 'COMPONENT' as const,
+			icon: '/images/scheme/adapter-sc-apc.png',
+			id: `adapter_apc_${index}`,
+			label: 'Розетка SC/APC',
+			componentType: 'ADAPTER' as const,
+			connectorType: 'SC_APC' as const
+		};
+	}
+
+	return {
+		type: 'COMPONENT' as const,
+		icon: '/images/scheme/adapter-sc-upc.png',
+		id: `adapter_upc_${index}`,
+		label: 'Розетка SC/UPC',
+		componentType: 'ADAPTER' as const,
 		connectorType: 'SC_UPC' as const
 	};
 }
@@ -84,14 +109,18 @@ export function ConnectionSchemeStage({
 					icon: '/images/instruction/fot-930.png'
 				},
 				getConnector(endConnectorType, 1),
-				...scenarioChain.map((c) => ({
-					type: 'COMPONENT' as const,
-					id: c.id,
-					label: c.label,
-					icon: c.icon,
-					componentType: c.type,
-					splitterOutput: isSplitterType(c.type) ? 1 : undefined
-				})),
+				...scenarioChain.flatMap((c, i) => [
+					getAdapter(endConnectorType, i + 1),
+					{
+						type: 'COMPONENT' as const,
+						id: c.id,
+						label: c.label,
+						icon: c.icon,
+						componentType: c.type,
+						splitterOutput: isSplitterType(c.type) ? 1 : undefined
+					}
+				]),
+				getAdapter(endConnectorType, scenarioChain.length + 1),
 				getConnector(endConnectorType, 2),
 				{
 					type: 'TESTER' as const,
@@ -108,7 +137,7 @@ export function ConnectionSchemeStage({
 					icon: '/images/instruction/fot-930.png'
 				},
 				getConnector(currentComponent.connectorType, 1),
-				getConnector(currentComponent.connectorType, 2),
+				getAdapter(currentComponent.connectorType, 1),
 				{
 					type: 'COMPONENT' as const,
 					id: currentComponent.id,
@@ -117,6 +146,8 @@ export function ConnectionSchemeStage({
 					componentType: currentComponent.type,
 					splitterOutput: isSplitter ? 1 : undefined
 				},
+				getAdapter(currentComponent.connectorType, 2),
+				getConnector(currentComponent.connectorType, 2),
 				{
 					type: 'TESTER' as const,
 					id: 'tester_2',
