@@ -54,9 +54,12 @@ const MEASUREMENT_CONFIG = {
 
 /**
  * Фиксированные избыточные потери для неисправных компонентов (dB).
- * Прибавляются к типичным потерям — результат стабильно превышает норму.
+ * Добавляются к типичным потерям — результат стабильно превышает допустимую норму.
+ * Подобрано с учётом минимального запаса компонентов: оптический шнур (0.10 dB),
+ * сплиттер 1:4 (0.30 dB). При значении 0.40 оба компонента гарантированно
+ * превышают верхнюю границу из справочных таблиц.
  */
-const FAULTY_EXCESS_LOSS_DB = 5.0;
+const FAULTY_EXCESS_LOSS_DB = 0.40;
 
 /**
  * Типичные значения затухания компонентов (дБ).
@@ -406,18 +409,22 @@ function calculateComplexChainLoss(
 			componentLoss += getSplitterOutputOffset(splitterOutput, outputCount);
 		}
 
-		// Фиксированные избыточные потери для неисправных компонентов
-		if (
-			isFaultyMeasurement(
-				component,
-				isSplitterType(component.type) ? splitterOutput : undefined
-			)
-		) {
+		const componentUpperBound = getComponentLossUpperBound(component, wavelength);
+		const componentFaulty = isFaultyMeasurement(
+			component,
+			isSplitterType(component.type) ? splitterOutput : undefined
+		);
+
+		if (componentFaulty) {
+			// Неисправный компонент: добавляем фиксированные избыточные потери
 			componentLoss += FAULTY_EXCESS_LOSS_DB;
+		} else {
+			// Исправный компонент: зажимаем до верхней границы из справочных таблиц
+			componentLoss = Math.min(componentLoss, componentUpperBound);
 		}
 
 		totalLoss += componentLoss;
-		upperBoundTotal += getComponentLossUpperBound(component, wavelength);
+		upperBoundTotal += componentUpperBound;
 	}
 
 	// Два коннектора на концах цепи
@@ -643,27 +650,27 @@ function generateFreshMeasurement(
 		return { wavelength, aToB, bToA, average, isExcessive: true };
 	}
 
-	// Нормальный компонент: стандартная генерация
-	const baseResult = generateSingleComponentMeasurement(
-		component,
-		'LOSS',
-		wavelength
-	);
-	if ('error' in baseResult) return baseResult;
+	// Исправный компонент: потери строго в пределах допустимого диапазона из таблиц теории
+	const baseLoss = getComponentLoss(component, wavelength);
+	const componentUpperBound = getComponentLossUpperBound(component, wavelength);
 
-	const aToB = baseResult.value;
-	const asymmetry = gaussianRandom() * 0.15;
-	const bToA = aToB + asymmetry;
+	// Зажимаем потери компонента по верхней границе — исправный компонент
+	// не может выдавать значения выше нормы независимо от случайной вариации
+	const variation = gaussianRandom() * MEASUREMENT_CONFIG.MEASUREMENT_STD_DEV;
+	const componentLoss = Math.min(baseLoss + variation, componentUpperBound);
+
+	// Небольшая асимметрия между направлениями (реальный шум измерений ≤ 0.05 dB)
+	const asymmetry = gaussianRandom() * 0.05;
+	const aToB = parseFloat((componentLoss + connectorLoss).toFixed(2));
+	const bToA = parseFloat((componentLoss + asymmetry + connectorLoss).toFixed(2));
 	const average = (aToB + bToA) / 2;
-	const upperBound =
-		getComponentLossUpperBound(component, wavelength) + connectorLoss;
 
 	return {
 		wavelength,
-		aToB: parseFloat(aToB.toFixed(2)),
-		bToA: parseFloat(bToA.toFixed(2)),
+		aToB,
+		bToA,
 		average: parseFloat(average.toFixed(2)),
-		isExcessive: average > upperBound
+		isExcessive: false
 	};
 }
 
