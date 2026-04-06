@@ -106,7 +106,7 @@ export function ScreenFastestMain({ state }: ScreenFastestMainProps) {
 
 						<div className="grow">
 							<div className="flex gap-3 items-center">
-								<div className="shrink-0 text-fot930-blue">Опор. зн. (дБ)</div>
+								<div className="shrink-0 text-fot930-blue">Опор. зн. (дБм)</div>
 								<div className="w-full h-px bg-fot930-blue"></div>
 							</div>
 

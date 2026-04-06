@@ -688,29 +688,26 @@ export function generateReferenceMeasurement(
 	portStatus: PortStatus,
 	previousResults?: { wavelength: Wavelength; value: number }[]
 ): { wavelength: Wavelength; value: number }[] {
-	// Базовые потери для обратной петли (loopback):
+	// Метод обратной петли (loopback): опорное значение = мощность источника − потери петли
+	// Потери петли:
 	// - 2 коннектора (на приборе и в петле): 2 × 0.3 = 0.6 dB
-	// - Патч-корд (~1 метр): ~0.1 dB
+	// - Патч-корд петли (~1 метр): ~0.1 dB
 	// - Итого: ~0.7 dB
-	const BASE_LOOPBACK_LOSS: Record<Wavelength, number> = {
-		850: 0.75,
-		1300: 0.72,
-		1310: 0.7,
-		1550: 0.68,
-		1625: 0.69
-	};
+	const BASE_LOOPBACK_LOSS = 0.7;
 
-	// Дополнительные потери от грязных портов
-	const DIRTY_PORT_PENALTY = 0.8; // +0.8 dB для грязных портов
+	// Дополнительные потери при грязных портах
+	const DIRTY_PORT_PENALTY = 0.8;
 
 	return wavelengths.map((wavelength) => {
-		// Генерируем ожидаемое базовое значение для текущего состояния портов
-		let expectedBaseLoss = BASE_LOOPBACK_LOSS[wavelength];
+		const sourcePower = MEASUREMENT_CONFIG.SOURCE_POWER[wavelength];
+		let loopbackLoss = BASE_LOOPBACK_LOSS;
 
-		// Добавляем penalty если порты грязные или в процессе очистки
 		if (portStatus === 'dirty' || portStatus === 'cleaning') {
-			expectedBaseLoss += DIRTY_PORT_PENALTY;
+			loopbackLoss += DIRTY_PORT_PENALTY;
 		}
+
+		// Ожидаемое опорное значение в дБм
+		const expectedValue = sourcePower - loopbackLoss;
 
 		// Проверяем есть ли предыдущее измерение для этой длины волны
 		const prevResult = previousResults?.find(
@@ -718,30 +715,24 @@ export function generateReferenceMeasurement(
 		);
 
 		if (prevResult) {
-			// Проверяем отличается ли предыдущее значение от ожидаемого для текущего состояния
-			// Если разница больше 0.3 dB - значит состояние портов изменилось
-			const difference = Math.abs(prevResult.value - expectedBaseLoss);
+			// Если предыдущее значение близко к ожидаемому — состояние портов не изменилось
+			const difference = Math.abs(prevResult.value - expectedValue);
 
 			if (difference < 0.3) {
-				// Состояние портов не изменилось: добавляем минимальную вариацию (±0.01-0.02 dB)
+				// Добавляем минимальную вариацию (±0.01-0.02 dBм)
 				const minimalVariation = gaussianRandom() * 0.015;
-				const value = prevResult.value + minimalVariation;
 				return {
 					wavelength,
-					value: parseFloat(value.toFixed(2))
+					value: parseFloat((prevResult.value + minimalVariation).toFixed(2))
 				};
 			}
-			// Иначе: состояние портов изменилось - генерируем новое базовое значение
 		}
 
-		// Первое измерение или после изменения состояния портов:
-		// генерируем новое базовое значение с вариацией
+		// Первое измерение или состояние портов изменилось
 		const variation = gaussianRandom() * MEASUREMENT_CONFIG.MEASUREMENT_STD_DEV;
-		const value = expectedBaseLoss + variation;
-
 		return {
 			wavelength,
-			value: parseFloat(value.toFixed(2))
+			value: parseFloat((expectedValue + variation).toFixed(2))
 		};
 	});
 }
