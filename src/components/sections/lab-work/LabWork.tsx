@@ -423,20 +423,20 @@ export function LabWork() {
 						/>
 						{/* TODO: Вернуть условие с разработкой */}
 						{/* {import.meta.env.DEV && */}
-							{!deviceState.preparation.isReadyForMeasurements && (
-								<button
-									type="button"
-									className="ml-auto shrink-0 text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2"
-									onClick={() => {
-										if (deviceDispatchRef.current) {
-											deviceDispatchRef.current({ type: 'SKIP_PREPARATION' });
-										}
-										handleStageChange('CONNECTION_SCHEME');
-									}}
-								>
-									Пропустить подготовку
-								</button>
-							)}
+						{!deviceState.preparation.isReadyForMeasurements && (
+							<button
+								type="button"
+								className="ml-auto shrink-0 text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2"
+								onClick={() => {
+									if (deviceDispatchRef.current) {
+										deviceDispatchRef.current({ type: 'SKIP_PREPARATION' });
+									}
+									handleStageChange('CONNECTION_SCHEME');
+								}}
+							>
+								Пропустить подготовку
+							</button>
+						)}
 					</div>
 				</div>
 

@@ -59,7 +59,7 @@ const MEASUREMENT_CONFIG = {
  * сплиттер 1:4 (0.30 dB). При значении 0.40 оба компонента гарантированно
  * превышают верхнюю границу из справочных таблиц.
  */
-const FAULTY_EXCESS_LOSS_DB = 0.40;
+const FAULTY_EXCESS_LOSS_DB = 0.4;
 
 /**
  * Типичные значения затухания компонентов (дБ).
@@ -409,7 +409,10 @@ function calculateComplexChainLoss(
 			componentLoss += getSplitterOutputOffset(splitterOutput, outputCount);
 		}
 
-		const componentUpperBound = getComponentLossUpperBound(component, wavelength);
+		const componentUpperBound = getComponentLossUpperBound(
+			component,
+			wavelength
+		);
 		const componentFaulty = isFaultyMeasurement(
 			component,
 			isSplitterType(component.type) ? splitterOutput : undefined
@@ -662,7 +665,9 @@ function generateFreshMeasurement(
 	// Небольшая асимметрия между направлениями (реальный шум измерений ≤ 0.05 dB)
 	const asymmetry = gaussianRandom() * 0.05;
 	const aToB = parseFloat((componentLoss + connectorLoss).toFixed(2));
-	const bToA = parseFloat((componentLoss + asymmetry + connectorLoss).toFixed(2));
+	const bToA = parseFloat(
+		(componentLoss + asymmetry + connectorLoss).toFixed(2)
+	);
 	const average = (aToB + bToA) / 2;
 
 	return {

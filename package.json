@@ -16,11 +16,15 @@
 			"target": [
 				{
 					"target": "nsis",
-					"arch": ["x64"]
+					"arch": [
+						"x64"
+					]
 				},
 				{
 					"target": "portable",
-					"arch": ["x64"]
+					"arch": [
+						"x64"
+					]
 				}
 			],
 			"icon": "icon.png"
@@ -42,7 +46,9 @@
 		"dev": "vite",
 		"pack": "electron-builder --dir",
 		"build": "vite build",
+		"build:web": "vite build --config vite.web.config.ts",
 		"dist": "vite build && electron-builder",
+		"dist:web": "vite build --config vite.web.config.ts",
 		"lint": "eslint . && biome check --write .",
 		"vite:preview": "vite preview",
 		"tailwind:init": "tailwindcss init -p",
@@ -58,6 +64,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.2",
+		"@csstools/postcss-oklab-function": "^5.0.2",
 		"@eslint/js": "^9.36.0",
 		"@tailwindcss/vite": "^4.1.16",
 		"@types/node": "^24.6.0",

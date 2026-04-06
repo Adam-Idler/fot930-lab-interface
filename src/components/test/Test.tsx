@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { storage } from '../../lib/storage';
 import { useRegistration } from '../registration-form';
 import { Progress } from './Progress';
 import { Question } from './Question';
@@ -121,7 +122,7 @@ export function Test({ questions, testID }: TestProps) {
 			};
 
 			setStudent(updatedStudent);
-			window.electronAPI.saveStudent(updatedStudent);
+			storage.saveStudent(updatedStudent);
 
 			return;
 		}
@@ -165,7 +166,7 @@ export function Test({ questions, testID }: TestProps) {
 
 		const updatedStudent = { ...student, [studentTestResultKey]: undefined };
 		setStudent(updatedStudent);
-		window.electronAPI.saveStudent(updatedStudent);
+		storage.saveStudent(updatedStudent);
 	}, [student, studentTestResultKey, setStudent]);
 
 	if (isEnd) {

@@ -1,4 +1,5 @@
 import type { FormEvent } from 'react';
+import { storage } from '../../lib/storage';
 import { useRegistration } from './registrationContext';
 
 export function RegistrationForm() {
@@ -6,7 +7,7 @@ export function RegistrationForm() {
 
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
-		await window.electronAPI.saveStudent(student);
+		await storage.saveStudent(student);
 		setIsRegistered(true);
 	};
 

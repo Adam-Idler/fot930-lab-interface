@@ -1,4 +1,5 @@
 import { type PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import { storage } from '../../lib/storage';
 import type { Student } from '../../types';
 import {
 	defaultStudent,
@@ -12,7 +13,7 @@ export function RegistrationProvider({ children }: PropsWithChildren) {
 
 	useEffect(() => {
 		// Пробуем загрузить данные из файла при запуске
-		window.electronAPI.loadStudent().then((savedStudent) => {
+		storage.loadStudent().then((savedStudent) => {
 			if (savedStudent) {
 				setStudent(savedStudent);
 				setIsRegistered(true);
