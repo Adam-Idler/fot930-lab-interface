@@ -151,56 +151,63 @@ export function InteractiveMeasurementTable({
 			{/* Вывод об исправности компонента */}
 			<div className="px-4 py-3 border-t bg-gray-50">
 				<div className="flex flex-wrap items-center gap-3">
-					<span
-						className={clsx(
-							'text-sm font-semibold',
-							table.measurementsCompleted ? 'text-gray-700' : 'text-gray-400'
-						)}
-					>
-						Исправна ли линия?
-					</span>
-					<button
-						type="button"
-						disabled={
-							!table.measurementsCompleted || table.studentFaultyChoice !== null
-						}
-						onClick={() => onFaultyChoiceChange(false)}
-						className={clsx(
-							'px-4 py-1.5 text-sm rounded-md border-2 font-medium transition-colors',
-							!table.measurementsCompleted ||
-								(table.studentFaultyChoice !== null &&
-									table.studentFaultyChoice !== false)
-								? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-								: table.studentFaultyChoice === false
-									? table.faultyChoiceIsCorrect === true
-										? 'bg-green-100 border-green-500 text-green-800'
-										: 'bg-red-100 border-red-500 text-red-800'
-									: 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
-						)}
-					>
-						Да, исправна
-					</button>
-					<button
-						type="button"
-						disabled={
-							!table.measurementsCompleted || table.studentFaultyChoice !== null
-						}
-						onClick={() => onFaultyChoiceChange(true)}
-						className={clsx(
-							'px-4 py-1.5 text-sm rounded-md border-2 font-medium transition-colors',
-							!table.measurementsCompleted ||
-								(table.studentFaultyChoice !== null &&
-									table.studentFaultyChoice !== true)
-								? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-								: table.studentFaultyChoice === true
-									? table.faultyChoiceIsCorrect === true
-										? 'bg-green-100 border-green-500 text-green-800'
-										: 'bg-red-100 border-red-500 text-red-800'
-									: 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
-						)}
-					>
-						Нет, неисправна
-					</button>
+					{(() => {
+						const isComplex = table.componentLabel.startsWith('Комбинация элементов');
+						return (
+							<>
+								<span
+									className={clsx(
+										'text-sm font-semibold',
+										table.measurementsCompleted ? 'text-gray-700' : 'text-gray-400'
+									)}
+								>
+									{isComplex ? 'Исправна ли линия?' : 'Исправен ли компонент?'}
+								</span>
+								<button
+									type="button"
+									disabled={
+										!table.measurementsCompleted || table.studentFaultyChoice !== null
+									}
+									onClick={() => onFaultyChoiceChange(false)}
+									className={clsx(
+										'px-4 py-1.5 text-sm rounded-md border-2 font-medium transition-colors',
+										!table.measurementsCompleted ||
+											(table.studentFaultyChoice !== null &&
+												table.studentFaultyChoice !== false)
+											? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+											: table.studentFaultyChoice === false
+												? table.faultyChoiceIsCorrect === true
+													? 'bg-green-100 border-green-500 text-green-800'
+													: 'bg-red-100 border-red-500 text-red-800'
+												: 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
+									)}
+								>
+									{isComplex ? 'Да, исправна' : 'Да, исправен'}
+								</button>
+								<button
+									type="button"
+									disabled={
+										!table.measurementsCompleted || table.studentFaultyChoice !== null
+									}
+									onClick={() => onFaultyChoiceChange(true)}
+									className={clsx(
+										'px-4 py-1.5 text-sm rounded-md border-2 font-medium transition-colors',
+										!table.measurementsCompleted ||
+											(table.studentFaultyChoice !== null &&
+												table.studentFaultyChoice !== true)
+											? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+											: table.studentFaultyChoice === true
+												? table.faultyChoiceIsCorrect === true
+													? 'bg-green-100 border-green-500 text-green-800'
+													: 'bg-red-100 border-red-500 text-red-800'
+												: 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
+									)}
+								>
+									{isComplex ? 'Нет, неисправна' : 'Нет, неисправен'}
+								</button>
+							</>
+						);
+					})()}
 					{!table.measurementsCompleted && (
 						<span className="text-xs text-gray-400 italic">
 							Доступно после заполнения таблицы
