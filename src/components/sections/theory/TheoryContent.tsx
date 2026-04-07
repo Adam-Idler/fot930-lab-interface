@@ -4,7 +4,8 @@ import {
 	markedListClassNames,
 	orderedListClassNames,
 	paragraphClassNames,
-	paragraphListClassNames
+	paragraphListClassNames,
+	subheadingClassNames
 } from './classnames';
 
 export function TheoryContent() {
@@ -531,7 +532,7 @@ export function TheoryContent() {
 					требует проверки или замены.
 				</p>
 
-				<h3 className="mb-3 font-semibold">
+				<h3 className={subheadingClassNames}>
 					Таблица 1. Оптическое волокно (одномодовое, G.652 / G.657)
 				</h3>
 				<table className="w-full mb-6 border-collapse text-sm table-fixed">
@@ -565,7 +566,7 @@ export function TheoryContent() {
 					</tbody>
 				</table>
 
-				<h3 className="mb-3 font-semibold">
+				<h3 className={subheadingClassNames}>
 					Таблица 2. Оптические шнуры (patchcord, 1–5 м)
 				</h3>
 				<table className="w-full mb-2 border-collapse text-sm table-fixed">
@@ -611,7 +612,7 @@ export function TheoryContent() {
 					незначительно увеличиваться на 1310 нм.
 				</p>
 
-				<h3 className="mb-3 font-semibold">
+				<h3 className={subheadingClassNames}>
 					Таблица 3. Оптические разъёмы (одно соединение)
 				</h3>
 				<table className="w-full mb-6 border-collapse text-sm table-fixed">
@@ -645,7 +646,7 @@ export function TheoryContent() {
 					</tbody>
 				</table>
 
-				<h3 className="mb-3 font-semibold">
+				<h3 className={subheadingClassNames}>
 					Таблица 4. Оптические сплиттеры (PLC)
 				</h3>
 				<table className="w-full mb-2 border-collapse text-sm table-fixed">
@@ -689,7 +690,7 @@ export function TheoryContent() {
 					1310–1550 нм.
 				</p>
 
-				<h3 className="mb-3 font-semibold">
+				<h3 className={subheadingClassNames}>
 					Таблица 5. Дополнительные потери (рекомендуется учитывать)
 				</h3>
 				<table className="w-full mb-6 border-collapse text-sm table-fixed">

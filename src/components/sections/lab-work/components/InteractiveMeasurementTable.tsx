@@ -157,7 +157,7 @@ export function InteractiveMeasurementTable({
 							table.measurementsCompleted ? 'text-gray-700' : 'text-gray-400'
 						)}
 					>
-						Исправен ли компонент?
+						Исправна ли линия?
 					</span>
 					<button
 						type="button"
@@ -178,7 +178,7 @@ export function InteractiveMeasurementTable({
 									: 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
 						)}
 					>
-						Да, исправен
+						Да, исправна
 					</button>
 					<button
 						type="button"
@@ -199,7 +199,7 @@ export function InteractiveMeasurementTable({
 									: 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
 						)}
 					>
-						Нет, неисправен
+						Нет, неисправна
 					</button>
 					{!table.measurementsCompleted && (
 						<span className="text-xs text-gray-400 italic">

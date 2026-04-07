@@ -62,8 +62,8 @@ export function EditableCell({
 			return;
 		}
 
-		// Парсим число
-		const numValue = parseFloat(trimmed);
+		// Парсим число (поддержка запятой как разделителя)
+		const numValue = parseFloat(trimmed.replace(',', '.'));
 
 		if (Number.isNaN(numValue)) {
 			// Некорректное число - возвращаем предыдущее значение

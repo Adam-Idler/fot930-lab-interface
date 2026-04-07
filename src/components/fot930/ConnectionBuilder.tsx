@@ -87,6 +87,11 @@ export function ConnectionBuilder({
 		});
 	};
 
+	const handleAdd = (element: ConnectionElement) => {
+		const newSequence = [...draftScheme.sequence, element];
+		setDraftScheme({ ...draftScheme, sequence: newSequence });
+	};
+
 	const handleRemove = (index: number) => {
 		const newSequence = draftScheme.sequence.filter((_, i) => i !== index);
 		setDraftScheme({
@@ -223,6 +228,7 @@ export function ConnectionBuilder({
 								element={element}
 								onDragStart={() => handleDragStart(element)}
 								onDragEnd={handleDragEnd}
+								onAdd={() => handleAdd(element)}
 							/>
 						))}
 					</div>
