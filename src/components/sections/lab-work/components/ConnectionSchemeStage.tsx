@@ -176,11 +176,30 @@ export function ConnectionSchemeStage({
 		? scenarioSplitterOutputCount
 		: splitterOutputCount;
 
+	const handleAutoAssemble = () => {
+		const elementMap = new Map(baseElements.map((el) => [el.id, el]));
+		const sequence = scheme.correctSequence
+			.map((id) => elementMap.get(id))
+			.filter((el): el is ConnectionElement => el !== undefined);
+		onSchemeChange({ ...scheme, sequence });
+	};
+
 	return (
 		<div className="bg-white rounded-lg shadow-md p-6">
-			<h2 className="text-xl font-semibold mb-4">
-				Этап 3. Сборка схемы подключения
-			</h2>
+			<div className="flex items-center justify-between mb-4">
+				<h2 className="text-xl font-semibold">
+					Этап 3. Сборка схемы подключения
+				</h2>
+				{scheme.sequence.length < scheme.correctSequence.length && (
+					<button
+						type="button"
+						className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 cursor-pointer"
+						onClick={handleAutoAssemble}
+					>
+						Пропустить сборку схемы
+					</button>
+				)}
+			</div>
 
 			{/* Подсказка для сплиттера (одиночный режим) */}
 			{hasSplitter && !isScenario && (

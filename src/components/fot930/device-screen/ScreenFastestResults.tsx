@@ -125,7 +125,7 @@ export function ScreenFastestResults({ state }: ScreenFastestResultsProps) {
 
 			{/* Подсказки управления */}
 			<div className="text-[10px] text-gray-500 text-center border-t border-gray-200 pt-1 mt-auto">
-				FasTest: Measure Next
+				FasTest: Измерить след.
 			</div>
 		</div>
 	);

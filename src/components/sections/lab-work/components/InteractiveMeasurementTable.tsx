@@ -31,21 +31,71 @@ interface InteractiveMeasurementTableProps {
 
 	/** Callback при выборе студентом варианта исправности */
 	onFaultyChoiceChange: (studentThinksFaulty: boolean) => void;
+
+	/** Автоматически заполнить текущий уровень таблицы */
+	onAutoFill?: () => void;
 }
 
 export function InteractiveMeasurementTable({
 	table,
 	onValueChange,
 	isCellEditable,
-	onFaultyChoiceChange
+	onFaultyChoiceChange,
+	onAutoFill
 }: InteractiveMeasurementTableProps) {
 	const requiresKilometricAttenuation = table.fiberLength >= 500;
+
+	const currentIndex = table.currentMeasurementNumber - 1;
+	const hasPendingMeasurements = table.rows.some((row) => {
+		const entry = row.measurements[currentIndex];
+		return entry !== null && entry.value === null;
+	});
+	const allMeasurementsValid =
+		!hasPendingMeasurements &&
+		table.rows.every((row) =>
+			row.measurements.every(
+				(m) => m !== null && m.value !== null && m.status === 'valid'
+			)
+		);
+	const hasPendingAverage =
+		allMeasurementsValid &&
+		table.rows.some((row) => row.average === null || row.average.value === null);
+	const allAveragesValid = table.rows.every(
+		(row) =>
+			row.average !== null &&
+			row.average.value !== null &&
+			row.average.status === 'valid'
+	);
+	const hasPendingKm =
+		requiresKilometricAttenuation &&
+		allAveragesValid &&
+		table.rows.some(
+			(row) =>
+				row.kilometricAttenuation === null ||
+				row.kilometricAttenuation.value === null
+		);
+	const hasAutoFillTarget =
+		hasPendingMeasurements || hasPendingAverage || hasPendingKm;
+
+	const isComplex = table.componentLabel.startsWith('Комбинация элементов');
 
 	return (
 		<div className="bg-white rounded-lg shadow-md overflow-hidden">
 			{/* Заголовок таблицы */}
 			<div className="bg-blue-600 text-white px-4 py-3">
-				<h3 className="font-semibold text-lg">{table.componentLabel}</h3>
+				<div className="flex items-center justify-between gap-2">
+					<h3 className="inline-block font-semibold text-lg">{table.componentLabel}</h3>
+
+					{hasAutoFillTarget && onAutoFill && (
+						<button
+							type="button"
+							className="text-xs text-blue-200 hover:text-white underline underline-offset-2 cursor-pointer"
+							onClick={onAutoFill}
+						>
+							Заполнить автоматически
+						</button>
+					)}
+				</div>
 				<div className="flex items-center justify-between mt-1">
 					<p className="text-sm opacity-90">
 						Измерение {table.currentMeasurementNumber} из 3
@@ -151,63 +201,56 @@ export function InteractiveMeasurementTable({
 			{/* Вывод об исправности компонента */}
 			<div className="px-4 py-3 border-t bg-gray-50">
 				<div className="flex flex-wrap items-center gap-3">
-					{(() => {
-						const isComplex = table.componentLabel.startsWith('Комбинация элементов');
-						return (
-							<>
-								<span
-									className={clsx(
-										'text-sm font-semibold',
-										table.measurementsCompleted ? 'text-gray-700' : 'text-gray-400'
-									)}
-								>
-									{isComplex ? 'Исправна ли линия?' : 'Исправен ли компонент?'}
-								</span>
-								<button
-									type="button"
-									disabled={
-										!table.measurementsCompleted || table.studentFaultyChoice !== null
-									}
-									onClick={() => onFaultyChoiceChange(false)}
-									className={clsx(
-										'px-4 py-1.5 text-sm rounded-md border-2 font-medium transition-colors',
-										!table.measurementsCompleted ||
-											(table.studentFaultyChoice !== null &&
-												table.studentFaultyChoice !== false)
-											? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-											: table.studentFaultyChoice === false
-												? table.faultyChoiceIsCorrect === true
-													? 'bg-green-100 border-green-500 text-green-800'
-													: 'bg-red-100 border-red-500 text-red-800'
-												: 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
-									)}
-								>
-									{isComplex ? 'Да, исправна' : 'Да, исправен'}
-								</button>
-								<button
-									type="button"
-									disabled={
-										!table.measurementsCompleted || table.studentFaultyChoice !== null
-									}
-									onClick={() => onFaultyChoiceChange(true)}
-									className={clsx(
-										'px-4 py-1.5 text-sm rounded-md border-2 font-medium transition-colors',
-										!table.measurementsCompleted ||
-											(table.studentFaultyChoice !== null &&
-												table.studentFaultyChoice !== true)
-											? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
-											: table.studentFaultyChoice === true
-												? table.faultyChoiceIsCorrect === true
-													? 'bg-green-100 border-green-500 text-green-800'
-													: 'bg-red-100 border-red-500 text-red-800'
-												: 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
-									)}
-								>
-									{isComplex ? 'Нет, неисправна' : 'Нет, неисправен'}
-								</button>
-							</>
-						);
-					})()}
+					<span
+						className={clsx(
+							'text-sm font-semibold',
+							table.measurementsCompleted ? 'text-gray-700' : 'text-gray-400'
+						)}
+					>
+						{isComplex ? 'Исправна ли линия?' : 'Исправен ли компонент?'}
+					</span>
+					<button
+						type="button"
+						disabled={
+							!table.measurementsCompleted || table.studentFaultyChoice !== null
+						}
+						onClick={() => onFaultyChoiceChange(false)}
+						className={clsx(
+							'px-4 py-1.5 cursor-pointer text-sm rounded-md border-2 font-medium transition-colors',
+							!table.measurementsCompleted ||
+								(table.studentFaultyChoice !== null &&
+									table.studentFaultyChoice !== false)
+								? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+								: table.studentFaultyChoice === false
+									? table.faultyChoiceIsCorrect === true
+										? 'bg-green-100 border-green-500 text-green-800'
+										: 'bg-red-100 border-red-500 text-red-800'
+									: 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
+						)}
+					>
+						{isComplex ? 'Да, исправна' : 'Да, исправен'}
+					</button>
+					<button
+						type="button"
+						disabled={
+							!table.measurementsCompleted || table.studentFaultyChoice !== null
+						}
+						onClick={() => onFaultyChoiceChange(true)}
+						className={clsx(
+							'px-4 py-1.5 cursor-pointer text-sm rounded-md border-2 font-medium transition-colors',
+							!table.measurementsCompleted ||
+								(table.studentFaultyChoice !== null &&
+									table.studentFaultyChoice !== true)
+								? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+								: table.studentFaultyChoice === true
+									? table.faultyChoiceIsCorrect === true
+										? 'bg-green-100 border-green-500 text-green-800'
+										: 'bg-red-100 border-red-500 text-red-800'
+									: 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'
+						)}
+					>
+						{isComplex ? 'Нет, неисправна' : 'Нет, неисправен'}
+					</button>
 					{!table.measurementsCompleted && (
 						<span className="text-xs text-gray-400 italic">
 							Доступно после заполнения таблицы

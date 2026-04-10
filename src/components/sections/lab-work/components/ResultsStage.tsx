@@ -43,6 +43,12 @@ interface ResultsStageProps {
 		componentId: string,
 		studentThinksFaulty: boolean
 	) => void;
+
+	/** Callback при завершении анализа составляющих потерь */
+	onDecompositionCompleted: (componentId: string) => void;
+
+	/** Автоматически заполнить текущий уровень таблицы для указанного компонента */
+	onAutoFill: (componentId: string) => void;
 }
 
 export function ResultsStage({
@@ -50,7 +56,8 @@ export function ResultsStage({
 	selectedComponent,
 	onValueChange,
 	isCellEditable,
-	onFaultyChoiceChange
+	onFaultyChoiceChange,
+	onAutoFill
 }: ResultsStageProps) {
 	const { tables, pendingInputComponentId } = resultsTableState;
 
@@ -162,6 +169,7 @@ export function ResultsStage({
 									onFaultyChoiceChange={(studentThinksFaulty) =>
 										onFaultyChoiceChange(table.componentId, studentThinksFaulty)
 									}
+									onAutoFill={() => onAutoFill(table.componentId)}
 								/>
 							) : (
 								<div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-500">
@@ -202,8 +210,7 @@ export function ResultsStage({
 							(Длина в км), доступно только для волокон ≥1 км
 						</li>
 						<li>
-							• <strong>Исправность:</strong> Оцените, является ли компонент
-							исправным на основе полученных результатов измерений
+							• <strong>Исправность:</strong> При формировании вывода об исправности нужно учитывать потери на соединениях. Потери самого компонента будет равны потерям линии с вычетом потерь на соединениях.
 						</li>
 						<li>
 							•{' '}

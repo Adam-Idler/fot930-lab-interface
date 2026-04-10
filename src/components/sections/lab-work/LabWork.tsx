@@ -190,6 +190,8 @@ export function LabWork() {
 		addDeviceMeasurement,
 		enterStudentValue,
 		enterFaultyChoice,
+		enterDecompositionCompleted,
+		autoFillCurrentPending,
 		isCellEditable,
 		canProceedToNextMeasurement
 	} = useResultsTable();
@@ -415,7 +417,7 @@ export function LabWork() {
 						{!deviceState.preparation.isReadyForMeasurements && (
 							<button
 								type="button"
-								className="ml-auto shrink-0 text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2"
+								className="ml-auto shrink-0 text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 cursor-pointer"
 								onClick={() => {
 									if (deviceDispatchRef.current) {
 										deviceDispatchRef.current({ type: 'SKIP_PREPARATION' });
@@ -493,6 +495,8 @@ export function LabWork() {
 									)
 								}
 								onFaultyChoiceChange={enterFaultyChoice}
+								onDecompositionCompleted={enterDecompositionCompleted}
+								onAutoFill={autoFillCurrentPending}
 							/>
 						)}
 

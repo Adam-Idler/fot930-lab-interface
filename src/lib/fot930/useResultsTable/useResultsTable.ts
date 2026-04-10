@@ -409,12 +409,166 @@ export function useResultsTable() {
 		[state.tables]
 	);
 
+	/**
+	 * Заполняет текущий уровень активной таблицы правильными значениями:
+	 * - если ожидают ввода измерения текущей попытки — заполняет их;
+	 * - если все измерения готовы, но среднее не введено — заполняет среднее;
+	 * - если среднее готово, но км. затухание не введено — заполняет его.
+	 * Один клик = один уровень.
+	 */
+	const autoFillCurrentPending = useCallback((componentId?: string) => {
+		setState((prev) => {
+			// Целевая таблица: явный ID → pendingInputComponentId → первая незавершённая
+			const targetId =
+				componentId ??
+				prev.pendingInputComponentId ??
+				Object.keys(prev.tables).find((id) => {
+					const t = prev.tables[id];
+					return (
+						!t.isCompleted &&
+						t.rows.some((row) => row.measurements.some((m) => m !== null))
+					);
+				});
+
+			if (!targetId) return prev;
+
+			const table = prev.tables[targetId];
+			if (!table || table.isCompleted) return prev;
+
+			const currentIndex = table.currentMeasurementNumber - 1;
+			const requiresKm =
+				table.fiberLength >= MIN_FIBER_LENGTH_FOR_KM_ATTENUATION;
+
+			// --- Определяем, что сейчас ждёт заполнения ---
+
+			const hasPendingMeasurements = table.rows.some((row) => {
+				const entry = row.measurements[currentIndex];
+				return entry !== null && entry.value === null;
+			});
+
+			const allMeasurementsValid = table.rows.every((row) =>
+				row.measurements.every(
+					(m) => m !== null && m.value !== null && m.status === 'valid'
+				)
+			);
+
+			const hasPendingAverage =
+				allMeasurementsValid &&
+				table.rows.some((row) => !row.average || row.average.value === null);
+
+			const allAveragesValid = table.rows.every(
+				(row) =>
+					row.average !== null &&
+					row.average.value !== null &&
+					row.average.status === 'valid'
+			);
+
+			const hasPendingKm =
+				requiresKm &&
+				allAveragesValid &&
+				table.rows.some(
+					(row) =>
+						!row.kilometricAttenuation ||
+						row.kilometricAttenuation.value === null
+				);
+
+			// --- Заполняем нужный уровень ---
+
+			let updatedRows: WavelengthTableRow[];
+
+			if (hasPendingMeasurements) {
+				updatedRows = table.rows.map((row) => {
+					const entry = row.measurements[currentIndex];
+					if (!entry || entry.value !== null) return row;
+
+					const updatedMeasurements = [...row.measurements] as [
+						StudentMeasurementEntry | null,
+						StudentMeasurementEntry | null,
+						StudentMeasurementEntry | null
+					];
+					updatedMeasurements[currentIndex] = {
+						...entry,
+						value: entry.actualValue,
+						status: 'valid' as const,
+						errorMessage: undefined
+					};
+					return { ...row, measurements: updatedMeasurements };
+				});
+			} else if (hasPendingAverage) {
+				updatedRows = table.rows.map((row) => {
+					if (row.average !== null && row.average.value !== null) return row;
+
+					const vals = row.measurements
+						.filter(
+							(m): m is StudentMeasurementEntry =>
+								m !== null && m.value !== null && m.status === 'valid'
+						)
+						.map((m) => m.value as number);
+
+					if (vals.length !== 3) return row;
+
+					const avgValue = vals.reduce((s, v) => s + v, 0) / 3;
+					return {
+						...row,
+						average: {
+							value: avgValue,
+							actualValue: avgValue,
+							status: 'valid' as const,
+							errorMessage: undefined
+						}
+					};
+				});
+			} else if (hasPendingKm) {
+				updatedRows = table.rows.map((row) => {
+					if (
+						!row.average ||
+						row.average.value === null ||
+						(row.kilometricAttenuation !== null &&
+							row.kilometricAttenuation.value !== null)
+					)
+						return row;
+
+					const kmValue =
+						(row.average.value as number) / (table.fiberLength / 1000);
+					return {
+						...row,
+						kilometricAttenuation: {
+							value: kmValue,
+							actualValue: kmValue,
+							status: 'valid' as const,
+							errorMessage: undefined
+						}
+					};
+				});
+			} else {
+				return prev;
+			}
+
+			const updatedTable: ComponentResultsTable = {
+				...table,
+				rows: updatedRows,
+				measurementsCompleted: checkIfTableCompleted({ ...table, rows: updatedRows })
+			};
+
+			const canProceed =
+				hasPendingMeasurements &&
+				checkCanProceedToNextMeasurement(updatedTable);
+
+			return {
+				...prev,
+				tables: { ...prev.tables, [targetId]: updatedTable },
+				pendingInputComponentId: canProceed ? null : prev.pendingInputComponentId
+			};
+		});
+	}, []);
+
 	return {
 		state,
 		createTableForComponent,
 		addDeviceMeasurement,
 		enterStudentValue,
 		enterFaultyChoice,
+		autoFillCurrentPending,
 		isCellEditable,
 		canProceedToNextMeasurement
 	};

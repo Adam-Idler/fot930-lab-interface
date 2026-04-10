@@ -173,7 +173,7 @@ export function PreparationStage({
 													>
 														{preparation.portStatus === 'cleaning'
 															? 'Идёт очистка...'
-															: 'Грязный'}
+															: 'Не очищен'}
 													</span>
 												</div>
 											</div>
