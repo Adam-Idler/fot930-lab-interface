@@ -9,6 +9,10 @@ import type {
 	Wavelength
 } from '../../../../types/fot930';
 import { EditableCell } from './EditableCell';
+import {
+	LossFormulaBlock,
+	type WavelengthCorrectValue
+} from './LossFormulaBlock';
 
 interface InteractiveMeasurementTableProps {
 	/** Таблица результатов для компонента */
@@ -32,6 +36,22 @@ interface InteractiveMeasurementTableProps {
 	/** Callback при выборе студентом варианта исправности */
 	onFaultyChoiceChange: (studentThinksFaulty: boolean) => void;
 
+	/** LaTeX-формула расчёта суммарных потерь линии */
+	formulaLatex: string;
+
+	/** Правильные значения потерь по длинам волн (для валидации ввода студента) */
+	correctValues: WavelengthCorrectValue[];
+
+	/**
+	 * Вызывается при каждой проверке строки формулы.
+	 * Родитель сохраняет результат в персистентном состоянии.
+	 */
+	onSaveFormulaRow: (
+		wavelength: number,
+		value: string,
+		correct: boolean
+	) => void;
+
 	/** Автоматически заполнить текущий уровень таблицы */
 	onAutoFill?: () => void;
 }
@@ -41,6 +61,9 @@ export function InteractiveMeasurementTable({
 	onValueChange,
 	isCellEditable,
 	onFaultyChoiceChange,
+	formulaLatex,
+	correctValues,
+	onSaveFormulaRow,
 	onAutoFill
 }: InteractiveMeasurementTableProps) {
 	const requiresKilometricAttenuation = table.fiberLength >= 500;
@@ -59,7 +82,9 @@ export function InteractiveMeasurementTable({
 		);
 	const hasPendingAverage =
 		allMeasurementsValid &&
-		table.rows.some((row) => row.average === null || row.average.value === null);
+		table.rows.some(
+			(row) => row.average === null || row.average.value === null
+		);
 	const allAveragesValid = table.rows.every(
 		(row) =>
 			row.average !== null &&
@@ -84,8 +109,11 @@ export function InteractiveMeasurementTable({
 			{/* Заголовок таблицы */}
 			<div className="bg-blue-600 text-white px-4 py-3">
 				<div className="flex items-center justify-between gap-2">
-					<h3 className="inline-block font-semibold text-lg">{table.componentLabel}</h3>
+					<h3 className="inline-block font-semibold text-lg">
+						{table.componentLabel}
+					</h3>
 
+					{/* TODO: import.meta.env.DEV */}
 					{hasAutoFillTarget && onAutoFill && (
 						<button
 							type="button"
@@ -117,20 +145,20 @@ export function InteractiveMeasurementTable({
 								Длина волны
 							</th>
 							<th className="px-4 py-3 text-center font-semibold border-b">
-								Изм. 1 (dB)
+								Изм. 1, дБ
 							</th>
 							<th className="px-4 py-3 text-center font-semibold border-b">
-								Изм. 2 (dB)
+								Изм. 2 дБ
 							</th>
 							<th className="px-4 py-3 text-center font-semibold border-b">
-								Изм. 3 (dB)
+								Изм. 3 дБ
 							</th>
 							<th className="px-4 py-3 text-center font-semibold border-b bg-blue-50">
-								Среднее (dB)
+								Среднее дБ
 							</th>
 							{requiresKilometricAttenuation && (
 								<th className="px-4 py-3 text-center font-semibold border-b bg-purple-50">
-									Км. затухание (dB/км)
+									Км. затухание (дБ/км)
 								</th>
 							)}
 						</tr>
@@ -198,13 +226,27 @@ export function InteractiveMeasurementTable({
 				</table>
 			</div>
 
+			{/* Блок расчёта ожидаемых потерь — виден только после заполнения таблицы */}
+			{table.measurementsCompleted && (
+				<div className="px-4 py-3 border-t">
+					<LossFormulaBlock
+						formulaLatex={formulaLatex}
+						correctValues={correctValues}
+						initialInputs={table.formulaInputs}
+						onSaveRow={onSaveFormulaRow}
+					/>
+				</div>
+			)}
+
 			{/* Вывод об исправности компонента */}
 			<div className="px-4 py-3 border-t bg-gray-50">
 				<div className="flex flex-wrap items-center gap-3">
 					<span
 						className={clsx(
 							'text-sm font-semibold',
-							table.measurementsCompleted ? 'text-gray-700' : 'text-gray-400'
+							table.measurementsCompleted && table.formulaCompleted
+								? 'text-gray-700'
+								: 'text-gray-400'
 						)}
 					>
 						{isComplex ? 'Исправна ли линия?' : 'Исправен ли компонент?'}
@@ -212,12 +254,15 @@ export function InteractiveMeasurementTable({
 					<button
 						type="button"
 						disabled={
-							!table.measurementsCompleted || table.studentFaultyChoice !== null
+							!table.measurementsCompleted ||
+							!table.formulaCompleted ||
+							table.studentFaultyChoice !== null
 						}
 						onClick={() => onFaultyChoiceChange(false)}
 						className={clsx(
 							'px-4 py-1.5 cursor-pointer text-sm rounded-md border-2 font-medium transition-colors',
 							!table.measurementsCompleted ||
+								!table.formulaCompleted ||
 								(table.studentFaultyChoice !== null &&
 									table.studentFaultyChoice !== false)
 								? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
@@ -233,12 +278,15 @@ export function InteractiveMeasurementTable({
 					<button
 						type="button"
 						disabled={
-							!table.measurementsCompleted || table.studentFaultyChoice !== null
+							!table.measurementsCompleted ||
+							!table.formulaCompleted ||
+							table.studentFaultyChoice !== null
 						}
 						onClick={() => onFaultyChoiceChange(true)}
 						className={clsx(
 							'px-4 py-1.5 cursor-pointer text-sm rounded-md border-2 font-medium transition-colors',
 							!table.measurementsCompleted ||
+								!table.formulaCompleted ||
 								(table.studentFaultyChoice !== null &&
 									table.studentFaultyChoice !== true)
 								? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
@@ -251,9 +299,11 @@ export function InteractiveMeasurementTable({
 					>
 						{isComplex ? 'Нет, неисправна' : 'Нет, неисправен'}
 					</button>
-					{!table.measurementsCompleted && (
+					{(!table.measurementsCompleted || !table.formulaCompleted) && (
 						<span className="text-xs text-gray-400 italic">
-							Доступно после заполнения таблицы
+							{!table.measurementsCompleted
+								? 'Доступно после заполнения таблицы'
+								: 'Доступно после верного расчёта по формуле'}
 						</span>
 					)}
 					{table.faultyChoiceIsCorrect !== null && (

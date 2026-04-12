@@ -45,7 +45,10 @@ export function AboutModal({ onClose }: AboutModalProps) {
 			>
 				{/* Заголовок */}
 				<div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-					<h2 id="about-modal-title" className="text-lg font-semibold text-gray-800">
+					<h2
+						id="about-modal-title"
+						className="text-lg font-semibold text-gray-800"
+					>
 						О программе
 					</h2>
 					<button
@@ -60,10 +63,22 @@ export function AboutModal({ onClose }: AboutModalProps) {
 
 				{/* Содержимое */}
 				<div className="px-6 py-5 flex flex-col gap-3">
-					<InfoRow label="Название" value={'Интерфейс к лабораторной работе\n«Измерение оптическим тестером FOT-930»'} multiline />
+					<InfoRow
+						label="Название"
+						value={
+							'Интерфейс к лабораторной работе\n«Измерение оптическим тестером FOT-930»'
+						}
+						multiline
+					/>
 					<InfoRow label="ВУЗ" value="СибГУТИ" />
-					<InfoRow label="Кафедра" value="Кафедра фотоники в телекоммуникациях" />
-					<InfoRow label="Научный руководитель" value="Первушина Любовь Валентиновна" />
+					<InfoRow
+						label="Кафедра"
+						value="Кафедра фотоники в телекоммуникациях"
+					/>
+					<InfoRow
+						label="Научный руководитель"
+						value="Первушина Любовь Валентиновна"
+					/>
 					<InfoRow label="Автор" value="Раков Павел Олегович" />
 					<InfoRow
 						label="Email"
@@ -90,7 +105,9 @@ interface InfoRowProps {
 
 function InfoRow({ label, value, multiline }: InfoRowProps) {
 	return (
-		<div className={`flex gap-2 text-sm text-gray-700 ${multiline ? 'flex-col' : ''}`}>
+		<div
+			className={`flex gap-2 text-sm text-gray-700 ${multiline ? 'flex-col' : ''}`}
+		>
 			<span className="font-semibold shrink-0">{label}:</span>
 			<span className={multiline ? 'whitespace-pre-line' : ''}>{value}</span>
 		</div>

@@ -413,6 +413,15 @@ export interface ComponentResultsTable {
 
 	/** Правильно ли ответил студент об исправности */
 	faultyChoiceIsCorrect: boolean | null;
+
+	/** Студент верно рассчитал ожидаемые суммарные потери линии */
+	formulaCompleted: boolean;
+
+	/**
+	 * Сохранённые значения, введённые студентом в блоке расчёта формулы.
+	 * Ключ — длина волны (нм), значение — введённая строка и результат проверки.
+	 */
+	formulaInputs: Record<number, { value: string; correct: boolean }>;
 }
 
 /** Состояние всех таблиц результатов */

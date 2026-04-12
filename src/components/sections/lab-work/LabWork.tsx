@@ -46,7 +46,7 @@ const availableComponents: PassiveComponent[] = [
 		id: 'optical_cable_1',
 		icon: '/images/scheme/sc-apc-g-652.png',
 		type: 'OPTICAL_CABLE',
-		label: 'Оптический шнур simplex SC/APC G.652 (2 м)',
+		label: 'Оптический шнур simplex SC/APC (2 м)',
 		typicalLoss: COMPONENT_LOSS_DB.OPTICAL_CABLE,
 		connectorType: 'SC_APC',
 		fiberLength: 2
@@ -55,7 +55,7 @@ const availableComponents: PassiveComponent[] = [
 		id: 'optical_cable_2',
 		icon: '/images/scheme/sc-upc-g-657.jpg',
 		type: 'OPTICAL_CABLE',
-		label: 'Оптический шнур simplex SC/UPC G.657 (3 м)',
+		label: 'Оптический шнур simplex SC/UPC (3 м)',
 		typicalLoss: COMPONENT_LOSS_DB.OPTICAL_CABLE,
 		connectorType: 'SC_UPC',
 		fiberLength: 3,
@@ -147,7 +147,7 @@ const SCENARIO_SUBSCRIBER_CORD: PassiveComponent = {
 	id: 'scenario_subscriber_cord',
 	icon: '/images/scheme/sc-apc-g-652.png',
 	type: 'OPTICAL_CABLE',
-	label: 'Абонентский оптический шнур SC/APC G.652 (5 м)',
+	label: 'Абонентский оптический шнур SC/APC (5 м)',
 	typicalLoss: COMPONENT_LOSS_DB.OPTICAL_CABLE,
 	connectorType: 'SC_APC',
 	fiberLength: 5
@@ -190,7 +190,7 @@ export function LabWork() {
 		addDeviceMeasurement,
 		enterStudentValue,
 		enterFaultyChoice,
-		enterDecompositionCompleted,
+		saveFormulaInput,
 		autoFillCurrentPending,
 		isCellEditable,
 		canProceedToNextMeasurement
@@ -494,8 +494,11 @@ export function LabWork() {
 										measurementIndex
 									)
 								}
+								chainComponents={activeScenario?.chain}
 								onFaultyChoiceChange={enterFaultyChoice}
-								onDecompositionCompleted={enterDecompositionCompleted}
+								onSaveFormulaRow={(componentId, wavelength, value, correct) =>
+									saveFormulaInput(componentId, wavelength, value, correct)
+								}
 								onAutoFill={autoFillCurrentPending}
 							/>
 						)}

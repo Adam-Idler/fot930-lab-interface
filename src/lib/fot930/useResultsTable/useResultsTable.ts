@@ -67,7 +67,9 @@ export function useResultsTable() {
 					isCompleted: false,
 					isActuallyFaulty,
 					studentFaultyChoice: null,
-					faultyChoiceIsCorrect: null
+					faultyChoiceIsCorrect: null,
+					formulaCompleted: false,
+					formulaInputs: {}
 				};
 
 				return {
@@ -264,8 +266,50 @@ export function useResultsTable() {
 	);
 
 	/**
+	 * Сохраняет ответ студента по одной длине волны в блоке расчёта формулы.
+	 * Автоматически выставляет formulaCompleted когда все строки таблицы верно заполнены.
+	 */
+	const saveFormulaInput = useCallback(
+		(
+			componentId: string,
+			wavelength: number,
+			value: string,
+			correct: boolean
+		): void => {
+			setState((prev) => {
+				const table = prev.tables[componentId];
+				if (!table) return prev;
+
+				const updatedInputs = {
+					...table.formulaInputs,
+					[wavelength]: { value, correct }
+				};
+
+				// formulaCompleted = все длины волн из строк таблицы проверены верно
+				const allWavelengths = table.rows.map((r) => r.wavelength);
+				const formulaCompleted = allWavelengths.every(
+					(wl) => updatedInputs[wl]?.correct === true
+				);
+
+				return {
+					...prev,
+					tables: {
+						...prev.tables,
+						[componentId]: {
+							...table,
+							formulaInputs: updatedInputs,
+							formulaCompleted
+						}
+					}
+				};
+			});
+		},
+		[]
+	);
+
+	/**
 	 * Фиксирует выбор студента об исправности компонента.
-	 * Доступно только после заполнения всех числовых ячеек.
+	 * Доступно только после заполнения всех числовых ячеек и верного расчёта по формуле.
 	 * После первого выбора изменение заблокировано.
 	 */
 	const enterFaultyChoice = useCallback(
@@ -276,9 +320,10 @@ export function useResultsTable() {
 					return prev;
 				}
 
-				// Блокируем: числа не заполнены или выбор уже зафиксирован
+				// Блокируем: числа не заполнены, формула не решена или выбор уже зафиксирован
 				if (
 					!table.measurementsCompleted ||
+					!table.formulaCompleted ||
 					table.studentFaultyChoice !== null
 				) {
 					return prev;
@@ -547,7 +592,10 @@ export function useResultsTable() {
 			const updatedTable: ComponentResultsTable = {
 				...table,
 				rows: updatedRows,
-				measurementsCompleted: checkIfTableCompleted({ ...table, rows: updatedRows })
+				measurementsCompleted: checkIfTableCompleted({
+					...table,
+					rows: updatedRows
+				})
 			};
 
 			const canProceed =
@@ -557,7 +605,9 @@ export function useResultsTable() {
 			return {
 				...prev,
 				tables: { ...prev.tables, [targetId]: updatedTable },
-				pendingInputComponentId: canProceed ? null : prev.pendingInputComponentId
+				pendingInputComponentId: canProceed
+					? null
+					: prev.pendingInputComponentId
 			};
 		});
 	}, []);
@@ -568,6 +618,7 @@ export function useResultsTable() {
 		addDeviceMeasurement,
 		enterStudentValue,
 		enterFaultyChoice,
+		saveFormulaInput,
 		autoFillCurrentPending,
 		isCellEditable,
 		canProceedToNextMeasurement

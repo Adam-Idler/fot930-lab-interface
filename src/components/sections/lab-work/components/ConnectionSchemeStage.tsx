@@ -190,6 +190,7 @@ export function ConnectionSchemeStage({
 				<h2 className="text-xl font-semibold">
 					Этап 3. Сборка схемы подключения
 				</h2>
+				{/* TODO: import.meta.env.DEV */}
 				{scheme.sequence.length < scheme.correctSequence.length && (
 					<button
 						type="button"

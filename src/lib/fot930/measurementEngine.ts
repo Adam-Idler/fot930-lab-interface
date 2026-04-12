@@ -149,7 +149,10 @@ function getComponentLoss(
  * Верхние границы допустимых потерь компонентов (дБ).
  * Соответствуют максимальным значениям из справочных таблиц в теоретическом разделе.
  */
-const COMPONENT_LOSS_UPPER_BOUND: Record<string, Record<Wavelength, number>> = {
+export const COMPONENT_LOSS_UPPER_BOUND: Record<
+	string,
+	Record<Wavelength, number>
+> = {
 	OPTICAL_CABLE: {
 		850: 1.0,
 		1300: 0.3, // Таблица 2: SC/UPC ↔ SC/UPC до 0.30 дБ
@@ -206,7 +209,10 @@ const COMPONENT_LOSS_UPPER_BOUND: Record<string, Record<Wavelength, number>> = {
  * Используется для проверки FIBER_COIL: если измеренное затухание/км
  * превышает этот порог — волокно или соединение неисправно.
  */
-const FIBER_ATTENUATION_UPPER_BOUND_DB_PER_KM: Record<Wavelength, number> = {
+export const FIBER_ATTENUATION_UPPER_BOUND_DB_PER_KM: Record<
+	Wavelength,
+	number
+> = {
 	850: 3.5, // MMF 50/125 мкм: верхняя граница
 	1300: 1.5, // MMF 50/125 мкм: верхняя граница
 	1310: 0.4, // SMF G.652: немного выше максимума 0.36 дБ/км
@@ -445,9 +451,10 @@ function calculateComplexChainLoss(
 		upperBoundTotal += componentUpperBound;
 	}
 
-	// Два коннектора на концах цепи
-	totalLoss += MEASUREMENT_CONFIG.CONNECTOR_LOSS * 2;
-	upperBoundTotal += MEASUREMENT_CONFIG.CONNECTOR_LOSS * 2;
+	// По одному соединению между каждой парой соседних компонентов + вход и выход
+	const connectorCount = chainComponents.length + 1;
+	totalLoss += MEASUREMENT_CONFIG.CONNECTOR_LOSS * connectorCount;
+	upperBoundTotal += MEASUREMENT_CONFIG.CONNECTOR_LOSS * connectorCount;
 
 	if (totalLoss > MEASUREMENT_CONFIG.MAX_MEASURABLE_LOSS) {
 		return { error: 'Loss exceeds measurement range' };
@@ -755,4 +762,166 @@ export function generateReferenceMeasurement(
 			value: parseFloat((expectedValue + variation).toFixed(2))
 		};
 	});
+}
+
+// ============================================================
+// УТИЛИТЫ ДЛЯ РАСЧЁТА ОЖИДАЕМЫХ ПОТЕРЬ (ФОРМУЛА ДЛЯ СТУДЕНТА)
+// ============================================================
+
+/**
+ * Количество соединителей в стандартной измерительной схеме.
+ * Один на каждом конце: тестер ↔ компонент ↔ тестер.
+ */
+const SCHEME_CONNECTOR_COUNT = 2;
+
+/**
+ * Максимально допустимые потери оптического шнура (дБ) по типу разъёма.
+ * Источник: Таблица 2 теоретического раздела.
+ *   SC/APC ↔ SC/APC: 0.10 – 0.25 дБ → max 0.25
+ *   SC/UPC ↔ SC/UPC: 0.10 – 0.30 дБ → max 0.30
+ * Потери слабо зависят от длины волны (единое значение для всех λ).
+ */
+const OPTICAL_CABLE_MAX_LOSS_BY_CONNECTOR: Record<'SC_APC' | 'SC_UPC', number> =
+	{
+		SC_APC: 0.25,
+		SC_UPC: 0.3
+	};
+
+/**
+ * Максимально допустимое удельное затухание одномодового волокна (дБ/км).
+ * Источник: Таблица 1 теоретического раздела.
+ *   1310 нм: 0.33–0.36 дБ/км → max 0.36
+ *   1550 нм: 0.18–0.22 дБ/км → max 0.22
+ */
+const FIBER_ATTENUATION_FORMULA_MAX_DB_PER_KM: Record<Wavelength, number> = {
+	850: 3.5,
+	1300: 1.5,
+	1310: 0.36,
+	1550: 0.22,
+	1625: 0.28
+};
+
+/**
+ * Рассчитывает ожидаемые суммарные потери линии с использованием
+ * максимально допустимых значений из справочных таблиц теоретического раздела.
+ * Используется для проверки ответа студента при выполнении расчёта по формуле.
+ *
+ * Формула: L_лин = L_компонента + N × L_разъём
+ *   где N = 2 (два соединителя в измерительной схеме),
+ *   L_разъём = 0.3 дБ (Таблица 3, максимально допустимое).
+ *
+ * @param component - Пассивный компонент
+ * @param wavelength - Длина волны измерения (нм)
+ * @returns Ожидаемые суммарные потери (дБ), округлённые до 2 знаков
+ */
+export function computeExpectedLineLoss(
+	component: PassiveComponent,
+	wavelength: Wavelength
+): number {
+	let componentLoss: number;
+
+	if (component.type === 'FIBER_COIL') {
+		// Таблица 1: максимальное удельное затухание × длина
+		const maxPerKm = FIBER_ATTENUATION_FORMULA_MAX_DB_PER_KM[wavelength];
+		componentLoss = maxPerKm * (component.fiberLength / 1000);
+	} else if (component.type === 'OPTICAL_CABLE') {
+		// Таблица 2: максимально допустимые потери шнура по типу разъёма.
+		// Потери не зависят от длины волны (единое значение для всех λ).
+		componentLoss =
+			OPTICAL_CABLE_MAX_LOSS_BY_CONNECTOR[component.connectorType] ?? 0.3;
+	} else {
+		// Сплиттеры — Таблица 4
+		componentLoss =
+			COMPONENT_LOSS_UPPER_BOUND[component.type]?.[wavelength] ?? 1.0;
+	}
+
+	const connectorLoss =
+		SCHEME_CONNECTOR_COUNT * MEASUREMENT_CONFIG.CONNECTOR_LOSS;
+	return parseFloat((componentLoss + connectorLoss).toFixed(2));
+}
+
+/**
+ * Возвращает символическую LaTeX-строку формулы расчёта потерь одного компонента.
+ * Формула не содержит подставленных числовых значений.
+ */
+export function getFormulaLatex(component: PassiveComponent): string {
+	if (component.type === 'OPTICAL_CABLE') {
+		return String.raw`A_{\text{лин}} = A_{\text{шнур}} + 2 \cdot A_{\text{соед}}`;
+	}
+
+	if (component.type === 'FIBER_COIL') {
+		return String.raw`A_{\text{лин}} = \alpha \cdot L + 2 \cdot A_{\text{соед}}`;
+	}
+
+	// Сплиттеры любого коэффициента деления
+	return String.raw`A_{\text{лин}} = A_{\text{спл}} + 2 \cdot A_{\text{соед}}`;
+}
+
+/**
+ * Возвращает символическую LaTeX-строку формулы расчёта потерь
+ * для цепочки компонентов (комплексная схема).
+ *
+ * Принцип построения:
+ *   – FIBER_COIL           → αᵢ·Lᵢ (каждый со своим индексом)
+ *   – OPTICAL_CABLE        → L_шнур
+ *   – Сплиттер             → L_спл (если один) / L_спл₁, L_спл₂, … (если несколько)
+ *   – Всегда + 2·L_разъём в конце
+ */
+export function getFormulaLatexForComponents(
+	components: PassiveComponent[]
+): string {
+	const parts: string[] = [];
+	let fiberIdx = 1;
+	let splitterIdx = 1;
+	const splitterCount = components.filter((c) => isSplitterType(c.type)).length;
+
+	for (const c of components) {
+		if (c.type === 'FIBER_COIL') {
+			parts.push(String.raw`\alpha_{${fiberIdx}} \cdot L_{${fiberIdx}}`);
+			fiberIdx++;
+		} else if (c.type === 'OPTICAL_CABLE') {
+			parts.push(String.raw`A_{\text{шнур}}`);
+		} else if (isSplitterType(c.type)) {
+			if (splitterCount === 1) {
+				parts.push(String.raw`A_{\text{спл}}`);
+			} else {
+				parts.push(String.raw`A_{\text{спл}_{${splitterIdx}}}`);
+				splitterIdx++;
+			}
+		}
+	}
+
+	const connectorCount = components.length + 1;
+	parts.push(String.raw`${connectorCount} \cdot A_{\text{соед}}`);
+	return `A_{\\text{лин}} = ${parts.join(' + ')}`;
+}
+
+/**
+ * Рассчитывает ожидаемые суммарные потери линии для цепочки компонентов
+ * (комплексная схема). Использует максимально допустимые значения из справочных таблиц.
+ *
+ * @param components - Упорядоченная цепочка пассивных компонентов
+ * @param wavelength - Длина волны измерения (нм)
+ * @returns Ожидаемые суммарные потери (дБ), округлённые до 2 знаков
+ */
+export function computeExpectedLineLossForComponents(
+	components: PassiveComponent[],
+	wavelength: Wavelength
+): number {
+	let total = 0;
+
+	for (const c of components) {
+		if (c.type === 'FIBER_COIL') {
+			const maxPerKm = FIBER_ATTENUATION_FORMULA_MAX_DB_PER_KM[wavelength];
+			total += maxPerKm * (c.fiberLength / 1000);
+		} else if (c.type === 'OPTICAL_CABLE') {
+			// Таблица 2: максимально допустимые потери шнура по типу разъёма
+			total += OPTICAL_CABLE_MAX_LOSS_BY_CONNECTOR[c.connectorType] ?? 0.3;
+		} else if (isSplitterType(c.type)) {
+			total += COMPONENT_LOSS_UPPER_BOUND[c.type]?.[wavelength] ?? 1.0;
+		}
+	}
+
+	total += (components.length + 1) * MEASUREMENT_CONFIG.CONNECTOR_LOSS;
+	return parseFloat(total.toFixed(2));
 }

@@ -57,7 +57,9 @@
 		"biome:check": "biome check --write ."
 	},
 	"dependencies": {
+		"@types/katex": "^0.16.8",
 		"clsx": "^2.1.1",
+		"katex": "^0.16.45",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
 		"tailwindcss": "^4.1.16"
