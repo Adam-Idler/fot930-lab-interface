@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
 	getSplitterOutputCount,
 	isSplitterType
@@ -22,6 +22,8 @@ interface ConnectionSchemeStageProps {
 	 * Если задана — схема строится для всей цепи вместо одиночного currentComponent.
 	 */
 	scenarioChain?: PassiveComponent[];
+	/** Callback при подтверждении неправильно собранной схемы */
+	onSchemeError?: () => void;
 }
 
 function getConnector(
@@ -77,8 +79,24 @@ export function ConnectionSchemeStage({
 	currentComponent,
 	onSchemeChange,
 	measuredSplitterOutputs = [],
-	scenarioChain
+	scenarioChain,
+	onSchemeError
 }: ConnectionSchemeStageProps) {
+	// Флаг: штраф за ошибку сборки уже начислен для текущей схемы.
+	// Сбрасывается при смене компонента или сценария.
+	const schemePenalizedRef = useRef(false);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: намеренный сброс флага при смене компонента/сценария
+	useEffect(() => {
+		schemePenalizedRef.current = false;
+	}, [currentComponent, scenarioChain]);
+
+	const handleSchemeError = useCallback(() => {
+		if (!schemePenalizedRef.current) {
+			schemePenalizedRef.current = true;
+			onSchemeError?.();
+		}
+	}, [onSchemeError]);
+
 	const isScenario = scenarioChain && scenarioChain.length > 0;
 
 	// Для сплиттера в одиночном режиме
@@ -241,6 +259,7 @@ export function ConnectionSchemeStage({
 						? { [splitterForOutputs.id]: measuredSplitterOutputs }
 						: {}
 				}
+				onSchemeError={handleSchemeError}
 			/>
 		</div>
 	);

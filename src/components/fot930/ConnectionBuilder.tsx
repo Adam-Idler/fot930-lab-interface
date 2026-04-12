@@ -22,13 +22,16 @@ interface ConnectionBuilderProps {
 	availableElements: ConnectionElement[];
 	/** Измеренные выходы для элементов схемы: ключ — ID элемента, значение — список измеренных выходов */
 	elementMeasuredOutputs?: Record<string, number[]>;
+	/** Callback при подтверждении неправильно собранной схемы */
+	onSchemeError?: () => void;
 }
 
 export function ConnectionBuilder({
 	scheme,
 	onChange,
 	availableElements,
-	elementMeasuredOutputs = {}
+	elementMeasuredOutputs = {},
+	onSchemeError
 }: ConnectionBuilderProps) {
 	const [draggedElement, setDraggedElement] =
 		useState<ConnectionElement | null>(null);
@@ -117,6 +120,16 @@ export function ConnectionBuilder({
 	};
 
 	const handleConfirm = () => {
+		// Штрафуем только если схема полностью собрана (все элементы на месте),
+		// но порядок неверный. Пустой или частичный черновик ошибкой не считается.
+		const isFullyAssembled =
+			draftScheme.sequence.length === draftScheme.correctSequence.length;
+		if (isFullyAssembled) {
+			const validation = validateConnectionScheme(draftScheme);
+			if (!validation.valid) {
+				onSchemeError?.();
+			}
+		}
 		onChange(draftScheme);
 	};
 

@@ -144,23 +144,6 @@ export function IntroductionStage() {
 								как измерены все выходы.
 							</p>
 						</div>
-
-						{/* Особенности комплексной схемы */}
-						<div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-							<div className="font-semibold text-emerald-800 text-sm mb-1">
-								Измерение комплексной схемы
-							</div>
-							<p className="text-xs text-emerald-700 leading-relaxed">
-								Помимо одиночных компонентов, в работе предусмотрено измерение{' '}
-								<b>комплексного сценария</b> — цепочки из нескольких
-								компонентов, соединённых последовательно (например:
-								магистральный кабель → сплиттер → абонентский кабель). При
-								сборке схемы для такого сценария все компоненты цепи размещаются
-								между тестерами в правильном порядке. Измерение отражает
-								суммарные потери всей цепи, а сплиттер в составе сценария также
-								измеряется по каждому выходу отдельно.
-							</p>
-						</div>
 					</div>
 				</div>
 
@@ -211,6 +194,121 @@ export function IntroductionStage() {
 								Вопрос об исправности появляется автоматически после того, как
 								все ячейки таблицы заполнены. Без ответа на этот вопрос
 								компонент считается неизмеренным.
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{/* Система оценивания */}
+			<div className="bg-white rounded-lg shadow-md overflow-hidden">
+				<div className="bg-amber-600 text-white px-6 py-3 flex items-center gap-3">
+					<div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0">
+						★
+					</div>
+					<h3 className="font-semibold text-base">Система оценивания</h3>
+				</div>
+				<div className="p-6">
+					<p className="text-sm text-gray-600 mb-4">
+						В ходе выполнения работы ведётся учёт ошибок. Начальный счёт —{' '}
+						<strong>100 баллов</strong>. За каждую ошибку снимается штраф
+						(повторные ошибки в одном месте не суммируются). Итоговая оценка
+						отображается автоматически после завершения всех измерений.
+					</p>
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						<div>
+							<div className="text-sm font-semibold text-gray-700 mb-2">
+								Штрафы за ошибки
+							</div>
+							<div className="border border-gray-200 rounded-lg overflow-hidden text-sm">
+								<div className="bg-gray-50 px-3 py-2 font-medium text-gray-600 grid grid-cols-[1fr_auto] gap-2">
+									<span>Ошибка</span>
+									<span className="text-right">Штраф</span>
+								</div>
+								<div className="divide-y divide-gray-100">
+									<div className="px-3 py-2 grid grid-cols-[1fr_auto] gap-2 items-center">
+										<span className="text-gray-700">
+											Неверный вывод об исправности компонента
+										</span>
+										<span className="text-red-600 font-semibold text-right whitespace-nowrap">
+											−10 б.
+										</span>
+									</div>
+									<div className="px-3 py-2 grid grid-cols-[1fr_auto] gap-2 items-center">
+										<span className="text-gray-700">
+											Ошибка при сборке схемы подключения
+										</span>
+										<span className="text-red-600 font-semibold text-right whitespace-nowrap">
+											−10 б.
+										</span>
+									</div>
+									<div className="px-3 py-2 grid grid-cols-[1fr_auto] gap-2 items-center">
+										<span className="text-gray-700">
+											Неверный расчёт среднего или км. затухания
+										</span>
+										<span className="text-orange-500 font-semibold text-right whitespace-nowrap">
+											−5 б.
+										</span>
+									</div>
+									<div className="px-3 py-2 grid grid-cols-[1fr_auto] gap-2 items-center">
+										<span className="text-gray-700">
+											Неверная запись ожидаемых потерь
+										</span>
+										<span className="text-orange-500 font-semibold text-right whitespace-nowrap">
+											−5 б.
+										</span>
+									</div>
+									<div className="px-3 py-2 grid grid-cols-[1fr_auto] gap-2 items-center">
+										<span className="text-gray-700">
+											Ошибка переноса измерений из прибора
+										</span>
+										<span className="text-yellow-600 font-semibold text-right whitespace-nowrap">
+											−2 б.
+										</span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<div className="text-sm font-semibold text-gray-700 mb-2">
+								Критерии оценок
+							</div>
+							<div className="border border-gray-200 rounded-lg overflow-hidden text-sm">
+								<div className="bg-gray-50 px-3 py-2 font-medium text-gray-600 grid grid-cols-[2rem_4rem_1fr] gap-2">
+									<span>Оц.</span>
+									<span>Баллы</span>
+									<span />
+								</div>
+								<div className="divide-y divide-gray-100">
+									<div className="px-3 py-2 grid grid-cols-[2rem_4rem_1fr] gap-2 items-center">
+										<span className="font-bold text-green-700 text-base">
+											5
+										</span>
+										<span className="text-gray-700">90–100</span>
+										<span className="text-gray-500 text-xs">отлично</span>
+									</div>
+									<div className="px-3 py-2 grid grid-cols-[2rem_4rem_1fr] gap-2 items-center">
+										<span className="font-bold text-blue-700 text-base">4</span>
+										<span className="text-gray-700">70–89</span>
+										<span className="text-gray-500 text-xs">хорошо</span>
+									</div>
+									<div className="px-3 py-2 grid grid-cols-[2rem_4rem_1fr] gap-2 items-center">
+										<span className="font-bold text-yellow-600 text-base">
+											3
+										</span>
+										<span className="text-gray-700">55–69</span>
+										<span className="text-gray-500 text-xs">
+											удовлетворительно
+										</span>
+									</div>
+									<div className="px-3 py-2 grid grid-cols-[2rem_4rem_1fr] gap-2 items-center">
+										<span className="font-bold text-red-700 text-base">2</span>
+										<span className="text-gray-700">0–54</span>
+										<span className="text-gray-500 text-xs">
+											неудовлетворительно
+										</span>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>

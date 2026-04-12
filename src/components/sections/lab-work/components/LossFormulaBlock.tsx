@@ -134,7 +134,7 @@ export function LossFormulaBlock({
 			</p>
 
 			{/* Строки по длинам волн */}
-			<div className="flex flex-wrap justify-between gap-2">
+			<div className="flex flex-wrap justify-between gap-4">
 				{correctValues.map((cv) => {
 					const isCorrect = rowsCorrect[cv.wavelength] === true;
 					const wasChecked = rowsChecked[cv.wavelength] === true;
@@ -143,72 +143,75 @@ export function LossFormulaBlock({
 					return (
 						<div
 							key={cv.wavelength}
-							className="flex flex-wrap items-center gap-2"
+							className="flex flex-col flex-wrap items-center gap-2"
 						>
-							{/* Метка длины волны */}
-							<span className="text-sm font-medium text-gray-700 w-16 shrink-0">
-								{cv.wavelength} нм:
-							</span>
+							<div className="flex items-center gap-2">
+								{/* Метка длины волны */}
+								<span className="text-sm font-medium text-gray-700 w-16 shrink-0">
+									{cv.wavelength} нм:
+								</span>
 
-							{/* Поле ввода — read-only после верного ответа, значение сохраняется */}
-							<input
-								type="number"
-								step="0.01"
-								min="0"
-								value={inputs[cv.wavelength] ?? ''}
-								readOnly={isCorrect}
-								onChange={(e) => {
-									if (isCorrect) return;
-									setInputs((prev) => ({
-										...prev,
-										[cv.wavelength]: e.target.value
-									}));
-									// Сбрасываем ошибку при новом вводе
-									if (isError) {
-										setRowsChecked((prev) => ({
+								{/* Поле ввода — read-only после верного ответа, значение сохраняется */}
+								<input
+									type="number"
+									step="0.01"
+									min="0"
+									value={inputs[cv.wavelength] ?? ''}
+									readOnly={isCorrect}
+									onChange={(e) => {
+										if (isCorrect) return;
+										setInputs((prev) => ({
 											...prev,
-											[cv.wavelength]: false
+											[cv.wavelength]: e.target.value
 										}));
-									}
-								}}
-								onKeyDown={handleKeyDown(cv.wavelength)}
-								className={[
-									'w-28 px-3 py-1.5 text-sm border rounded-md outline-none transition-colors',
-									isCorrect
-										? 'border-green-400 bg-green-50 text-green-800 cursor-default'
-										: isError
-											? 'border-red-400 bg-red-50 focus:ring-1 focus:ring-red-400'
-											: 'border-gray-300 bg-white focus:border-blue-400 focus:ring-1 focus:ring-blue-300'
-								].join(' ')}
-								placeholder="0.00"
-							/>
+										// Сбрасываем ошибку при новом вводе
+										if (isError) {
+											setRowsChecked((prev) => ({
+												...prev,
+												[cv.wavelength]: false
+											}));
+										}
+									}}
+									onKeyDown={handleKeyDown(cv.wavelength)}
+									className={[
+										'w-28 px-3 py-1.5 text-sm border rounded-md outline-none transition-colors',
+										isCorrect
+											? 'border-green-400 bg-green-50 text-green-800 cursor-default'
+											: isError
+												? 'border-red-400 bg-red-50 focus:ring-1 focus:ring-red-400'
+												: 'border-gray-300 bg-white focus:border-blue-400 focus:ring-1 focus:ring-blue-300'
+									].join(' ')}
+									placeholder="0.00"
+								/>
 
-							<span className="text-xs text-gray-500">дБ</span>
+								<span className="text-xs text-gray-500">дБ</span>
 
-							{/* Кнопка проверки — скрыта после верного ответа */}
-							{!isCorrect && (
-								<button
-									type="button"
-									onClick={() => checkRow(cv.wavelength)}
-									className="px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer"
-								>
-									Проверить
-								</button>
-							)}
+								{/* Кнопка проверки — скрыта после верного ответа */}
+								{!isCorrect && (
+									<button
+										type="button"
+										onClick={() => checkRow(cv.wavelength)}
+										className="px-3 py-1.5 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer"
+									>
+										Проверить
+									</button>
+								)}
 
-							{isCorrect && (
-								<span className="text-sm font-semibold text-green-700">✓</span>
-							)}
+								{isCorrect && (
+									<span className="text-sm font-semibold text-green-700">
+										✓
+									</span>
+								)}
+								{/* Ожидаемое значение — только в dev-режиме */}
+								{import.meta.env.DEV && (
+									<span className="text-xs text-gray-300 ml-1 select-none">
+										({cv.value.toFixed(2)} дБ)
+									</span>
+								)}
+							</div>
 							{isError && (
 								<span className="text-sm text-red-600">
 									✗ Неверно. Проверьте расчёт.
-								</span>
-							)}
-
-							{/* Ожидаемое значение — только в dev-режиме */}
-							{import.meta.env.DEV && (
-								<span className="text-xs text-gray-300 ml-1 select-none">
-									({cv.value.toFixed(2)} дБ)
 								</span>
 							)}
 						</div>

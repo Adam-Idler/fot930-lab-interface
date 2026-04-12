@@ -178,11 +178,21 @@ export function LabWork() {
 	);
 	const [connectionScheme, setConnectionScheme] = useState<ConnectionScheme>({
 		sequence: [],
-		correctSequence: buildSingleComponentSequence(selectedComponent)
+		correctSequence: buildSingleComponentSequence(availableComponents[0])
 	});
 
 	const [deviceState, setDeviceState] =
 		useState<DeviceState>(initialDeviceState);
+
+	// ============================================================
+	// СИСТЕМА ОЦЕНИВАНИЯ
+	// ============================================================
+
+	const [score, setScore] = useState(100);
+
+	const handlePenalty = useCallback((_amount: number, _reason: string) => {
+		setScore((prev) => Math.max(0, prev - _amount));
+	}, []);
 
 	const {
 		state: resultsTableState,
@@ -194,7 +204,38 @@ export function LabWork() {
 		autoFillCurrentPending,
 		isCellEditable,
 		canProceedToNextMeasurement
-	} = useResultsTable();
+	} = useResultsTable({ onPenalty: handlePenalty });
+
+	// Все компоненты и сценарии завершены?
+	const allComponentsMeasured = useMemo(() => {
+		for (const component of availableComponents) {
+			if (isSplitterType(component.type)) {
+				const count = getSplitterOutputCount(component.type);
+				for (let i = 1; i <= count; i++) {
+					if (
+						!resultsTableState.tables[`${component.id}_output_${i}`]
+							?.isCompleted
+					)
+						return false;
+				}
+			} else {
+				if (!resultsTableState.tables[component.id]?.isCompleted) return false;
+			}
+		}
+		for (const scenario of complexScenarios) {
+			const splitter = scenario.chain.find((c) => isSplitterType(c.type));
+			if (splitter) {
+				const count = getSplitterOutputCount(splitter.type);
+				for (let i = 1; i <= count; i++) {
+					if (
+						!resultsTableState.tables[`${splitter.id}_output_${i}`]?.isCompleted
+					)
+						return false;
+				}
+			}
+		}
+		return Object.keys(resultsTableState.tables).length > 0;
+	}, [resultsTableState.tables]);
 
 	// Обновляем correctSequence при смене компонента или сценария
 	useEffect(() => {
@@ -374,16 +415,52 @@ export function LabWork() {
 		setCurrentStage(stage);
 	};
 
+	const grade = getGrade(score);
+
 	return (
 		<div className="h-full overflow-auto bg-gray-50">
 			<div className="mx-auto py-6 space-y-6">
 				<div className="bg-white rounded-lg shadow-md p-6">
-					<h1 className="text-3xl font-bold text-gray-900">
-						Выполнение лабораторной работы
-					</h1>
-					<p className="mt-2 text-gray-600">
-						Измерения оптическим тестером FOT-930
-					</p>
+					<div className="flex flex-wrap items-center justify-between gap-4">
+						<div>
+							<h1 className="text-3xl font-bold text-gray-900">
+								Выполнение лабораторной работы
+							</h1>
+							<p className="mt-2 text-gray-600">
+								Измерения оптическим тестером FOT-930
+							</p>
+						</div>
+
+						{/* Блок баллов — виден на всех этапах */}
+						<div className="flex items-center gap-4">
+							<div className="text-right">
+								<div className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">
+									Баллы
+								</div>
+								<div className={`text-3xl font-bold ${scoreColor(score)}`}>
+									{score}
+									<span className="text-lg font-normal text-gray-400">
+										{' '}
+										/ 100
+									</span>
+								</div>
+							</div>
+
+							{allComponentsMeasured && (
+								<div
+									className={`px-4 py-2 rounded-lg text-center ${gradeBadgeStyle(score)}`}
+								>
+									<div className="text-xs uppercase tracking-wide mb-0.5 opacity-70">
+										Оценка
+									</div>
+									<div className="text-2xl font-bold leading-none">
+										{grade.digit}
+									</div>
+									<div className="text-xs mt-0.5">{grade.label}</div>
+								</div>
+							)}
+						</div>
+					</div>
 				</div>
 
 				<div className="bg-white rounded-lg shadow-md p-4">
@@ -524,6 +601,9 @@ export function LabWork() {
 						onSchemeChange={setConnectionScheme}
 						measuredSplitterOutputs={measuredSplitterOutputs}
 						scenarioChain={activeScenario?.chain}
+						onSchemeError={() =>
+							handlePenalty(10, 'Ошибка при сборке схемы подключения')
+						}
 					/>
 				)}
 			</div>
@@ -534,6 +614,27 @@ export function LabWork() {
 // ============================================================
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // ============================================================
+
+function getGrade(score: number): { digit: number; label: string } {
+	if (score >= 90) return { digit: 5, label: 'отлично' };
+	if (score >= 70) return { digit: 4, label: 'хорошо' };
+	if (score >= 55) return { digit: 3, label: 'удовлетворительно' };
+	return { digit: 2, label: 'неудовлетворительно' };
+}
+
+function scoreColor(s: number): string {
+	if (s >= 90) return 'text-green-600';
+	if (s >= 70) return 'text-blue-600';
+	if (s >= 55) return 'text-yellow-600';
+	return 'text-red-600';
+}
+
+function gradeBadgeStyle(s: number): string {
+	if (s >= 90) return 'bg-green-100 text-green-800';
+	if (s >= 70) return 'bg-blue-100 text-blue-800';
+	if (s >= 55) return 'bg-yellow-100 text-yellow-800';
+	return 'bg-red-100 text-red-800';
+}
 
 function getStageTitle(stage: LabStage): string {
 	const titles: Record<LabStage, string> = {

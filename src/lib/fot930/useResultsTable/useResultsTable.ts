@@ -3,7 +3,7 @@
  * Обрабатывает ввод студентов, валидацию и переходы между измерениями
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type {
 	ComponentResultsTable,
 	FiberMeasurementResult,
@@ -24,14 +24,28 @@ import {
 	validateMeasurement
 } from './validation';
 
+interface UseResultsTableOptions {
+	/** Callback при начислении штрафа */
+	onPenalty?: (amount: number, reason: string) => void;
+}
+
 /**
  * Хук для управления интерактивными таблицами результатов
  */
-export function useResultsTable() {
+export function useResultsTable(options: UseResultsTableOptions = {}) {
+	const { onPenalty } = options;
+
 	const [state, setState] = useState<ResultsTableState>({
 		tables: {},
 		pendingInputComponentId: null
 	});
+
+	// Snapshot-ref: всегда актуальное состояние для чтения вне setState
+	const stateRef = useRef(state);
+	stateRef.current = state;
+
+	// Набор ключей ячеек, по которым штраф уже был начислен (защита от двойного штрафа)
+	const penalizedCellsRef = useRef<Set<string>>(new Set());
 
 	/**
 	 * Создает новую таблицу результатов для компонента после первого измерения
@@ -179,7 +193,8 @@ export function useResultsTable() {
 	);
 
 	/**
-	 * Вводит значение студентом и валидирует его
+	 * Вводит значение студентом и валидирует его.
+	 * При первой ошибке в ячейке начисляет штраф через onPenalty.
 	 */
 	const enterStudentValue = useCallback(
 		(
@@ -189,6 +204,63 @@ export function useResultsTable() {
 			measurementIndex: number | null,
 			value: number
 		): void => {
+			// Читаем текущее состояние через snapshot-ref для проверки штрафов
+			const currentTable = stateRef.current.tables[componentId];
+			if (currentTable) {
+				const currentRow = currentTable.rows.find(
+					(r) => r.wavelength === wavelength
+				);
+				if (currentRow) {
+					if (
+						field === 'measurement' &&
+						measurementIndex !== null &&
+						measurementIndex >= 0 &&
+						measurementIndex <= 2
+					) {
+						const entry = currentRow.measurements[measurementIndex];
+						if (entry) {
+							const { isValid } = validateMeasurement(
+								currentRow,
+								measurementIndex,
+								value
+							);
+							if (!isValid) {
+								const cellKey = `${componentId}_${wavelength}_measurement_${measurementIndex}`;
+								if (!penalizedCellsRef.current.has(cellKey)) {
+									penalizedCellsRef.current.add(cellKey);
+									onPenalty?.(
+										2,
+										'Ошибка при переносе измерений из прибора в таблицу'
+									);
+								}
+							}
+						}
+					} else if (field === 'average') {
+						const { isValid } = validateAverage(currentRow, value);
+						if (!isValid) {
+							const cellKey = `${componentId}_${wavelength}_average`;
+							if (!penalizedCellsRef.current.has(cellKey)) {
+								penalizedCellsRef.current.add(cellKey);
+								onPenalty?.(5, 'Ошибка при вводе среднего значения потерь');
+							}
+						}
+					} else if (field === 'kilometricAttenuation') {
+						const { isValid } = validateKilometricAttenuation(
+							currentRow,
+							currentTable,
+							value
+						);
+						if (!isValid) {
+							const cellKey = `${componentId}_${wavelength}_kilometricAttenuation`;
+							if (!penalizedCellsRef.current.has(cellKey)) {
+								penalizedCellsRef.current.add(cellKey);
+								onPenalty?.(5, 'Ошибка при вводе километрического затухания');
+							}
+						}
+					}
+				}
+			}
+
 			setState((prev) => {
 				const table = prev.tables[componentId];
 				if (!table) {
@@ -262,11 +334,12 @@ export function useResultsTable() {
 				};
 			});
 		},
-		[]
+		[onPenalty]
 	);
 
 	/**
 	 * Сохраняет ответ студента по одной длине волны в блоке расчёта формулы.
+	 * При первой ошибке по длине волны начисляет штраф через onPenalty.
 	 * Автоматически выставляет formulaCompleted когда все строки таблицы верно заполнены.
 	 */
 	const saveFormulaInput = useCallback(
@@ -276,6 +349,14 @@ export function useResultsTable() {
 			value: string,
 			correct: boolean
 		): void => {
+			if (!correct) {
+				const formulaKey = `${componentId}_formula_${wavelength}`;
+				if (!penalizedCellsRef.current.has(formulaKey)) {
+					penalizedCellsRef.current.add(formulaKey);
+					onPenalty?.(5, 'Ошибка при вводе ожидаемых потерь');
+				}
+			}
+
 			setState((prev) => {
 				const table = prev.tables[componentId];
 				if (!table) return prev;
@@ -304,16 +385,30 @@ export function useResultsTable() {
 				};
 			});
 		},
-		[]
+		[onPenalty]
 	);
 
 	/**
 	 * Фиксирует выбор студента об исправности компонента.
 	 * Доступно только после заполнения всех числовых ячеек и верного расчёта по формуле.
 	 * После первого выбора изменение заблокировано.
+	 * При неверном выводе начисляет штраф через onPenalty.
 	 */
 	const enterFaultyChoice = useCallback(
 		(componentId: string, studentThinksFaulty: boolean): void => {
+			// Проверяем условия и начисляем штраф через snapshot-ref
+			const currentTable = stateRef.current.tables[componentId];
+			if (
+				currentTable?.measurementsCompleted &&
+				currentTable.formulaCompleted &&
+				currentTable.studentFaultyChoice === null
+			) {
+				const isCorrect = studentThinksFaulty === currentTable.isActuallyFaulty;
+				if (!isCorrect) {
+					onPenalty?.(10, 'Неправильный вывод об исправности компонента');
+				}
+			}
+
 			setState((prev) => {
 				const table = prev.tables[componentId];
 				if (!table) {
@@ -346,7 +441,7 @@ export function useResultsTable() {
 				};
 			});
 		},
-		[]
+		[onPenalty]
 	);
 
 	/**

@@ -461,6 +461,18 @@ export interface LabWorkState {
 	resultsTableState: ResultsTableState;
 }
 
+/** Событие штрафа в системе оценивания */
+export interface PenaltyEvent {
+	/** Размер штрафа (положительное число) */
+	amount: number;
+
+	/** Описание ошибки */
+	reason: string;
+
+	/** Временная метка события */
+	timestamp: number;
+}
+
 /** Выполненное измерение (для таблицы результатов) */
 export interface CompletedMeasurement {
 	/** ID компонента */
