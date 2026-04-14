@@ -1,7 +1,12 @@
 import clsx from 'clsx';
 import { type ReactNode, useEffect, useRef } from 'react';
 import { Header } from './components/header';
-import { AdmissionTest, LabWork, Theory } from './components/sections';
+import {
+	AdmissionTest,
+	FinalTest,
+	LabWork,
+	Theory
+} from './components/sections';
 import { Tabs, useTabs } from './components/tabs';
 import type { Section } from './types';
 
@@ -54,6 +59,10 @@ export function Layout() {
 
 					<TabContent active={activeTab === 'lab-work'}>
 						<LabWork />
+					</TabContent>
+
+					<TabContent active={activeTab === 'final-test'}>
+						<FinalTest />
 					</TabContent>
 				</div>
 			</main>

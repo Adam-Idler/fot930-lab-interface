@@ -18,6 +18,7 @@ import {
 	isSplitterType
 } from '../../../lib/fot930/splitter';
 import { useResultsTable } from '../../../lib/fot930/useResultsTable';
+import { storage } from '../../../lib/storage';
 import type {
 	ConnectionScheme,
 	DeviceAction,
@@ -27,6 +28,7 @@ import type {
 	Wavelength
 } from '../../../types/fot930';
 import { Device } from '../../fot930';
+import { useRegistration } from '../../registration-form';
 import {
 	ConnectionSchemeStage,
 	IntroductionStage,
@@ -169,6 +171,10 @@ const PROVIDER_SCENARIO: ComplexScenario = {
 const complexScenarios: ComplexScenario[] = [PROVIDER_SCENARIO];
 
 export function LabWork() {
+	const { student, setStudent } = useRegistration();
+	const studentRef = useRef(student);
+	studentRef.current = student;
+
 	const [currentStage, setCurrentStage] = useState<LabStage>('INTRODUCTION');
 	const [selectedComponent, setSelectedComponent] = useState<PassiveComponent>(
 		availableComponents[0]
@@ -236,6 +242,18 @@ export function LabWork() {
 		}
 		return Object.keys(resultsTableState.tables).length > 0;
 	}, [resultsTableState.tables]);
+
+	// Сохраняем результат лабораторной работы при завершении всех измерений
+	useEffect(() => {
+		if (!allComponentsMeasured) return;
+		const digit = getGrade(score).digit;
+		const updatedStudent = {
+			...studentRef.current,
+			labWorkResult: { score, grade: digit }
+		};
+		setStudent(updatedStudent);
+		storage.saveStudent(updatedStudent);
+	}, [allComponentsMeasured, score, setStudent]);
 
 	// Обновляем correctSequence при смене компонента или сценария
 	useEffect(() => {

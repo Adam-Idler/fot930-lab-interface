@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { publicUrl } from '../../lib/utils';
 import { useRegistration } from '../registration-form';
 import { AboutModal } from './AboutModal';
+import { StudentResultsModal } from './StudentResultsModal';
 
 export function Header() {
 	const { student } = useRegistration();
 	const [isAboutOpen, setIsAboutOpen] = useState(false);
+	const [isResultsOpen, setIsResultsOpen] = useState(false);
 
 	return (
 		<>
@@ -19,12 +21,23 @@ export function Header() {
 					<img src={publicUrl('/sibsutis-logo.svg')} alt="Логотип СибГУТИ" />
 				</button>
 				<div className="text-white">Измерения оптическим тестером FOT-930</div>
-				<div className="text-sm text-gray-300">
+				<button
+					type="button"
+					aria-label="Открыть результаты студента"
+					onClick={() => setIsResultsOpen(true)}
+					className="text-sm text-gray-300 hover:text-white transition-colors cursor-pointer bg-transparent border-0 p-0 underline underline-offset-2 decoration-dotted"
+				>
 					Студент: {student.name} {student.group}
-				</div>
+				</button>
 			</header>
 
 			{isAboutOpen && <AboutModal onClose={() => setIsAboutOpen(false)} />}
+			{isResultsOpen && (
+				<StudentResultsModal
+					student={student}
+					onClose={() => setIsResultsOpen(false)}
+				/>
+			)}
 		</>
 	);
 }

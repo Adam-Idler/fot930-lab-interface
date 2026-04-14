@@ -5,16 +5,16 @@ import { shuffleQuestionsAnswers } from '../../test/utils';
 import { questions } from './questions-bank';
 
 function pickQuestions() {
-	return shuffleQuestionsAnswers(getRandomElements(questions, 15));
+	return shuffleQuestionsAnswers(getRandomElements(questions, 10));
 }
 
-export function AdmissionTest() {
+export function FinalTest() {
 	const [testQuestions, setTestQuestions] = useState(pickQuestions);
 
 	return (
 		<div className="flex flex-col justify-center h-full">
 			<Test
-				testID="admissionTest"
+				testID="finalTest"
 				questions={testQuestions}
 				onRestart={() => setTestQuestions(pickQuestions())}
 			/>

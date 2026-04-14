@@ -12,6 +12,10 @@ const tabs: TabProps[] = [
 	{
 		id: 'lab-work',
 		label: 'Выполнение работы'
+	},
+	{
+		id: 'final-test',
+		label: 'Итоговый тест'
 	}
 ];
 

@@ -312,6 +312,10 @@ export function IntroductionStage() {
 							</div>
 						</div>
 					</div>
+					<p className="text-xs text-gray-500 mt-4">
+						💡 Итоговые оценки по всем разделам работы можно посмотреть, нажав
+						на имя студента в верхней панели программы.
+					</p>
 				</div>
 			</div>
 
