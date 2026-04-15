@@ -26,6 +26,12 @@
 	}
 }
 
+@layer base {
+	html {
+		overflow-y: hidden;
+	}
+}
+
 @layer utilities {
 	/* Кастомный скроллбар без стрелок */
 	.custom-scrollbar::-webkit-scrollbar {

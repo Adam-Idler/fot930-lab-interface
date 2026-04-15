@@ -436,195 +436,188 @@ export function LabWork() {
 	const grade = getGrade(score);
 
 	return (
-		<div className="h-full overflow-auto bg-gray-50">
-			<div className="mx-auto py-6 space-y-6">
-				<div className="bg-white rounded-lg shadow-md p-6">
-					<div className="flex flex-wrap items-center justify-between gap-4">
-						<div>
-							<h1 className="text-3xl font-bold text-gray-900">
-								Выполнение лабораторной работы
-							</h1>
-							<p className="mt-2 text-gray-600">
-								Измерения оптическим тестером FOT-930
+		<div className="py-6 space-y-6">
+			<div className="bg-white rounded-lg shadow-md p-6">
+				<div className="flex flex-wrap items-center justify-between gap-4">
+					<div>
+						<h1 className="text-3xl font-bold text-gray-900">
+							Выполнение лабораторной работы
+						</h1>
+						<p className="mt-2 text-gray-600">
+							Измерения оптическим тестером FOT-930
+						</p>
+					</div>
+
+					{/* Блок баллов — виден на всех этапах */}
+					<div className="flex items-center gap-4">
+						<div className="text-right">
+							<div className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">
+								Баллы
+							</div>
+							<div className={`text-3xl font-bold ${scoreColor(score)}`}>
+								{score}
+								<span className="text-lg font-normal text-gray-400">
+									{' '}
+									/ 100
+								</span>
+							</div>
+						</div>
+
+						{allComponentsMeasured && (
+							<div
+								className={`px-4 py-2 rounded-lg text-center ${gradeBadgeStyle(score)}`}
+							>
+								<div className="text-xs uppercase tracking-wide mb-0.5 opacity-70">
+									Оценка
+								</div>
+								<div className="text-2xl font-bold leading-none">
+									{grade.digit}
+								</div>
+								<div className="text-xs mt-0.5">{grade.label}</div>
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+
+			<div className="bg-white rounded-lg shadow-md p-4">
+				<div className="flex gap-2 overflow-x-auto items-center">
+					<StageButton
+						stage="INTRODUCTION"
+						label="Введение"
+						active={currentStage === 'INTRODUCTION'}
+						onClick={() => handleStageChange('INTRODUCTION')}
+					/>
+					<StageButton
+						stage="PREPARATION"
+						label="Подготовка"
+						active={currentStage === 'PREPARATION'}
+						onClick={() => handleStageChange('PREPARATION')}
+					/>
+					<StageButton
+						stage="CONNECTION_SCHEME"
+						label="Сборка схемы"
+						active={currentStage === 'CONNECTION_SCHEME'}
+						onClick={() => handleStageChange('CONNECTION_SCHEME')}
+					/>
+					<StageButton
+						stage="RESULTS_ANALYSIS"
+						label="Анализ результатов"
+						active={currentStage === 'RESULTS_ANALYSIS'}
+						onClick={() => handleStageChange('RESULTS_ANALYSIS')}
+					/>
+					{/* TODO: Вернуть условие с разработкой */}
+					{/* {import.meta.env.DEV && */}
+					{!deviceState.preparation.isReadyForMeasurements && (
+						<button
+							type="button"
+							className="ml-auto shrink-0 text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 cursor-pointer"
+							onClick={() => {
+								if (deviceDispatchRef.current) {
+									deviceDispatchRef.current({ type: 'SKIP_PREPARATION' });
+								}
+								handleStageChange('CONNECTION_SCHEME');
+							}}
+						>
+							Пропустить подготовку
+						</button>
+					)}
+				</div>
+			</div>
+
+			{currentStage === 'INTRODUCTION' && <IntroductionStage />}
+
+			{/* Двухколоночный блок: прибор + контент этапа */}
+			<div
+				className={
+					currentStage === 'INTRODUCTION'
+						? 'hidden'
+						: 'flex flex-wrap xl:flex-nowrap gap-6'
+				}
+			>
+				<div className="w-full xl:w-auto">
+					<Device
+						onDeviceStateChange={setDeviceState}
+						onDispatchReady={(dispatch) => {
+							deviceDispatchRef.current = dispatch;
+						}}
+						selectedComponent={selectedComponent}
+						connectionScheme={connectionScheme}
+						chainComponents={activeScenario?.chain}
+						measurementHistoryKey={effectiveComponentId}
+						splitterOutput={currentSplitterOutput}
+					/>
+				</div>
+
+				<div className="space-y-6 grow min-w-0">
+					{currentStage === 'PREPARATION' && (
+						<PreparationStage
+							deviceState={deviceState}
+							onCleanPorts={handleCleanPorts}
+						/>
+					)}
+
+					{currentStage === 'CONNECTION_SCHEME' && (
+						<PassiveMeasurementsStage
+							components={availableComponents}
+							selectedComponent={selectedComponent}
+							activeScenario={activeScenario}
+							complexScenarios={complexScenarios}
+							resultsTableState={resultsTableState}
+							canStartNextMeasurement={canStartNextMeasurement}
+							onSelectComponent={handleSelectComponent}
+							onSelectScenario={handleSelectScenario}
+						/>
+					)}
+
+					{currentStage === 'RESULTS_ANALYSIS' && (
+						<ResultsStage
+							resultsTableState={resultsTableState}
+							selectedComponent={selectedComponent}
+							onValueChange={handleValueChange}
+							isCellEditable={(
+								componentId,
+								wavelength,
+								field,
+								measurementIndex
+							) =>
+								isCellEditable(componentId, wavelength, field, measurementIndex)
+							}
+							chainComponents={activeScenario?.chain}
+							onFaultyChoiceChange={enterFaultyChoice}
+							onSaveFormulaRow={(componentId, wavelength, value, correct) =>
+								saveFormulaInput(componentId, wavelength, value, correct)
+							}
+							onAutoFill={autoFillCurrentPending}
+						/>
+					)}
+
+					{currentStage !== 'PREPARATION' && (
+						<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+							<h3 className="font-semibold text-blue-900 mb-2">
+								{getStageTitle(currentStage)}
+							</h3>
+							<p className="text-sm text-blue-800">
+								{getStageInstructions(currentStage)}
 							</p>
 						</div>
-
-						{/* Блок баллов — виден на всех этапах */}
-						<div className="flex items-center gap-4">
-							<div className="text-right">
-								<div className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">
-									Баллы
-								</div>
-								<div className={`text-3xl font-bold ${scoreColor(score)}`}>
-									{score}
-									<span className="text-lg font-normal text-gray-400">
-										{' '}
-										/ 100
-									</span>
-								</div>
-							</div>
-
-							{allComponentsMeasured && (
-								<div
-									className={`px-4 py-2 rounded-lg text-center ${gradeBadgeStyle(score)}`}
-								>
-									<div className="text-xs uppercase tracking-wide mb-0.5 opacity-70">
-										Оценка
-									</div>
-									<div className="text-2xl font-bold leading-none">
-										{grade.digit}
-									</div>
-									<div className="text-xs mt-0.5">{grade.label}</div>
-								</div>
-							)}
-						</div>
-					</div>
+					)}
 				</div>
-
-				<div className="bg-white rounded-lg shadow-md p-4">
-					<div className="flex gap-2 overflow-x-auto items-center">
-						<StageButton
-							stage="INTRODUCTION"
-							label="Введение"
-							active={currentStage === 'INTRODUCTION'}
-							onClick={() => handleStageChange('INTRODUCTION')}
-						/>
-						<StageButton
-							stage="PREPARATION"
-							label="Подготовка"
-							active={currentStage === 'PREPARATION'}
-							onClick={() => handleStageChange('PREPARATION')}
-						/>
-						<StageButton
-							stage="CONNECTION_SCHEME"
-							label="Сборка схемы"
-							active={currentStage === 'CONNECTION_SCHEME'}
-							onClick={() => handleStageChange('CONNECTION_SCHEME')}
-						/>
-						<StageButton
-							stage="RESULTS_ANALYSIS"
-							label="Анализ результатов"
-							active={currentStage === 'RESULTS_ANALYSIS'}
-							onClick={() => handleStageChange('RESULTS_ANALYSIS')}
-						/>
-						{/* TODO: Вернуть условие с разработкой */}
-						{/* {import.meta.env.DEV && */}
-						{!deviceState.preparation.isReadyForMeasurements && (
-							<button
-								type="button"
-								className="ml-auto shrink-0 text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 cursor-pointer"
-								onClick={() => {
-									if (deviceDispatchRef.current) {
-										deviceDispatchRef.current({ type: 'SKIP_PREPARATION' });
-									}
-									handleStageChange('CONNECTION_SCHEME');
-								}}
-							>
-								Пропустить подготовку
-							</button>
-						)}
-					</div>
-				</div>
-
-				{currentStage === 'INTRODUCTION' && <IntroductionStage />}
-
-				{/* Двухколоночный блок: прибор + контент этапа */}
-				<div
-					className={
-						currentStage === 'INTRODUCTION'
-							? 'hidden'
-							: 'flex flex-wrap xl:flex-nowrap gap-6'
-					}
-				>
-					<div className="w-full xl:w-auto">
-						<Device
-							onDeviceStateChange={setDeviceState}
-							onDispatchReady={(dispatch) => {
-								deviceDispatchRef.current = dispatch;
-							}}
-							selectedComponent={selectedComponent}
-							connectionScheme={connectionScheme}
-							chainComponents={activeScenario?.chain}
-							measurementHistoryKey={effectiveComponentId}
-							splitterOutput={currentSplitterOutput}
-						/>
-					</div>
-
-					<div className="space-y-6 grow min-w-0">
-						{currentStage === 'PREPARATION' && (
-							<PreparationStage
-								deviceState={deviceState}
-								onCleanPorts={handleCleanPorts}
-							/>
-						)}
-
-						{currentStage === 'CONNECTION_SCHEME' && (
-							<PassiveMeasurementsStage
-								components={availableComponents}
-								selectedComponent={selectedComponent}
-								activeScenario={activeScenario}
-								complexScenarios={complexScenarios}
-								resultsTableState={resultsTableState}
-								canStartNextMeasurement={canStartNextMeasurement}
-								onSelectComponent={handleSelectComponent}
-								onSelectScenario={handleSelectScenario}
-							/>
-						)}
-
-						{currentStage === 'RESULTS_ANALYSIS' && (
-							<ResultsStage
-								resultsTableState={resultsTableState}
-								selectedComponent={selectedComponent}
-								onValueChange={handleValueChange}
-								isCellEditable={(
-									componentId,
-									wavelength,
-									field,
-									measurementIndex
-								) =>
-									isCellEditable(
-										componentId,
-										wavelength,
-										field,
-										measurementIndex
-									)
-								}
-								chainComponents={activeScenario?.chain}
-								onFaultyChoiceChange={enterFaultyChoice}
-								onSaveFormulaRow={(componentId, wavelength, value, correct) =>
-									saveFormulaInput(componentId, wavelength, value, correct)
-								}
-								onAutoFill={autoFillCurrentPending}
-							/>
-						)}
-
-						{currentStage !== 'PREPARATION' && (
-							<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-								<h3 className="font-semibold text-blue-900 mb-2">
-									{getStageTitle(currentStage)}
-								</h3>
-								<p className="text-sm text-blue-800">
-									{getStageInstructions(currentStage)}
-								</p>
-							</div>
-						)}
-					</div>
-				</div>
-
-				{/* Сборка схемы — на всю ширину, под двухколоночным блоком */}
-				{currentStage === 'CONNECTION_SCHEME' && (
-					<ConnectionSchemeStage
-						scheme={connectionScheme}
-						currentComponent={selectedComponent}
-						onSchemeChange={setConnectionScheme}
-						measuredSplitterOutputs={measuredSplitterOutputs}
-						scenarioChain={activeScenario?.chain}
-						onSchemeError={() =>
-							handlePenalty(10, 'Ошибка при сборке схемы подключения')
-						}
-					/>
-				)}
 			</div>
+
+			{/* Сборка схемы — на всю ширину, под двухколоночным блоком */}
+			{currentStage === 'CONNECTION_SCHEME' && (
+				<ConnectionSchemeStage
+					scheme={connectionScheme}
+					currentComponent={selectedComponent}
+					onSchemeChange={setConnectionScheme}
+					measuredSplitterOutputs={measuredSplitterOutputs}
+					scenarioChain={activeScenario?.chain}
+					onSchemeError={() =>
+						handlePenalty(10, 'Ошибка при сборке схемы подключения')
+					}
+				/>
+			)}
 		</div>
 	);
 }

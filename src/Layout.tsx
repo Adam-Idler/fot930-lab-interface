@@ -48,7 +48,7 @@ export function Layout() {
 			</div>
 
 			<main id="main-scroll" className="flex-1 overflow-auto">
-				<div className="h-full max-w-400 mx-auto px-4 sm:px-6 lg:px-8">
+				<div className="min-h-full max-w-400 mx-auto px-4 sm:px-6 lg:px-8">
 					<TabContent active={activeTab === 'theory'}>
 						<Theory />
 					</TabContent>

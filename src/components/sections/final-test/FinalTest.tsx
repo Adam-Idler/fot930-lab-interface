@@ -5,7 +5,7 @@ import { shuffleQuestionsAnswers } from '../../test/utils';
 import { questions } from './questions-bank';
 
 function pickQuestions() {
-	return shuffleQuestionsAnswers(getRandomElements(questions, 10));
+	return shuffleQuestionsAnswers(getRandomElements(questions, 20));
 }
 
 export function FinalTest() {

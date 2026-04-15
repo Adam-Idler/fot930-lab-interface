@@ -79,18 +79,7 @@ export function AboutModal({ onClose }: AboutModalProps) {
 						label="Научный руководитель"
 						value="Первушина Любовь Валентиновна"
 					/>
-					<InfoRow label="Автор" value="Раков Павел Олегович" />
-					<InfoRow
-						label="Email"
-						value={
-							<a
-								href="mailto:pasha_rakov@bk.ru"
-								className="text-blue-600 hover:underline"
-							>
-								pasha_rakov@bk.ru
-							</a>
-						}
-					/>
+					<InfoRow label="Автор" value="Раков Павел Олегович ЗС-021" />
 				</div>
 			</div>
 		</div>

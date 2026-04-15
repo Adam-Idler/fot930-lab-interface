@@ -203,11 +203,11 @@ export function LossFormulaBlock({
 									</span>
 								)}
 								{/* Ожидаемое значение — только в dev-режиме */}
-								{import.meta.env.DEV && (
-									<span className="text-xs text-gray-300 ml-1 select-none">
-										({cv.value.toFixed(2)} дБ)
-									</span>
-								)}
+								{/* {import.meta.env.DEV && ( */}
+								<span className="text-xs text-gray-300 ml-1 select-none">
+									({cv.value.toFixed(2)} дБ)
+								</span>
+								{/* )} */}
 							</div>
 							{isError && (
 								<span className="text-sm text-red-600">

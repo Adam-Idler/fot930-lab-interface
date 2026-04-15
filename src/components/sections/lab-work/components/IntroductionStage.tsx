@@ -1,5 +1,6 @@
 import type React from 'react';
 
+// TODO: Проверить эмодзи на Windows 7. По необходимости заменить иконками
 export function IntroductionStage() {
 	return (
 		<div className="flex flex-col gap-6">
@@ -316,6 +317,45 @@ export function IntroductionStage() {
 						💡 Итоговые оценки по всем разделам работы можно посмотреть, нажав
 						на имя студента в верхней панели программы.
 					</p>
+				</div>
+			</div>
+
+			{/* Требования к отчёту */}
+			<div className="bg-white rounded-lg shadow-md overflow-hidden">
+				<div className="bg-slate-700 text-white px-6 py-3 flex items-center gap-3">
+					<div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0">
+						✎
+					</div>
+					<h3 className="font-semibold text-base">Требования к отчёту</h3>
+				</div>
+				<div className="p-6">
+					<p className="text-sm text-gray-600 mb-4">
+						Бланк отчёта должен содержать <strong>титульный лист</strong> (по
+						форме, принятой в СибГУТИ) с названием выполняемой работы, фамилией
+						студента и номером группы. В отчёте должны быть приведены:
+					</p>
+					<ul className="flex flex-col gap-2">
+						{[
+							'Цель работы',
+							'Фотография / скриншот выполненного теста-допуска с оценкой не ниже 4',
+							'Фотография / скриншот выполненного этапа подготовки работы',
+							'Фотографии / скриншоты хода выполнения работы',
+							'Фотография / скриншот с подтверждением выполненного измерения всех приведённых компонентов и оценкой не ниже 3',
+							'Фотография / скриншот выполненного итогового теста с оценкой не ниже 3',
+							'Фотография / скриншот экрана с результатами по проделанной работе',
+							'Вывод по лабораторной работе'
+						].map((item, index) => (
+							<li
+								key={item}
+								className="flex items-start gap-3 text-sm text-gray-700"
+							>
+								<span className="mt-0.5 w-5 h-5 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold shrink-0">
+									{index + 1}
+								</span>
+								<span>{item}</span>
+							</li>
+						))}
+					</ul>
 				</div>
 			</div>
 
