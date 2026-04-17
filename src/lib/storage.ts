@@ -7,14 +7,14 @@ export const storage = {
 		if (window.electronAPI) {
 			return window.electronAPI.saveStudent(student);
 		}
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(student));
+		sessionStorage.setItem(STORAGE_KEY, JSON.stringify(student));
 	},
 
 	async loadStudent(): Promise<Student | null> {
 		if (window.electronAPI) {
 			return window.electronAPI.loadStudent();
 		}
-		const data = localStorage.getItem(STORAGE_KEY);
+		const data = sessionStorage.getItem(STORAGE_KEY);
 		return data ? (JSON.parse(data) as Student) : null;
 	}
 };
