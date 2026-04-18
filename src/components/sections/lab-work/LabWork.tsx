@@ -29,6 +29,7 @@ import type {
 } from '../../../types/fot930';
 import { Device } from '../../fot930';
 import { useRegistration } from '../../registration-form';
+import { DefectModule } from '../defect-module';
 import {
 	ConnectionSchemeStage,
 	IntroductionStage,
@@ -506,6 +507,19 @@ export function LabWork() {
 						active={currentStage === 'RESULTS_ANALYSIS'}
 						onClick={() => handleStageChange('RESULTS_ANALYSIS')}
 					/>
+					<StageButton
+						stage="DEFECT_MODULE"
+						label="Определение дефектов"
+						active={currentStage === 'DEFECT_MODULE'}
+						// TODO: Вернуть условие !allComponentsMeasured
+						disabled={false}
+						title={
+							allComponentsMeasured
+								? undefined
+								: 'Модуль станет доступен после завершения основного этапа лабораторной работы'
+						}
+						onClick={() => handleStageChange('DEFECT_MODULE')}
+					/>
 					{/* TODO: Вернуть условие с разработкой */}
 					{/* {import.meta.env.DEV && */}
 					{!deviceState.preparation.isReadyForMeasurements && (
@@ -527,10 +541,12 @@ export function LabWork() {
 
 			{currentStage === 'INTRODUCTION' && <IntroductionStage />}
 
+			{currentStage === 'DEFECT_MODULE' && <DefectModule />}
+
 			{/* Двухколоночный блок: прибор + контент этапа */}
 			<div
 				className={
-					currentStage === 'INTRODUCTION'
+					currentStage === 'INTRODUCTION' || currentStage === 'DEFECT_MODULE'
 						? 'hidden'
 						: 'flex flex-wrap xl:flex-nowrap gap-6'
 				}
@@ -653,7 +669,8 @@ function getStageTitle(stage: LabStage): string {
 		PREPARATION: '',
 		CONNECTION_SCHEME: 'Сборка измерительной схемы',
 		COMPLEX_SCHEMES: 'Сложные измерительные схемы',
-		RESULTS_ANALYSIS: 'Анализ результатов'
+		RESULTS_ANALYSIS: 'Анализ результатов',
+		DEFECT_MODULE: ''
 	};
 	return titles[stage];
 }
@@ -700,7 +717,8 @@ function getStageInstructions(stage: LabStage): string {
 		COMPLEX_SCHEMES:
 			'Выполните измерения для сложных схем с последовательным соединением нескольких компонентов.',
 		RESULTS_ANALYSIS:
-			'Просмотрите и проанализируйте результаты всех выполненных измерений. Сравните средние значения с типичными характеристиками компонентов.'
+			'Просмотрите и проанализируйте результаты всех выполненных измерений. Сравните средние значения с типичными характеристиками компонентов.',
+		DEFECT_MODULE: ''
 	};
 	return instructions[stage];
 }

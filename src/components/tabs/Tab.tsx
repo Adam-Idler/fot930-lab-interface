@@ -6,9 +6,10 @@ export interface TabProps {
 	id: Section;
 	label: string;
 	disabled?: boolean;
+	title?: string;
 }
 
-export function Tab({ id, label, disabled }: TabProps) {
+export function Tab({ id, label, disabled, title }: TabProps) {
 	const { activeTab, setActiveTab } = useTabs();
 
 	const isActive = activeTab === id;
@@ -23,6 +24,7 @@ export function Tab({ id, label, disabled }: TabProps) {
 			key={id}
 			onClick={onClickHandler}
 			disabled={disabled}
+			title={title}
 			className={clsx(
 				'whitespace-nowrap py-4 px-1 border-b-2 -mb-px font-medium text-sm',
 				isActive
