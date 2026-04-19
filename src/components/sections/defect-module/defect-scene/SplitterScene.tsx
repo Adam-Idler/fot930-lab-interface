@@ -18,6 +18,7 @@ import {
 	toSvgPoint,
 	VFL_SNAP_X
 } from './constants';
+import { FipMicroscope } from './FipMicroscope';
 import { DefectPoint, GlowLine } from './GlowLine';
 
 interface SplitterSceneProps {
@@ -29,6 +30,9 @@ interface SplitterSceneProps {
 	splActiveHasDefect: boolean;
 	onSnap: (idx: 0 | 1) => void;
 	onDefectClick: () => void;
+	fipActive: boolean;
+	fipConnected: boolean;
+	onFipConnect: () => void;
 }
 
 export function SplitterScene({
@@ -39,7 +43,10 @@ export function SplitterScene({
 	defectFound,
 	splActiveHasDefect,
 	onSnap,
-	onDefectClick
+	onDefectClick,
+	fipActive,
+	fipConnected,
+	onFipConnect
 }: SplitterSceneProps) {
 	const [splDragIdx, setSplDragIdx] = useState<0 | 1 | null>(null);
 	const [splDragPos, setSplDragPos] = useState({ x: 0, y: 0 });
@@ -238,6 +245,13 @@ export function SplitterScene({
 						onClick={onDefectClick}
 					/>
 				</g>
+			)}
+			{fipActive && (
+				<FipMicroscope
+					svgRef={svgRef}
+					connected={fipConnected}
+					onConnect={onFipConnect}
+				/>
 			)}
 		</>
 	);

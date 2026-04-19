@@ -69,6 +69,13 @@ export function DefectScene({
 		}
 	}
 
+	const fipActive =
+		isSplitter &&
+		completedStepIds.includes('find_defect') &&
+		completedStepIds.includes('characterize_vfl');
+	const fipConnected = completedStepIds.includes('connect_fip');
+	const svgHeight = fipActive ? 300 : 200;
+
 	const showQuestion =
 		questionKey !== null &&
 		(!isCompletionQuestion || !completedStepIds.includes('characterize_vfl'));
@@ -87,12 +94,15 @@ export function DefectScene({
 
 	return (
 		<div className="space-y-3">
-			<div className="relative mx-auto" style={{ width: 600, height: 200 }}>
+			<div
+				className="relative mx-auto"
+				style={{ width: 600, height: svgHeight }}
+			>
 				<svg
 					ref={svgRef}
 					width={600}
-					height={200}
-					viewBox="0 0 600 200"
+					height={svgHeight}
+					viewBox={`0 0 600 ${svgHeight}`}
 					className="bg-gray-50 border-2 border-gray-200 rounded-lg select-none"
 				>
 					<title>Визуализация компонента</title>
@@ -108,6 +118,16 @@ export function DefectScene({
 								50%, 99% { opacity: 0; }
 							}
 							.beam-blink { animation: vfl-blink 1s linear infinite; }
+							@keyframes fip-snap-anim {
+								0%, 100% { stroke-opacity: 0.7; }
+								50% { stroke-opacity: 0.1; }
+							}
+							.fip-snap-ring { animation: fip-snap-anim 1.5s ease-in-out infinite; }
+							@keyframes fip-tip-anim {
+								0%, 100% { opacity: 1; }
+								50% { opacity: 0.35; }
+							}
+							.fip-tip-pulse { animation: fip-tip-anim 1.4s ease-in-out infinite; }
 						`}</style>
 					</defs>
 					<VflDevice connected={isConnected} />
@@ -135,6 +155,9 @@ export function DefectScene({
 								onStepComplete?.('connect_fiber');
 							}}
 							onDefectClick={handleDefectClick}
+							fipActive={fipActive}
+							fipConnected={fipConnected}
+							onFipConnect={() => onStepComplete?.('connect_fip')}
 						/>
 					)}
 				</svg>

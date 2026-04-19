@@ -87,9 +87,11 @@ export function DefectModule({
 		return Array.from(merged);
 	}, [state.completedVflStepIds, deviceVflSteps]);
 
+	const isSplitterSelected = state.selectedComponentId === 'splitter_1_2';
 	const isAllStepsComplete =
 		state.completedVflStepIds.includes('find_defect') &&
-		state.completedVflStepIds.includes('characterize_vfl');
+		state.completedVflStepIds.includes('characterize_vfl') &&
+		(!isSplitterSelected || state.completedVflStepIds.includes('connect_fip'));
 
 	return (
 		<div className="space-y-4">
@@ -187,6 +189,41 @@ export function DefectModule({
 					/>
 				</div>
 			)}
+
+			{/* Анализ коннектора (FIP) — только для сплиттера */}
+			{selectedComponent !== null &&
+				isSplitterSelected &&
+				state.completedVflStepIds.includes('find_defect') &&
+				state.completedVflStepIds.includes('characterize_vfl') && (
+					<div className="bg-white rounded-lg shadow-md p-4 space-y-3">
+						<h2 className="text-base font-semibold text-gray-800">
+							Анализ коннектора (FIP)
+						</h2>
+						<div className="border border-gray-200 rounded-lg p-3 space-y-3">
+							<div className="flex items-center gap-2">
+								<span
+									className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+										state.completedVflStepIds.includes('connect_fip')
+											? 'bg-green-500 text-white'
+											: 'bg-blue-600 text-white'
+									}`}
+								>
+									{state.completedVflStepIds.includes('connect_fip')
+										? '✓'
+										: '1'}
+								</span>
+								<span className="text-sm font-medium text-gray-700">
+									Подключение FIP
+								</span>
+							</div>
+							<p className="text-sm text-gray-600 pl-7">
+								Подключите видеомикроскоп (FIP) к коннектору выбранного выхода.
+								Перетащите конец провода к порту в нижней части прибора VFL на
+								схеме.
+							</p>
+						</div>
+					</div>
+				)}
 
 			{/* Итог: дефект найден */}
 			{selectedComponent !== null &&
