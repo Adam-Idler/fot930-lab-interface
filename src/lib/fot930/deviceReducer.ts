@@ -45,7 +45,11 @@ export const initialDeviceState: DeviceState = {
 	fiberMeasurementsHistory: {},
 	currentMeasurementType: null,
 	connectionError: false,
-	footerPageIndex: 0
+	footerPageIndex: 0,
+	vflMenuIndex: 0,
+	vflEnabled: false,
+	vflModulationMode: 'CW',
+	vflSectionIndex: 0
 };
 
 /** Доступные длины волн для FasTest */
@@ -363,6 +367,28 @@ function handleUpButton(state: DeviceState): DeviceState {
 					!state.fastestMainReferenceTypeSelected
 			};
 
+		case 'SOURCE_VFL_MENU':
+			return {
+				...state,
+				vflMenuIndex: state.vflMenuIndex > 0 ? state.vflMenuIndex - 1 : 1
+			};
+
+		case 'VFL_SCREEN':
+			if (
+				state.openDropdown === 'VFL_ENABLED' ||
+				state.openDropdown === 'VFL_MODULATION'
+			) {
+				return {
+					...state,
+					dropdownIndex: state.dropdownIndex > 0 ? state.dropdownIndex - 1 : 1
+				};
+			}
+			return {
+				...state,
+				vflSectionIndex:
+					state.vflSectionIndex > 0 ? state.vflSectionIndex - 1 : 1
+			};
+
 		default:
 			return state;
 	}
@@ -449,6 +475,28 @@ function handleDownButton(state: DeviceState): DeviceState {
 					!state.fastestMainReferenceTypeSelected
 			};
 
+		case 'SOURCE_VFL_MENU':
+			return {
+				...state,
+				vflMenuIndex: state.vflMenuIndex < 1 ? state.vflMenuIndex + 1 : 0
+			};
+
+		case 'VFL_SCREEN':
+			if (
+				state.openDropdown === 'VFL_ENABLED' ||
+				state.openDropdown === 'VFL_MODULATION'
+			) {
+				return {
+					...state,
+					dropdownIndex: state.dropdownIndex < 1 ? state.dropdownIndex + 1 : 0
+				};
+			}
+			return {
+				...state,
+				vflSectionIndex:
+					state.vflSectionIndex < 1 ? state.vflSectionIndex + 1 : 0
+			};
+
 		default:
 			return state;
 	}
@@ -457,12 +505,18 @@ function handleDownButton(state: DeviceState): DeviceState {
 function handleEnterButton(state: DeviceState): DeviceState {
 	switch (state.screen) {
 		case 'MENU_SETUP':
-			// Переход в экран настроек
 			if (state.setupMenuIndex === 0) {
 				return {
 					...state,
 					screen: 'SETUP_SETTINGS',
 					settingsMenuIndex: 0
+				};
+			}
+			if (state.setupMenuIndex === 4) {
+				return {
+					...state,
+					screen: 'SOURCE_VFL_MENU',
+					vflMenuIndex: 0
 				};
 			}
 			return state;
@@ -574,6 +628,51 @@ function handleEnterButton(state: DeviceState): DeviceState {
 			return state;
 		}
 
+		case 'SOURCE_VFL_MENU':
+			// Индекс 0 = Источник (недоступен), Индекс 1 = VFL
+			if (state.vflMenuIndex === 1) {
+				return {
+					...state,
+					screen: 'VFL_SCREEN',
+					vflSectionIndex: 0
+				};
+			}
+			return state;
+
+		case 'VFL_SCREEN': {
+			if (state.openDropdown === 'VFL_ENABLED') {
+				// 0 = Вкл, 1 = Выкл
+				return {
+					...state,
+					openDropdown: null,
+					dropdownIndex: 0,
+					vflEnabled: state.dropdownIndex === 0
+				};
+			}
+			if (state.openDropdown === 'VFL_MODULATION') {
+				// 0 = CW, 1 = Модул
+				return {
+					...state,
+					openDropdown: null,
+					dropdownIndex: 0,
+					vflModulationMode: state.dropdownIndex === 0 ? 'CW' : 'MODULATED'
+				};
+			}
+			// Открываем dropdown для выбранной секции
+			if (state.vflSectionIndex === 0) {
+				return {
+					...state,
+					openDropdown: 'VFL_ENABLED',
+					dropdownIndex: state.vflEnabled ? 0 : 1
+				};
+			}
+			return {
+				...state,
+				openDropdown: 'VFL_MODULATION',
+				dropdownIndex: state.vflModulationMode === 'CW' ? 0 : 1
+			};
+		}
+
 		case 'FASTEST_MAIN':
 			// Если dropdown открыт - применяем выбранное значение
 			if (state.openDropdown === 'REFERENCE_TYPE') {
@@ -619,10 +718,28 @@ function handleEnterButton(state: DeviceState): DeviceState {
 function handleBackButton(state: DeviceState): DeviceState {
 	switch (state.screen) {
 		case 'MENU_SETUP':
-			// Возврат на главный экран или READY
 			return {
 				...state,
 				screen: 'MAIN'
+			};
+
+		case 'SOURCE_VFL_MENU':
+			return {
+				...state,
+				screen: 'MENU_SETUP'
+			};
+
+		case 'VFL_SCREEN':
+			if (state.openDropdown !== null) {
+				return {
+					...state,
+					openDropdown: null,
+					dropdownIndex: 0
+				};
+			}
+			return {
+				...state,
+				screen: 'SOURCE_VFL_MENU'
 			};
 
 		case 'SETUP_SETTINGS':
@@ -764,6 +881,10 @@ function handleCompleteLoading(state: DeviceState): DeviceState {
 }
 
 function handleF1Button(state: DeviceState): DeviceState {
+	if (state.screen === 'VFL_SCREEN') {
+		return { ...state, vflEnabled: !state.vflEnabled };
+	}
+
 	// F1 на экране FASTEST_SETUP — сброс к заводским настройкам
 	if (state.screen === 'FASTEST_SETUP') {
 		return {
@@ -810,6 +931,13 @@ function handleF1Button(state: DeviceState): DeviceState {
 }
 
 function handleF2Button(state: DeviceState): DeviceState {
+	if (state.screen === 'VFL_SCREEN') {
+		return {
+			...state,
+			vflModulationMode: state.vflModulationMode === 'CW' ? 'MODULATED' : 'CW'
+		};
+	}
+
 	// F2 на экране FASTEST_SETUP — переход к FasTest Изм. (только при верных настройках)
 	if (state.screen === 'FASTEST_SETUP') {
 		const { fastestSettings } = state.preparation;

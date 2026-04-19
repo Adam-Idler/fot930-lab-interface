@@ -37,7 +37,9 @@ export type DeviceScreen =
 	| 'FASTEST_SETUP' // Настройка FasTest
 	| 'FASTEST_MAIN' // Главный экран FasTest
 	| 'FASTEST_MEASURING' // Измерение FasTest
-	| 'FASTEST_RESULTS'; // Результаты измерения FasTest
+	| 'FASTEST_RESULTS' // Результаты измерения FasTest
+	| 'SOURCE_VFL_MENU' // Подменю Источник/VFL
+	| 'VFL_SCREEN'; // Экран настройки VFL
 
 // ============================================================
 // СОСТОЯНИЕ ПРИБОРА
@@ -179,7 +181,13 @@ export interface DeviceState {
 	fastestMainReferenceTypeSelected: boolean;
 
 	/** Открытый выпадающий список */
-	openDropdown: 'PORT' | 'LENGTH_UNIT' | 'REFERENCE_TYPE' | null;
+	openDropdown:
+		| 'PORT'
+		| 'LENGTH_UNIT'
+		| 'REFERENCE_TYPE'
+		| 'VFL_ENABLED'
+		| 'VFL_MODULATION'
+		| null;
 
 	/** Индекс элемента в открытом выпадающем списке */
 	dropdownIndex: number;
@@ -198,6 +206,18 @@ export interface DeviceState {
 
 	/** Ошибка схемы подключения */
 	connectionError: boolean;
+
+	/** Индекс выбранного пункта в подменю Источник/VFL */
+	vflMenuIndex: number;
+
+	/** VFL включён */
+	vflEnabled: boolean;
+
+	/** Режим модуляции VFL */
+	vflModulationMode: 'CW' | 'MODULATED';
+
+	/** Индекс выбранной секции на экране VFL_SCREEN (0 = Вкл/Выкл, 1 = Модуляция) */
+	vflSectionIndex: number;
 }
 
 /** Результат измерения */

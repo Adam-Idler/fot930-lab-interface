@@ -44,6 +44,9 @@ function getFooterItems(state: DeviceState): FooterItem[] {
 			];
 		}
 
+		case 'VFL_SCREEN':
+			return [{ label: 'VFL Вкл/Выкл' }, { label: 'Модуляция' }];
+
 		default:
 			return [];
 	}
@@ -100,7 +103,7 @@ export function DeviceFooter({ state }: DeviceFooterProps) {
 			>
 				<span
 					className={clsx(
-						'text-[10px] font-semibold truncate',
+						'text-[12px] truncate',
 						f1Enabled ? 'text-black' : 'text-gray-400'
 					)}
 				>
@@ -119,7 +122,7 @@ export function DeviceFooter({ state }: DeviceFooterProps) {
 			>
 				<span
 					className={clsx(
-						'text-[10px] font-semibold truncate',
+						'text-[12px] truncate',
 						f2Enabled ? 'text-black' : 'text-gray-400'
 					)}
 				>

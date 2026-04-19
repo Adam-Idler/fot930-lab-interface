@@ -15,7 +15,9 @@ import {
 	ScreenMain,
 	ScreenMenuSetup,
 	ScreenOff,
-	ScreenSettings
+	ScreenSettings,
+	ScreenSourceVflMenu,
+	ScreenVfl
 } from './device-screen';
 
 interface DeviceScreenProps {
@@ -68,6 +70,12 @@ function renderScreen(state: DeviceState) {
 
 		case 'FASTEST_RESULTS':
 			return <ScreenFastestResults state={state} />;
+
+		case 'SOURCE_VFL_MENU':
+			return <ScreenSourceVflMenu state={state} />;
+
+		case 'VFL_SCREEN':
+			return <ScreenVfl state={state} />;
 
 		default:
 			return <ScreenOff />;
