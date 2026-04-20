@@ -5,7 +5,12 @@
 
 import { useEffect, useState } from 'react';
 
-export function DeviceHeader() {
+interface DeviceHeaderProps {
+	/** Лазер VFL включён — индикатор VFL в шапке «горит» */
+	vflEnabled: boolean;
+}
+
+export function DeviceHeader({ vflEnabled }: DeviceHeaderProps) {
 	const [currentTime, setCurrentTime] = useState(new Date());
 
 	useEffect(() => {
@@ -29,6 +34,12 @@ export function DeviceHeader() {
 		return `${hours}:${minutes}`;
 	};
 
+	let vflIndicatorClassName = 'w-3 h-2 bg-red-900 border border-white/30';
+	if (vflEnabled) {
+		vflIndicatorClassName =
+			'w-3 h-2 bg-red-500 border border-white/40 shadow-sm shadow-red-500/60';
+	}
+
 	return (
 		<div className="w-full bg-fot930-blue text-white text-xs font-semibold py-0.5 px-4 flex justify-between items-center">
 			{/* Левая часть - индикаторы */}
@@ -50,7 +61,7 @@ export function DeviceHeader() {
 
 				{/* VFL индикатор */}
 				<div className="flex items-center gap-0.5">
-					<div className="w-3 h-2 bg-red-900 border border-white/30" />
+					<div className={vflIndicatorClassName} />
 					<span>VFL</span>
 				</div>
 

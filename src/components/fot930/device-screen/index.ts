@@ -12,3 +12,4 @@ export { ScreenOff } from './ScreenOff';
 export { ScreenSettings } from './ScreenSettings';
 export { ScreenSourceVflMenu } from './ScreenSourceVflMenu';
 export { ScreenVfl } from './ScreenVfl';
+export { ScreenVideoMicroscope } from './ScreenVideoMicroscope';

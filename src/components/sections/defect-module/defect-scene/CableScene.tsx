@@ -51,7 +51,7 @@ export function CableScene({
 	const displayX = isConnected ? VFL_SNAP_X : cablePos.x;
 	const displayY = isConnected ? CONN_INIT_Y : cablePos.y;
 	const fiberX = displayX + CW;
-	const arrowTipX = VFL_SNAP_X + CW + 2;
+	const arrowTipX = VFL_SNAP_X + CW + 3;
 
 	const handleDown = (e: React.PointerEvent<SVGRectElement>) => {
 		if (isConnected || !svgRef.current) return;
@@ -100,15 +100,15 @@ export function CableScene({
 					<line
 						x1={displayX}
 						y1={CONN_CENTER_Y}
-						x2={arrowTipX + 6}
+						x2={arrowTipX + 9}
 						y2={CONN_CENTER_Y}
 						stroke="#3b82f6"
-						strokeWidth={1.5}
-						strokeDasharray="5 4"
+						strokeWidth={2.5}
+						strokeDasharray="8 6"
 						opacity={0.35}
 					/>
 					<polygon
-						points={`${arrowTipX + 8},${CONN_CENTER_Y - 5} ${arrowTipX},${CONN_CENTER_Y} ${arrowTipX + 8},${CONN_CENTER_Y + 5}`}
+						points={`${arrowTipX + 12},${CONN_CENTER_Y - 8} ${arrowTipX},${CONN_CENTER_Y} ${arrowTipX + 12},${CONN_CENTER_Y + 8}`}
 						fill="#3b82f6"
 						opacity={0.5}
 					/>
@@ -120,14 +120,14 @@ export function CableScene({
 				x2={CABLE_R_CONN.x}
 				y2={CONN_CENTER_Y}
 				stroke={FIBER_COLOR}
-				strokeWidth={5}
+				strokeWidth={8}
 				strokeLinecap="round"
 			/>
 			<text
 				x={(fiberX + CABLE_R_CONN.x) / 2}
-				y={88}
+				y={132}
 				textAnchor="middle"
-				fontSize={11}
+				fontSize={17}
 				fill={FIBER_COLOR}
 			>
 				Оптический шнур
@@ -143,10 +143,10 @@ export function CableScene({
 				y={displayY}
 				width={CW}
 				height={CH}
-				rx={3}
+				rx={5}
 				fill={CONNECTOR_COLOR}
 				stroke={!isConnected ? '#3b82f6' : 'none'}
-				strokeWidth={!isConnected ? 2 : 0}
+				strokeWidth={!isConnected ? 3 : 0}
 				className={!isConnected ? 'drag-pulse' : undefined}
 				style={{
 					cursor: isConnected
@@ -161,9 +161,9 @@ export function CableScene({
 			/>
 			<text
 				x={displayX + CW / 2}
-				y={displayY + CH + 14}
+				y={displayY + CH + 21}
 				textAnchor="middle"
-				fontSize={11}
+				fontSize={17}
 				fill="#64748b"
 			>
 				SC/UPC
@@ -173,14 +173,14 @@ export function CableScene({
 				y={CABLE_R_CONN.y}
 				width={CW}
 				height={CH}
-				rx={3}
+				rx={5}
 				fill={CONNECTOR_COLOR}
 			/>
 			<text
 				x={CABLE_R_CONN.x + CW / 2}
-				y={CABLE_R_CONN.y + CH + 14}
+				y={CABLE_R_CONN.y + CH + 21}
 				textAnchor="middle"
-				fontSize={11}
+				fontSize={17}
 				fill="#64748b"
 			>
 				SC/UPC

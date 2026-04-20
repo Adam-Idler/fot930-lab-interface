@@ -196,6 +196,19 @@ export function LabWork() {
 		initialDefectModuleState
 	);
 
+	const videoMicroscopeConnected = useMemo(() => {
+		const inDefectModule = currentStage === 'DEFECT_MODULE';
+		const splitterSelected =
+			defectModuleState.selectedComponentId === 'splitter_1_2';
+		const fipConnected =
+			defectModuleState.completedVflStepIds.includes('connect_fip');
+		return inDefectModule && splitterSelected && fipConnected;
+	}, [
+		currentStage,
+		defectModuleState.selectedComponentId,
+		defectModuleState.completedVflStepIds
+	]);
+
 	// ============================================================
 	// СИСТЕМА ОЦЕНИВАНИЯ
 	// ============================================================
@@ -281,6 +294,13 @@ export function LabWork() {
 	}, [selectedComponent, activeScenario]);
 
 	const deviceDispatchRef = useRef<Dispatch<DeviceAction> | null>(null);
+
+	useEffect(() => {
+		deviceDispatchRef.current?.({
+			type: 'SET_VIDEO_MICROSCOPE_CONNECTED',
+			payload: videoMicroscopeConnected
+		});
+	}, [videoMicroscopeConnected]);
 
 	const handleCleanPorts = useCallback(() => {
 		if (deviceDispatchRef.current) {

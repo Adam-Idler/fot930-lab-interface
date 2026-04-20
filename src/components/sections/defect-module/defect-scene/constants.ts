@@ -1,26 +1,31 @@
-export const CW = 20;
-export const CH = 40;
-export const VFL_SNAP_X = 45;
-export const CONN_INIT_Y = 80;
-export const CONN_CENTER_Y = CONN_INIT_Y + CH / 2; // 100
-export const SNAP_DIST = 48;
+/** Logical SVG width; scene scales to full container width via viewBox */
+export const SVG_VIEW_WIDTH = 900;
+export const SVG_HEIGHT_CABLE = 300;
+export const SVG_HEIGHT_FIP = 450;
+
+export const CW = 30;
+export const CH = 60;
+export const VFL_SNAP_X = 68;
+export const CONN_INIT_Y = 120;
+export const CONN_CENTER_Y = CONN_INIT_Y + CH / 2;
+export const SNAP_DIST = 72;
 export const CONNECTOR_COLOR = '#475569';
 export const FIBER_COLOR = '#94a3b8';
 
-export const CABLE_CONN_INIT = { x: 158, y: CONN_INIT_Y };
-export const CABLE_R_CONN = { x: 510, y: CONN_INIT_Y };
+export const CABLE_CONN_INIT = { x: 237, y: CONN_INIT_Y };
+export const CABLE_R_CONN = { x: 765, y: CONN_INIT_Y };
 
 // Splitter: outputs LEFT, input RIGHT
-export const SPL_FORK = { x: 308, y: CONN_CENTER_Y };
-export const SPL_INPUT_CONN = { x: 488, y: CONN_INIT_Y };
+export const SPL_FORK = { x: 462, y: CONN_CENTER_Y };
+export const SPL_INPUT_CONN = { x: 732, y: CONN_INIT_Y };
 export const SPL_OUT_NATURAL = [
-	{ x: 88, y: 52 }, // Выход 1 (top)
-	{ x: 88, y: 128 } // Выход 2 (bottom)
+	{ x: 132, y: 78 }, // Выход 1 (top)
+	{ x: 132, y: 192 } // Выход 2 (bottom)
 ] as const;
 
 export const BEAM_Y = CONN_CENTER_Y;
 export const CABLE_BEAM_START_X = VFL_SNAP_X + CW; // 65
-export const CABLE_BEAM_END_X = CABLE_R_CONN.x + CW; // 530
+export const CABLE_BEAM_END_X = CABLE_R_CONN.x + CW;
 export const CABLE_DEFECT_X =
 	CABLE_BEAM_START_X + (CABLE_BEAM_END_X - CABLE_BEAM_START_X) * 0.38; // ~242
 

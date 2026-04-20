@@ -1,6 +1,11 @@
 import { useRef, useState } from 'react';
 import { CableScene } from './defect-scene/CableScene';
-import { SPL_DEFECT_OUTPUT_IDX } from './defect-scene/constants';
+import {
+	SPL_DEFECT_OUTPUT_IDX,
+	SVG_HEIGHT_CABLE,
+	SVG_HEIGHT_FIP,
+	SVG_VIEW_WIDTH
+} from './defect-scene/constants';
 import { SceneHints } from './defect-scene/SceneHints';
 import { SplitterScene } from './defect-scene/SplitterScene';
 import { VflCharQuestion } from './defect-scene/VflCharQuestion';
@@ -74,7 +79,7 @@ export function DefectScene({
 		completedStepIds.includes('find_defect') &&
 		completedStepIds.includes('characterize_vfl');
 	const fipConnected = completedStepIds.includes('connect_fip');
-	const svgHeight = fipActive ? 300 : 200;
+	const svgHeight = fipActive ? SVG_HEIGHT_FIP : SVG_HEIGHT_CABLE;
 
 	const showQuestion =
 		questionKey !== null &&
@@ -95,15 +100,16 @@ export function DefectScene({
 	return (
 		<div className="space-y-3">
 			<div
-				className="relative mx-auto"
-				style={{ width: 600, height: svgHeight }}
+				className="relative w-full"
+				style={{ aspectRatio: `${SVG_VIEW_WIDTH} / ${svgHeight}` }}
 			>
 				<svg
 					ref={svgRef}
-					width={600}
-					height={svgHeight}
-					viewBox={`0 0 600 ${svgHeight}`}
-					className="bg-gray-50 border-2 border-gray-200 rounded-lg select-none"
+					width="100%"
+					height="100%"
+					viewBox={`0 0 ${SVG_VIEW_WIDTH} ${svgHeight}`}
+					preserveAspectRatio="xMidYMid meet"
+					className="block w-full h-full bg-gray-50 border-2 border-gray-200 rounded-lg select-none"
 				>
 					<title>Визуализация компонента</title>
 					<defs>

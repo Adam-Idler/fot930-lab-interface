@@ -17,6 +17,7 @@ import {
 	ScreenOff,
 	ScreenSettings,
 	ScreenSourceVflMenu,
+	ScreenVideoMicroscope,
 	ScreenVfl
 } from './device-screen';
 
@@ -33,7 +34,7 @@ export function DeviceScreen({ state }: DeviceScreenProps) {
 				isOff ? 'bg-gray-700' : 'bg-white'
 			}`}
 		>
-			{!isOff && <DeviceHeader />}
+			{!isOff && <DeviceHeader vflEnabled={state.vflEnabled} />}
 			<div className="flex-1 flex items-center justify-center p-1">
 				{renderScreen(state)}
 			</div>
@@ -76,6 +77,11 @@ function renderScreen(state: DeviceState) {
 
 		case 'VFL_SCREEN':
 			return <ScreenVfl state={state} />;
+
+		case 'VIDEO_MICROSCOPE_SCREEN':
+			return (
+				<ScreenVideoMicroscope connected={state.videoMicroscopeConnected} />
+			);
 
 		default:
 			return <ScreenOff />;

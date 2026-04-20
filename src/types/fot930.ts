@@ -38,8 +38,9 @@ export type DeviceScreen =
 	| 'FASTEST_MAIN' // Главный экран FasTest
 	| 'FASTEST_MEASURING' // Измерение FasTest
 	| 'FASTEST_RESULTS' // Результаты измерения FasTest
-	| 'SOURCE_VFL_MENU' // Подменю Источник/VFL
-	| 'VFL_SCREEN'; // Экран настройки VFL
+	| 'SOURCE_VFL_MENU' // Подменю Источник/VFL/Видеомикроскоп
+	| 'VFL_SCREEN' // Экран настройки VFL
+	| 'VIDEO_MICROSCOPE_SCREEN'; // Статус видеомикроскопа
 
 // ============================================================
 // СОСТОЯНИЕ ПРИБОРА
@@ -207,7 +208,7 @@ export interface DeviceState {
 	/** Ошибка схемы подключения */
 	connectionError: boolean;
 
-	/** Индекс выбранного пункта в подменю Источник/VFL */
+	/** Индекс выбранного пункта: 0 Источник, 1 VFL, 2 Видеомикроскоп */
 	vflMenuIndex: number;
 
 	/** VFL включён */
@@ -218,6 +219,9 @@ export interface DeviceState {
 
 	/** Индекс выбранной секции на экране VFL_SCREEN (0 = Вкл/Выкл, 1 = Модуляция) */
 	vflSectionIndex: number;
+
+	/** Видеомикроскоп (FIP) подключён в модуле дефектовки */
+	videoMicroscopeConnected: boolean;
 }
 
 /** Результат измерения */
@@ -265,6 +269,7 @@ export type DeviceAction =
 	| { type: 'COMPLETE_FIBER_MEASUREMENT'; payload: FiberMeasurementResult }
 	| { type: 'SET_CONNECTION_ERROR'; payload: boolean }
 	| { type: 'SET_FOOTER_PAGE'; payload: number }
+	| { type: 'SET_VIDEO_MICROSCOPE_CONNECTED'; payload: boolean }
 	| { type: 'PRESS_LEFT' }
 	| { type: 'PRESS_RIGHT' }
 	| { type: 'SKIP_PREPARATION' };

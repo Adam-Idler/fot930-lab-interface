@@ -11,11 +11,11 @@ export function VflCharQuestion({
 	onAnswer
 }: VflCharQuestionProps) {
 	return (
-		<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-			<p className="text-sm font-semibold text-gray-800 mb-3">
+		<div className="bg-blue-50 border border-blue-200 rounded-lg p-5">
+			<p className="text-lg font-semibold text-gray-800 mb-4">
 				Какой характер повреждения наблюдается по результатам VFL?
 			</p>
-			<div className="space-y-2">
+			<div className="space-y-3">
 				{VFL_CHARACTER_OPTIONS.map((option, idx) => {
 					const isSelected = currentAnswer?.idx === idx;
 					const isLocked = currentAnswer?.locked ?? false;
@@ -27,7 +27,7 @@ export function VflCharQuestion({
 							disabled={isLocked}
 							onClick={() => onAnswer(idx)}
 							className={clsx(
-								'w-full text-left px-3 py-2 rounded-lg text-sm border transition-colors',
+								'w-full text-left px-4 py-3 rounded-lg text-base border transition-colors',
 								isSelected &&
 									isLocked &&
 									'bg-green-100 border-green-500 text-green-800 cursor-default',
@@ -48,10 +48,10 @@ export function VflCharQuestion({
 				})}
 			</div>
 			{currentAnswer?.locked && (
-				<p className="mt-2 text-sm font-medium text-green-700">✓ Верно!</p>
+				<p className="mt-3 text-base font-medium text-green-700">✓ Верно!</p>
 			)}
 			{currentAnswer && !currentAnswer.locked && (
-				<p className="mt-2 text-sm text-red-600">
+				<p className="mt-3 text-base text-red-600">
 					Неверно. Попробуйте ещё раз.
 				</p>
 			)}

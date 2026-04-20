@@ -11,7 +11,7 @@ export function ScreenMenuSetup({ state }: ScreenMenuSetupProps) {
 		'Автоимена данных',
 		'Порог. значения',
 		'Результаты/Информация',
-		'Источник/VFL',
+		'Источник/VFL/Видеомикроскоп',
 		'Телефон/Сообщения'
 	];
 	const selectedIndex = state.setupMenuIndex;

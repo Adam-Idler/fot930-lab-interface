@@ -2,10 +2,10 @@ import type React from 'react';
 import { useRef, useState } from 'react';
 import { toSvgPoint } from './constants';
 
-const SNAP = { x: 25, y: 155 };
-const CABLE_TOP = { x: 25, y: 216 };
-const TIP_INIT = { x: 25, y: 188 };
-const SNAP_DIST = 26;
+const SNAP = { x: 38, y: 233 };
+const CABLE_TOP = { x: 38, y: 324 };
+const TIP_INIT = { x: 38, y: 282 };
+const SNAP_DIST = 39;
 
 interface FipMicroscopeProps {
 	svgRef: React.RefObject<SVGSVGElement | null>;
@@ -59,105 +59,62 @@ export function FipMicroscope({
 	return (
 		<>
 			{/* Port at bottom of VFL device */}
-			<circle cx={SNAP.x} cy={SNAP.y} r={5} fill="#1e293b" />
+			<circle cx={SNAP.x} cy={SNAP.y} r={8} fill="#1e293b" />
 			<circle
 				cx={SNAP.x}
 				cy={SNAP.y}
-				r={9}
+				r={14}
 				fill="none"
 				stroke="#475569"
-				strokeWidth={1.5}
+				strokeWidth={2.5}
 			/>
-			{!connected && (
-				<circle
-					cx={SNAP.x}
-					cy={SNAP.y}
-					r={16}
-					fill="none"
-					stroke="#3b82f6"
-					strokeWidth={1.5}
-					strokeDasharray="4 3"
-					className="fip-snap-ring"
-				/>
-			)}
-			{connected && (
-				<>
-					<circle cx={42} cy={148} r={8} fill="#22c55e" />
-					<text
-						x={42}
-						y={152}
-						textAnchor="middle"
-						fontSize={10}
-						fill="white"
-						fontWeight="700"
-					>
-						✓
-					</text>
-				</>
-			)}
 			{/* Cable from microscope lens top to tip */}
 			<line
 				x1={CABLE_TOP.x}
 				y1={CABLE_TOP.y}
 				x2={tipPos.x}
 				y2={tipPos.y}
-				stroke={connected ? '#22c55e' : '#94a3b8'}
-				strokeWidth={3}
+				stroke={'#94a3b8'}
+				strokeWidth={5}
 				strokeLinecap="round"
 			/>
 			{/* Lens */}
 			<circle
-				cx={25}
-				cy={228}
-				r={12}
+				cx={38}
+				cy={342}
+				r={18}
 				fill="#1e293b"
 				stroke="#475569"
-				strokeWidth={2}
+				strokeWidth={3}
 			/>
-			<circle cx={25} cy={228} r={7} fill="#0f172a" />
-			<circle cx={22} cy={224} r={2} fill="white" fillOpacity={0.4} />
+			<circle cx={38} cy={342} r={11} fill="#0f172a" />
+			<circle cx={33} cy={336} r={3} fill="white" fillOpacity={0.4} />
 			{/* Body */}
-			<rect x={2} y={234} width={46} height={50} rx={4} fill="#475569" />
-			<line
-				x1={14}
-				y1={238}
-				x2={14}
-				y2={276}
-				stroke="#64748b"
-				strokeWidth={1}
-			/>
-			<line
-				x1={22}
-				y1={238}
-				x2={22}
-				y2={276}
-				stroke="#64748b"
-				strokeWidth={1}
-			/>
+			<rect x={3} y={351} width={69} height={75} rx={6} fill="#475569" />
 			<text
-				x={25}
-				y={253}
+				x={38}
+				y={380}
 				textAnchor="middle"
-				fontSize={9}
+				fontSize={14}
 				fill="white"
 				fontWeight="600"
 			>
 				FIP
 			</text>
-			<text x={25} y={265} textAnchor="middle" fontSize={7} fill="#94a3b8">
+			<text x={38} y={398} textAnchor="middle" fontSize={11} fill="#94a3b8">
 				Видео-
 			</text>
-			<text x={25} y={275} textAnchor="middle" fontSize={7} fill="#94a3b8">
+			<text x={38} y={413} textAnchor="middle" fontSize={11} fill="#94a3b8">
 				микроскоп
 			</text>
 			{/* Draggable tip */}
 			<circle
 				cx={tipPos.x}
 				cy={tipPos.y}
-				r={8}
+				r={12}
 				fill={connected ? '#22c55e' : '#3b82f6'}
 				stroke="white"
-				strokeWidth={2}
+				strokeWidth={3}
 				className={!connected ? 'fip-tip-pulse' : undefined}
 				style={{
 					cursor: connected ? 'default' : isDragging ? 'grabbing' : 'grab'
@@ -169,7 +126,7 @@ export function FipMicroscope({
 			<circle
 				cx={tipPos.x}
 				cy={tipPos.y}
-				r={3}
+				r={5}
 				fill="white"
 				fillOpacity={0.7}
 				style={{ pointerEvents: 'none' }}

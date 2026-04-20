@@ -196,6 +196,18 @@ export function Device({
 		actionMap[button]?.();
 	};
 
+	const isFastestMeasuring = state.screen === 'FASTEST_MEASURING';
+	const shouldPulseActiveLed = isFastestMeasuring || state.vflEnabled;
+
+	let activeLedClassName = 'w-3 h-3 border border-gray-900 transition-all ';
+	if (shouldPulseActiveLed) {
+		activeLedClassName += 'bg-red-500 animate-pulse-red';
+	} else if (state.isPoweredOn) {
+		activeLedClassName += 'bg-green-500 shadow-lg shadow-green-400/50';
+	} else {
+		activeLedClassName += 'bg-gray-700';
+	}
+
 	return (
 		<div className="flex flex-col gap-4 min-w-xl max-w-xl mx-auto select-none">
 			<div className="bg-fot930-blue p-8 rounded-3xl">
@@ -358,15 +370,7 @@ export function Device({
 						{/* Индикатор питания на корпусе */}
 						<div className="absolute bottom-4 right-6 flex flex-col items-end gap-1 cursor-default">
 							<span className="text-sm text-white/40 font-medium">Active</span>
-							<div
-								className={`w-3 h-3 border border-gray-900 transition-all ${
-									state.screen === 'FASTEST_MEASURING'
-										? 'bg-red-500 animate-pulse-red'
-										: state.isPoweredOn
-											? 'bg-green-500 shadow-lg shadow-green-400/50'
-											: 'bg-gray-700'
-								}`}
-							/>
+							<div className={activeLedClassName} />
 						</div>
 					</div>
 

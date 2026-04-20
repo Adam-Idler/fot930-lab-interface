@@ -116,7 +116,7 @@ export function SplitterScene({
 				x2={SPL_INPUT_CONN.x}
 				y2={CONN_CENTER_Y}
 				stroke={FIBER_COLOR}
-				strokeWidth={5}
+				strokeWidth={8}
 				strokeLinecap="round"
 			/>
 			<line
@@ -125,7 +125,7 @@ export function SplitterScene({
 				x2={SPL_FORK.x}
 				y2={CONN_CENTER_Y}
 				stroke={FIBER_COLOR}
-				strokeWidth={5}
+				strokeWidth={8}
 				strokeLinecap="round"
 			/>
 			<line
@@ -134,7 +134,7 @@ export function SplitterScene({
 				x2={SPL_FORK.x}
 				y2={CONN_CENTER_Y}
 				stroke={FIBER_COLOR}
-				strokeWidth={5}
+				strokeWidth={8}
 				strokeLinecap="round"
 			/>
 			{showBeam && (
@@ -164,14 +164,14 @@ export function SplitterScene({
 				y={SPL_INPUT_CONN.y}
 				width={CW}
 				height={CH}
-				rx={3}
+				rx={5}
 				fill={CONNECTOR_COLOR}
 			/>
 			<text
 				x={SPL_INPUT_CONN.x + CW / 2}
-				y={SPL_INPUT_CONN.y + CH + 14}
+				y={SPL_INPUT_CONN.y + CH + 21}
 				textAnchor="middle"
-				fontSize={11}
+				fontSize={17}
 				fill="#64748b"
 			>
 				Вход
@@ -181,10 +181,10 @@ export function SplitterScene({
 				y={spl0.y}
 				width={CW}
 				height={CH}
-				rx={3}
+				rx={5}
 				fill={CONNECTOR_COLOR}
 				stroke={spl0CanDrag ? '#3b82f6' : 'none'}
-				strokeWidth={spl0CanDrag ? 2 : 0}
+				strokeWidth={spl0CanDrag ? 3 : 0}
 				className={spl0CanDrag ? 'drag-pulse' : undefined}
 				style={{
 					cursor: spl0CanDrag
@@ -199,9 +199,9 @@ export function SplitterScene({
 			/>
 			<text
 				x={spl0.x + CW / 2}
-				y={spl0.y - 7}
+				y={spl0.y - 11}
 				textAnchor="middle"
-				fontSize={10}
+				fontSize={16}
 				fill="#64748b"
 			>
 				Выход 1
@@ -211,10 +211,10 @@ export function SplitterScene({
 				y={spl1.y}
 				width={CW}
 				height={CH}
-				rx={3}
+				rx={5}
 				fill={CONNECTOR_COLOR}
 				stroke={spl1CanDrag ? '#3b82f6' : 'none'}
-				strokeWidth={spl1CanDrag ? 2 : 0}
+				strokeWidth={spl1CanDrag ? 3 : 0}
 				className={spl1CanDrag ? 'drag-pulse' : undefined}
 				style={{
 					cursor: spl1CanDrag
@@ -229,9 +229,9 @@ export function SplitterScene({
 			/>
 			<text
 				x={spl1.x + CW / 2}
-				y={spl1.y + CH + 14}
+				y={spl1.y + CH + 21}
 				textAnchor="middle"
-				fontSize={10}
+				fontSize={16}
 				fill="#64748b"
 			>
 				Выход 2

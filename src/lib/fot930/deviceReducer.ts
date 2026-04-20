@@ -49,7 +49,8 @@ export const initialDeviceState: DeviceState = {
 	vflMenuIndex: 0,
 	vflEnabled: false,
 	vflModulationMode: 'CW',
-	vflSectionIndex: 0
+	vflSectionIndex: 0,
+	videoMicroscopeConnected: false
 };
 
 /** Доступные длины волн для FasTest */
@@ -211,6 +212,12 @@ function innerDeviceReducer(
 				footerPageIndex: action.payload
 			};
 
+		case 'SET_VIDEO_MICROSCOPE_CONNECTED':
+			return {
+				...state,
+				videoMicroscopeConnected: action.payload
+			};
+
 		case 'SKIP_PREPARATION':
 			return {
 				...initialDeviceState,
@@ -370,7 +377,7 @@ function handleUpButton(state: DeviceState): DeviceState {
 		case 'SOURCE_VFL_MENU':
 			return {
 				...state,
-				vflMenuIndex: state.vflMenuIndex > 0 ? state.vflMenuIndex - 1 : 1
+				vflMenuIndex: state.vflMenuIndex > 0 ? state.vflMenuIndex - 1 : 2
 			};
 
 		case 'VFL_SCREEN':
@@ -478,7 +485,7 @@ function handleDownButton(state: DeviceState): DeviceState {
 		case 'SOURCE_VFL_MENU':
 			return {
 				...state,
-				vflMenuIndex: state.vflMenuIndex < 1 ? state.vflMenuIndex + 1 : 0
+				vflMenuIndex: state.vflMenuIndex < 2 ? state.vflMenuIndex + 1 : 0
 			};
 
 		case 'VFL_SCREEN':
@@ -629,12 +636,18 @@ function handleEnterButton(state: DeviceState): DeviceState {
 		}
 
 		case 'SOURCE_VFL_MENU':
-			// Индекс 0 = Источник (недоступен), Индекс 1 = VFL
+			// 0 = Источник (недоступен), 1 = VFL, 2 = Видеомикроскоп
 			if (state.vflMenuIndex === 1) {
 				return {
 					...state,
 					screen: 'VFL_SCREEN',
 					vflSectionIndex: 0
+				};
+			}
+			if (state.vflMenuIndex === 2) {
+				return {
+					...state,
+					screen: 'VIDEO_MICROSCOPE_SCREEN'
 				};
 			}
 			return state;
@@ -737,6 +750,12 @@ function handleBackButton(state: DeviceState): DeviceState {
 					dropdownIndex: 0
 				};
 			}
+			return {
+				...state,
+				screen: 'SOURCE_VFL_MENU'
+			};
+
+		case 'VIDEO_MICROSCOPE_SCREEN':
 			return {
 				...state,
 				screen: 'SOURCE_VFL_MENU'
