@@ -13,6 +13,25 @@ import type {
 	Wavelength
 } from '../../types/fot930';
 
+/** Начальные и целевые уровни для настройки изображения FIP на экране видеомикроскопа */
+const VM_LEVEL_MAX = 16;
+const VM_BRIGHT_INIT = 5;
+const VM_CONTRAST_INIT = 6;
+const VM_BRIGHT_OK_MIN = 9;
+const VM_BRIGHT_OK_MAX = 11;
+const VM_CONTRAST_OK_MIN = 10;
+const VM_CONTRAST_OK_MAX = 12;
+
+/** Изображение «в фокусе»: яркость и контраст в рабочем диапазоне (при подключённом FIP) */
+export function isVideoMicroscopeImageSharp(state: DeviceState): boolean {
+	if (!state.videoMicroscopeConnected) return false;
+	const { videoMicroscopeBrightnessLevel: b, videoMicroscopeContrastLevel: c } =
+		state;
+	const brightnessOk = b >= VM_BRIGHT_OK_MIN && b <= VM_BRIGHT_OK_MAX;
+	const contrastOk = c >= VM_CONTRAST_OK_MIN && c <= VM_CONTRAST_OK_MAX;
+	return brightnessOk && contrastOk;
+}
+
 /** Начальное состояние подготовки */
 export const initialPreparationState: PreparationState = {
 	portStatus: 'dirty',
@@ -50,7 +69,9 @@ export const initialDeviceState: DeviceState = {
 	vflEnabled: false,
 	vflModulationMode: 'CW',
 	vflSectionIndex: 0,
-	videoMicroscopeConnected: false
+	videoMicroscopeConnected: false,
+	videoMicroscopeBrightnessLevel: VM_BRIGHT_INIT,
+	videoMicroscopeContrastLevel: VM_CONTRAST_INIT
 };
 
 /** Доступные длины волн для FasTest */
@@ -107,11 +128,35 @@ function innerDeviceReducer(
 			return handleF2Button(state);
 
 		case 'PRESS_LEFT':
+			if (
+				state.screen === 'VIDEO_MICROSCOPE_SCREEN' &&
+				state.videoMicroscopeConnected
+			) {
+				return {
+					...state,
+					videoMicroscopeContrastLevel: Math.max(
+						0,
+						state.videoMicroscopeContrastLevel - 1
+					)
+				};
+			}
 			return state.footerPageIndex > 0
 				? { ...state, footerPageIndex: state.footerPageIndex - 1 }
 				: state;
 
 		case 'PRESS_RIGHT': {
+			if (
+				state.screen === 'VIDEO_MICROSCOPE_SCREEN' &&
+				state.videoMicroscopeConnected
+			) {
+				return {
+					...state,
+					videoMicroscopeContrastLevel: Math.min(
+						VM_LEVEL_MAX,
+						state.videoMicroscopeContrastLevel + 1
+					)
+				};
+			}
 			const maxIdx = getMaxFooterIndex(state.screen);
 			return state.footerPageIndex < maxIdx
 				? { ...state, footerPageIndex: state.footerPageIndex + 1 }
@@ -215,7 +260,9 @@ function innerDeviceReducer(
 		case 'SET_VIDEO_MICROSCOPE_CONNECTED':
 			return {
 				...state,
-				videoMicroscopeConnected: action.payload
+				videoMicroscopeConnected: action.payload,
+				videoMicroscopeBrightnessLevel: VM_BRIGHT_INIT,
+				videoMicroscopeContrastLevel: VM_CONTRAST_INIT
 			};
 
 		case 'SKIP_PREPARATION':
@@ -396,6 +443,16 @@ function handleUpButton(state: DeviceState): DeviceState {
 					state.vflSectionIndex > 0 ? state.vflSectionIndex - 1 : 1
 			};
 
+		case 'VIDEO_MICROSCOPE_SCREEN':
+			if (!state.videoMicroscopeConnected) return state;
+			return {
+				...state,
+				videoMicroscopeBrightnessLevel: Math.min(
+					VM_LEVEL_MAX,
+					state.videoMicroscopeBrightnessLevel + 1
+				)
+			};
+
 		default:
 			return state;
 	}
@@ -502,6 +559,16 @@ function handleDownButton(state: DeviceState): DeviceState {
 				...state,
 				vflSectionIndex:
 					state.vflSectionIndex < 1 ? state.vflSectionIndex + 1 : 0
+			};
+
+		case 'VIDEO_MICROSCOPE_SCREEN':
+			if (!state.videoMicroscopeConnected) return state;
+			return {
+				...state,
+				videoMicroscopeBrightnessLevel: Math.max(
+					0,
+					state.videoMicroscopeBrightnessLevel - 1
+				)
 			};
 
 		default:

@@ -1,31 +1,56 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { DeviceState } from '../../../types/fot930';
+import { ActionQuestion } from './ActionQuestion';
 import { FAULTY_COMPONENTS } from './constants';
 import { DefectComponentSelector } from './DefectComponentSelector';
-import { DefectScene } from './DefectScene';
+import { type ActiveVflQuestion, DefectScene } from './DefectScene';
+import { VflCharQuestion } from './defect-scene/VflCharQuestion';
 import type { DefectModuleState } from './defectModuleState';
+import { FipAnalysis } from './FipAnalysis';
 import { VflPreparation } from './VflPreparation';
 
 interface DefectModuleProps {
 	deviceState?: DeviceState;
 	state: DefectModuleState;
 	onStateChange: (state: DefectModuleState) => void;
+	onPenalty?: (amount: number, reason: string) => void;
+	onSplitterOutputChange?: (idx: 0 | 1 | null) => void;
 }
 
 export function DefectModule({
 	deviceState,
 	state,
-	onStateChange
+	onStateChange,
+	onPenalty,
+	onSplitterOutputChange
 }: DefectModuleProps) {
+	const [activeVflQuestion, setActiveVflQuestion] =
+		useState<ActiveVflQuestion | null>(null);
+	const [activeSplOutput, setActiveSplOutput] = useState<0 | 1 | null>(null);
+	const penalizedRef = useRef<Set<string>>(new Set());
+
+	const handleSplitterOutput = useCallback(
+		(idx: 0 | 1 | null) => {
+			setActiveSplOutput(idx);
+			onSplitterOutputChange?.(idx);
+		},
+		[onSplitterOutputChange]
+	);
+
 	const selectedComponent =
 		FAULTY_COMPONENTS.find((c) => c.id === state.selectedComponentId) ?? null;
 
 	const handleSelect = (id: string) => {
+		penalizedRef.current.clear();
 		onStateChange({
 			...state,
 			selectedComponentId: id,
 			confirmReset: false,
-			completedVflStepIds: []
+			completedVflStepIds: [],
+			fipDefectTypeAnswer: null,
+			actionAnswer: null,
+			actionAnswerGoodInput: null,
+			vflCharAnswers: {}
 		});
 	};
 
@@ -38,11 +63,16 @@ export function DefectModule({
 	};
 
 	const handleResetConfirm = () => {
+		penalizedRef.current.clear();
 		onStateChange({
 			...state,
 			selectedComponentId: null,
 			confirmReset: false,
-			completedVflStepIds: []
+			completedVflStepIds: [],
+			fipDefectTypeAnswer: null,
+			actionAnswer: null,
+			actionAnswerGoodInput: null,
+			vflCharAnswers: {}
 		});
 	};
 
@@ -52,6 +82,10 @@ export function DefectModule({
 			selectedComponentId: null,
 			confirmReset: false,
 			completedVflStepIds: [],
+			fipDefectTypeAnswer: null,
+			actionAnswer: null,
+			actionAnswerGoodInput: null,
+			vflCharAnswers: {},
 			completedComponentIds: state.completedComponentIds.includes(
 				state.selectedComponentId
 			)
@@ -66,6 +100,81 @@ export function DefectModule({
 			...state,
 			completedVflStepIds: [...state.completedVflStepIds, stepId]
 		});
+	};
+
+	const handleFipDefectTypeAnswer = (idx: number) => {
+		const alreadyDone = state.completedVflStepIds.includes('identify_defect');
+		let newCompletedIds = state.completedVflStepIds;
+		if (idx === 0 && !alreadyDone) {
+			newCompletedIds = [...state.completedVflStepIds, 'identify_defect'];
+		}
+		if (idx !== 0 && !penalizedRef.current.has('fip_defect')) {
+			penalizedRef.current.add('fip_defect');
+			onPenalty?.(5, 'Неверное определение типа дефекта FIP');
+		}
+		onStateChange({
+			...state,
+			fipDefectTypeAnswer: idx,
+			completedVflStepIds: newCompletedIds
+		});
+	};
+
+	const handleVflCharAnswer = (key: string, idx: number) => {
+		if (state.vflCharAnswers[key]?.locked) return;
+		const correctIdx =
+			activeVflQuestion?.key === key ? activeVflQuestion.correctIdx : -1;
+		const locked = idx === correctIdx;
+		if (!locked && correctIdx !== -1) {
+			const penaltyKey = `vfl_char_${key}`;
+			if (!penalizedRef.current.has(penaltyKey)) {
+				penalizedRef.current.add(penaltyKey);
+				onPenalty?.(5, 'Неверный ответ о характере повреждения VFL');
+			}
+		}
+		const newAnswers = { ...state.vflCharAnswers, [key]: { idx, locked } };
+		let newCompletedIds = state.completedVflStepIds;
+		if (locked) {
+			if (
+				activeVflQuestion?.isCompletion &&
+				!newCompletedIds.includes('characterize_vfl')
+			) {
+				newCompletedIds = [...newCompletedIds, 'characterize_vfl'];
+			}
+			if (
+				key === 'spl_good' &&
+				!newCompletedIds.includes('characterize_vfl_good')
+			) {
+				newCompletedIds = [...newCompletedIds, 'characterize_vfl_good'];
+			}
+		}
+		onStateChange({
+			...state,
+			vflCharAnswers: newAnswers,
+			completedVflStepIds: newCompletedIds
+		});
+	};
+
+	const handleActionAnswer = (idx: number) => {
+		const correctIdx = state.selectedComponentId === 'splitter_1_2' ? 1 : 0;
+		if (idx !== correctIdx) {
+			const penaltyKey = `action_main_${state.selectedComponentId}`;
+			if (!penalizedRef.current.has(penaltyKey)) {
+				penalizedRef.current.add(penaltyKey);
+				onPenalty?.(5, 'Неверный ответ о действии с компонентом');
+			}
+		}
+		onStateChange({ ...state, actionAnswer: idx });
+	};
+
+	const handleActionAnswerGoodInput = (idx: number) => {
+		if (idx !== 2) {
+			const penaltyKey = `action_good_${state.selectedComponentId}`;
+			if (!penalizedRef.current.has(penaltyKey)) {
+				penalizedRef.current.add(penaltyKey);
+				onPenalty?.(5, 'Неверный ответ о действии с компонентом');
+			}
+		}
+		onStateChange({ ...state, actionAnswerGoodInput: idx });
 	};
 
 	const deviceVflSteps = useMemo(() => {
@@ -88,10 +197,17 @@ export function DefectModule({
 	}, [state.completedVflStepIds, deviceVflSteps]);
 
 	const isSplitterSelected = state.selectedComponentId === 'splitter_1_2';
+	const fipStepsDone =
+		state.completedVflStepIds.includes('connect_fip') &&
+		state.completedVflStepIds.includes('fip_adjust_focus') &&
+		state.completedVflStepIds.includes('identify_defect');
 	const isAllStepsComplete =
 		state.completedVflStepIds.includes('find_defect') &&
 		state.completedVflStepIds.includes('characterize_vfl') &&
-		(!isSplitterSelected || state.completedVflStepIds.includes('connect_fip'));
+		(!isSplitterSelected || fipStepsDone) &&
+		(isSplitterSelected || state.actionAnswer === 0) &&
+		(!isSplitterSelected || state.actionAnswerGoodInput === 2) &&
+		(!isSplitterSelected || state.actionAnswer === 1);
 
 	return (
 		<div className="space-y-4">
@@ -186,64 +302,84 @@ export function DefectModule({
 								? 'MODULATED'
 								: 'CW'
 						}
+						onActiveQuestionChange={setActiveVflQuestion}
+						onSplitterOutputChange={handleSplitterOutput}
 					/>
 				</div>
 			)}
 
-			{/* Анализ коннектора (FIP) — только для сплиттера */}
+			{/* Вопрос о характере повреждения (VFL) */}
+			{selectedComponent !== null && activeVflQuestion !== null && (
+				<div className="bg-white rounded-lg shadow-md p-4">
+					<VflCharQuestion
+						currentAnswer={state.vflCharAnswers[activeVflQuestion.key]}
+						onAnswer={(idx) => handleVflCharAnswer(activeVflQuestion.key, idx)}
+					/>
+				</div>
+			)}
+
+			{/* Действие после VFL — шнур */}
 			{selectedComponent !== null &&
-				isSplitterSelected &&
-				state.completedVflStepIds.includes('find_defect') &&
+				!isSplitterSelected &&
 				state.completedVflStepIds.includes('characterize_vfl') && (
-					<div className="bg-white rounded-lg shadow-md p-4 space-y-3">
-						<h2 className="text-base font-semibold text-gray-800">
-							Анализ коннектора (FIP)
-						</h2>
-						<div className="border border-gray-200 rounded-lg p-3 space-y-3">
-							<div className="flex items-center gap-2">
-								<span
-									className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-										state.completedVflStepIds.includes('connect_fip')
-											? 'bg-green-500 text-white'
-											: 'bg-blue-600 text-white'
-									}`}
-								>
-									{state.completedVflStepIds.includes('connect_fip')
-										? '✓'
-										: '1'}
-								</span>
-								<span className="text-sm font-medium text-gray-700">
-									Подключение FIP
-								</span>
-							</div>
-							<p className="text-sm text-gray-600 pl-7">
-								Подключите видеомикроскоп (FIP) к коннектору выбранного выхода.
-								Перетащите конец провода к порту в нижней части прибора VFL на
-								схеме.
-							</p>
-						</div>
+					<div className="bg-white rounded-lg shadow-md p-4">
+						<ActionQuestion
+							correctIdx={0}
+							answer={state.actionAnswer}
+							onAnswer={handleActionAnswer}
+						/>
 					</div>
 				)}
 
-			{/* Итог: дефект найден */}
+			{/* Действие после VFL — сплиттер, исправный вход */}
 			{selectedComponent !== null &&
-				state.completedVflStepIds.includes('find_defect') &&
-				state.completedVflStepIds.includes('characterize_vfl') && (
-					<div className="bg-green-50 border-2 border-green-500 rounded-lg p-4 flex items-center gap-3">
-						<div className="shrink-0 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
-							✓
-						</div>
-						<div>
-							<p className="font-semibold text-green-800">
-								Дефект успешно локализован
-							</p>
-							<p className="text-sm text-green-700">
-								Неисправность обнаружена в компоненте «{selectedComponent.label}
-								».
+				isSplitterSelected &&
+				activeSplOutput === 0 &&
+				state.completedVflStepIds.includes('characterize_vfl_good') && (
+					<div className="bg-white rounded-lg shadow-md p-4">
+						<div className="space-y-1 mb-3">
+							<p className="text-sm font-medium text-gray-700">
+								Выход 1 (исправный)
 							</p>
 						</div>
+						<ActionQuestion
+							correctIdx={2}
+							answer={state.actionAnswerGoodInput}
+							onAnswer={handleActionAnswerGoodInput}
+						/>
 					</div>
 				)}
+
+			{/* Анализ коннектора (FIP) — только для сплиттера, выход 2 */}
+			{selectedComponent !== null &&
+				isSplitterSelected &&
+				activeSplOutput === 1 &&
+				state.completedVflStepIds.includes('find_defect') &&
+				state.completedVflStepIds.includes('characterize_vfl') && (
+					<div className="bg-white rounded-lg shadow-md p-4">
+						<FipAnalysis
+							completedStepIds={state.completedVflStepIds}
+							defectTypeAnswer={state.fipDefectTypeAnswer}
+							onDefectTypeAnswer={handleFipDefectTypeAnswer}
+						/>
+					</div>
+				)}
+
+			{/* Действие после FIP — сплиттер, дефектный вход */}
+			{selectedComponent !== null && isSplitterSelected && fipStepsDone && (
+				<div className="bg-white rounded-lg shadow-md p-4">
+					<div className="space-y-1 mb-3">
+						<p className="text-sm font-medium text-gray-700">
+							Выход 2 (дефектный)
+						</p>
+					</div>
+					<ActionQuestion
+						correctIdx={1}
+						answer={state.actionAnswer}
+						onAnswer={handleActionAnswer}
+					/>
+				</div>
+			)}
 		</div>
 	);
 }

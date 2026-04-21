@@ -1,25 +1,32 @@
 import clsx from 'clsx';
-import { VFL_CHARACTER_OPTIONS } from './constants';
 
-interface VflCharQuestionProps {
-	currentAnswer: { idx: number; locked: boolean } | undefined;
+const ACTION_OPTIONS = [
+	'Заменить элемент',
+	'Почистить коннектор',
+	'Ничего не делать'
+] as const;
+
+interface ActionQuestionProps {
+	correctIdx: number;
+	answer: number | null;
 	onAnswer: (idx: number) => void;
 }
 
-export function VflCharQuestion({
-	currentAnswer,
+export function ActionQuestion({
+	correctIdx,
+	answer,
 	onAnswer
-}: VflCharQuestionProps) {
-	const isLocked = currentAnswer?.locked ?? false;
+}: ActionQuestionProps) {
+	const isLocked = answer === correctIdx;
 
 	return (
 		<div className="space-y-2">
 			<p className="text-sm text-gray-700 font-medium">
-				Какой характер повреждения наблюдается по результатам VFL?
+				Что необходимо сделать с компонентом?
 			</p>
 			<div className="space-y-2">
-				{VFL_CHARACTER_OPTIONS.map((option, idx) => {
-					const isSelected = currentAnswer?.idx === idx;
+				{ACTION_OPTIONS.map((option, idx) => {
+					const isSelected = answer === idx;
 					if (isLocked && !isSelected) return null;
 					return (
 						<button
@@ -47,7 +54,7 @@ export function VflCharQuestion({
 			{isLocked && (
 				<p className="text-sm font-medium text-green-700">✓ Верно!</p>
 			)}
-			{currentAnswer && !isLocked && (
+			{answer !== null && !isLocked && (
 				<p className="text-sm text-red-600">Неверно. Попробуйте ещё раз.</p>
 			)}
 		</div>

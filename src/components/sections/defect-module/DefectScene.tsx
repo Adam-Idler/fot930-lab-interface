@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CableScene } from './defect-scene/CableScene';
 import {
 	SPL_DEFECT_OUTPUT_IDX,
@@ -8,8 +8,13 @@ import {
 } from './defect-scene/constants';
 import { SceneHints } from './defect-scene/SceneHints';
 import { SplitterScene } from './defect-scene/SplitterScene';
-import { VflCharQuestion } from './defect-scene/VflCharQuestion';
 import { VflDevice } from './defect-scene/VflDevice';
+
+export interface ActiveVflQuestion {
+	key: string;
+	correctIdx: number;
+	isCompletion: boolean;
+}
 
 interface DefectSceneProps {
 	componentId: string;
@@ -17,6 +22,8 @@ interface DefectSceneProps {
 	completedStepIds?: string[];
 	vflEnabled: boolean;
 	vflMode: 'CW' | 'MODULATED';
+	onActiveQuestionChange?: (info: ActiveVflQuestion | null) => void;
+	onSplitterOutputChange?: (idx: 0 | 1 | null) => void;
 }
 
 export function DefectScene({
@@ -24,7 +31,9 @@ export function DefectScene({
 	onStepComplete,
 	completedStepIds = [],
 	vflEnabled,
-	vflMode
+	vflMode,
+	onActiveQuestionChange,
+	onSplitterOutputChange
 }: DefectSceneProps) {
 	const svgRef = useRef<SVGSVGElement>(null);
 	const isConnected = completedStepIds.includes('connect_fiber');
@@ -32,19 +41,23 @@ export function DefectScene({
 	const isSplitter = componentId === 'splitter_1_2';
 
 	const [defectFound, setDefectFound] = useState(false);
-	const [vflCharAnswers, setVflCharAnswers] = useState<
-		Record<string, { idx: number; locked: boolean }>
-	>({});
 	const [splConnIdx, setSplConnIdx] = useState<0 | 1 | null>(null);
 
 	const splEffIdx: 0 | 1 | null =
 		splConnIdx ?? (isConnected && isSplitter ? 0 : null);
 	const splActiveHasDefect = splEffIdx === SPL_DEFECT_OUTPUT_IDX;
 
+	const fipActive =
+		isSplitter &&
+		splEffIdx === SPL_DEFECT_OUTPUT_IDX &&
+		completedStepIds.includes('find_defect') &&
+		completedStepIds.includes('characterize_vfl');
+
 	const showBeam = vflEnabled && isConnected;
 	const beamBlink = vflMode === 'MODULATED';
 	const showCableBeam = showBeam && isCable;
-	const showSplBeam = showBeam && isSplitter && splEffIdx !== null;
+	const showSplBeam =
+		showBeam && isSplitter && splEffIdx !== null && !fipActive;
 
 	const handleDefectClick = () => {
 		if (!defectFound) {
@@ -53,7 +66,6 @@ export function DefectScene({
 		}
 	};
 
-	// VFL character question logic
 	let questionKey: string | null = null;
 	let correctAnswerIdx = -1;
 	let isCompletionQuestion = false;
@@ -74,40 +86,46 @@ export function DefectScene({
 		}
 	}
 
-	const fipActive =
-		isSplitter &&
-		completedStepIds.includes('find_defect') &&
-		completedStepIds.includes('characterize_vfl');
 	const fipConnected = completedStepIds.includes('connect_fip');
 	const svgHeight = fipActive ? SVG_HEIGHT_FIP : SVG_HEIGHT_CABLE;
 
-	const showQuestion =
-		questionKey !== null &&
-		(!isCompletionQuestion || !completedStepIds.includes('characterize_vfl'));
-	const currentVflAnswer = questionKey
-		? vflCharAnswers[questionKey]
-		: undefined;
+	const onActiveQuestionChangeRef = useRef(onActiveQuestionChange);
+	useEffect(() => {
+		onActiveQuestionChangeRef.current = onActiveQuestionChange;
+	});
 
-	const handleVflCharAnswer = (idx: number) => {
-		if (!questionKey || currentVflAnswer?.locked) return;
-		const locked = idx === correctAnswerIdx;
-		setVflCharAnswers((prev) => ({ ...prev, [questionKey!]: { idx, locked } }));
-		if (locked && isCompletionQuestion) {
-			onStepComplete?.('characterize_vfl');
+	useEffect(() => {
+		if (questionKey !== null) {
+			onActiveQuestionChangeRef.current?.({
+				key: questionKey,
+				correctIdx: correctAnswerIdx,
+				isCompletion: isCompletionQuestion
+			});
+		} else {
+			onActiveQuestionChangeRef.current?.(null);
 		}
-	};
+	}, [questionKey, correctAnswerIdx, isCompletionQuestion]);
+
+	const onSplitterOutputChangeRef = useRef(onSplitterOutputChange);
+	useEffect(() => {
+		onSplitterOutputChangeRef.current = onSplitterOutputChange;
+	});
+
+	useEffect(() => {
+		if (isSplitter) onSplitterOutputChangeRef.current?.(splEffIdx);
+	}, [splEffIdx, isSplitter]);
 
 	return (
 		<div className="space-y-3">
 			<div
 				className="relative w-full"
-				style={{ aspectRatio: `${SVG_VIEW_WIDTH} / ${svgHeight}` }}
+				style={{ aspectRatio: `${SVG_VIEW_WIDTH + 28} / ${svgHeight}` }}
 			>
 				<svg
 					ref={svgRef}
 					width="100%"
 					height="100%"
-					viewBox={`0 0 ${SVG_VIEW_WIDTH} ${svgHeight}`}
+					viewBox={`-28 0 ${SVG_VIEW_WIDTH + 28} ${svgHeight}`}
 					preserveAspectRatio="xMidYMid meet"
 					className="block w-full h-full bg-gray-50 border-2 border-gray-200 rounded-lg select-none"
 				>
@@ -178,12 +196,7 @@ export function DefectScene({
 				showSplBeam={showSplBeam}
 				splActiveHasDefect={splActiveHasDefect}
 			/>
-			{showQuestion && (
-				<VflCharQuestion
-					currentAnswer={currentVflAnswer}
-					onAnswer={handleVflCharAnswer}
-				/>
-			)}
+			{/* VflCharQuestion рендерится снаружи через onActiveQuestionChange */}
 		</div>
 	);
 }

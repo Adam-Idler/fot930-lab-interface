@@ -11,7 +11,10 @@ import {
 	useRef,
 	useState
 } from 'react';
-import { initialDeviceState } from '../../../lib/fot930/deviceReducer';
+import {
+	initialDeviceState,
+	isVideoMicroscopeImageSharp
+} from '../../../lib/fot930/deviceReducer';
 import { COMPONENT_LOSS_DB } from '../../../lib/fot930/measurementEngine';
 import {
 	getSplitterOutputCount,
@@ -195,6 +198,7 @@ export function LabWork() {
 	const [defectModuleState, setDefectModuleState] = useState<DefectModuleState>(
 		initialDefectModuleState
 	);
+	const [defectSplOutput, setDefectSplOutput] = useState<0 | 1 | null>(null);
 
 	const videoMicroscopeConnected = useMemo(() => {
 		const inDefectModule = currentStage === 'DEFECT_MODULE';
@@ -202,11 +206,17 @@ export function LabWork() {
 			defectModuleState.selectedComponentId === 'splitter_1_2';
 		const fipConnected =
 			defectModuleState.completedVflStepIds.includes('connect_fip');
-		return inDefectModule && splitterSelected && fipConnected;
+		return (
+			inDefectModule &&
+			splitterSelected &&
+			fipConnected &&
+			defectSplOutput === 1
+		);
 	}, [
 		currentStage,
 		defectModuleState.selectedComponentId,
-		defectModuleState.completedVflStepIds
+		defectModuleState.completedVflStepIds,
+		defectSplOutput
 	]);
 
 	// ============================================================
@@ -301,6 +311,19 @@ export function LabWork() {
 			payload: videoMicroscopeConnected
 		});
 	}, [videoMicroscopeConnected]);
+
+	// Шаг FIP: настройка яркости/контраста на экране видеомикроскопа прибора
+	useEffect(() => {
+		if (!videoMicroscopeConnected) return;
+		if (!isVideoMicroscopeImageSharp(deviceState)) return;
+		setDefectModuleState((prev) => {
+			if (prev.completedVflStepIds.includes('fip_adjust_focus')) return prev;
+			return {
+				...prev,
+				completedVflStepIds: [...prev.completedVflStepIds, 'fip_adjust_focus']
+			};
+		});
+	}, [videoMicroscopeConnected, deviceState]);
 
 	const handleCleanPorts = useCallback(() => {
 		if (deviceDispatchRef.current) {
@@ -636,6 +659,8 @@ export function LabWork() {
 							deviceState={deviceState}
 							state={defectModuleState}
 							onStateChange={setDefectModuleState}
+							onPenalty={handlePenalty}
+							onSplitterOutputChange={setDefectSplOutput}
 						/>
 					)}
 

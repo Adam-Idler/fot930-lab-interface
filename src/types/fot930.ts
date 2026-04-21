@@ -222,6 +222,12 @@ export interface DeviceState {
 
 	/** Видеомикроскоп (FIP) подключён в модуле дефектовки */
 	videoMicroscopeConnected: boolean;
+
+	/** Уровень яркости изображения FIP (0–16), экран «Видеомикроскоп» */
+	videoMicroscopeBrightnessLevel: number;
+
+	/** Уровень контраста изображения FIP (0–16), экран «Видеомикроскоп» */
+	videoMicroscopeContrastLevel: number;
 }
 
 /** Результат измерения */

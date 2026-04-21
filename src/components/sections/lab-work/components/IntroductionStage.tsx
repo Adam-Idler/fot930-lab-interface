@@ -1,4 +1,7 @@
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 import type React from 'react';
+import { useEffect, useRef } from 'react';
 
 // TODO: Проверить эмодзи на Windows 7. По необходимости заменить иконками
 export function IntroductionStage() {
@@ -7,15 +10,15 @@ export function IntroductionStage() {
 			{/* Общее описание */}
 			<div className="bg-white rounded-lg shadow-md p-6">
 				<h2 className="text-xl font-semibold mb-3">
-					Лабораторная работа: измерение параметров пассивных оптических
-					компонентов
+					Лабораторная работа: измерения оптическим тестером FOT-930
 				</h2>
 				<p className="text-gray-700 text-sm leading-relaxed">
 					В ходе лабораторной работы вы освоите методику измерения затухания
 					пассивных компонентов волоконно-оптических линий связи с помощью
-					оптического тестера FOT-930. Работа выполняется последовательно по
-					трём этапам: подготовка прибора, проведение измерений и анализ
-					результатов.
+					оптического тестера FOT-930, а также методы визуальной диагностики
+					дефектов с применением VFL и FIP. Работа выполняется последовательно
+					по четырём этапам: подготовка прибора, проведение измерений, анализ
+					результатов и определение дефектов.
 				</p>
 			</div>
 
@@ -41,12 +44,12 @@ export function IntroductionStage() {
 							<StepCard
 								number="1"
 								title="Включение прибора"
-								description="Нажмите кнопку POWER на корпусе прибора. Дождитесь завершения загрузки — прибор перейдёт на главный экран."
+								description="Нажмите кнопку POWER на корпусе прибора. Дождитесь завершения загрузки — будет открыт главный экран."
 							/>
 							<StepCard
 								number="2"
 								title="Очистка оптических портов"
-								description="Нажмите кнопку «Очистить порт» в интерфейсе. Появится модальное окно с увеличенным изображением торца коннектора. Его необходимо очистить с помощью курсора мыши. Загрязнения на торцах коннекторов приводят к завышенным потерям и погрешностям измерения."
+								description="Нажмите кнопку «Очистить порт» в интерфейсе. Появится модальное окно с увеличенным изображением торца коннектора. Его необходимо очистить с помощью курсора мыши. Загрязнения на торцах коннекторов приводят к завышенным потерям."
 							/>
 							<StepCard
 								number="3"
@@ -114,7 +117,7 @@ export function IntroductionStage() {
 							<StepCard
 								number="2"
 								title="Сборка схемы"
-								description="Перетащите элементы схемы в правильном порядке: Тестер → Коннектор → Компонент → Коннектор → Тестер."
+								description="Перетащите элементы схемы в правильном порядке: Тестер → Розетка → Компонент → Розетка → Тестер."
 								accentColor="emerald"
 							/>
 							<StepCard
@@ -173,13 +176,26 @@ export function IntroductionStage() {
 							<StepCard
 								number="2"
 								title="Среднее значение"
-								description="Рассчитайте среднее из трёх измерений по формуле: (A1 + A2 + A3) / 3. Введите результат в соответствующую ячейку."
+								description={
+									<>
+										Рассчитайте среднее из трёх измерений по формуле:{' '}
+										<InlineFormula latex="\bar{A} = \dfrac{A_1 + A_2 + A_3}{3}" />
+										. Введите результат в соответствующую ячейку.
+									</>
+								}
 								accentColor="violet"
 							/>
 							<StepCard
 								number="3"
 								title="Километрическое затухание"
-								description="Для кабельных компонентов длиной более 500 метров рассчитайте затухание на 1 км: A_ср / L, где L — длина волокна в километрах."
+								description={
+									<>
+										Для кабельных компонентов длиной более 1 кс рассчитайте
+										затухание на 1 км:{' '}
+										<InlineFormula latex="\alpha = \bar{A} / L" />, где{' '}
+										<InlineFormula latex="L" /> — длина волокна в километрах.
+									</>
+								}
 								accentColor="violet"
 							/>
 							<StepCard
@@ -190,6 +206,53 @@ export function IntroductionStage() {
 							/>
 						</div>
 
+						{/* Расчёт ожидаемых потерь */}
+						<div className="bg-violet-50 border border-violet-200 rounded-lg p-4 mb-3">
+							<div className="font-semibold text-violet-800 text-sm mb-2">
+								Расчёт ожидаемых потерь линии
+							</div>
+							<p className="text-xs text-violet-700 mb-3 leading-relaxed">
+								Перед вводом измерений необходимо рассчитать{' '}
+								<b>максимально допустимые</b> суммарные потери линии, используя
+								данные справочных таблиц теоретического раздела:
+							</p>
+							<div className="flex justify-center py-2 bg-white rounded border border-violet-200 mb-3">
+								<DisplayFormula latex="A_{\text{лин}} = A_{\text{компонента}} + N \cdot A_{\text{соед}}" />
+							</div>
+							<p className="text-xs text-violet-700 mb-3 leading-relaxed">
+								Здесь <InlineFormula latex="N" /> — количество соединений
+								исследуемого компонента в измерительной схеме,{' '}
+								<InlineFormula latex="A_{\text{соед}} = 0{,}3\;\text{дБ}" /> —
+								максимально допустимые потери разъёма (Таблица 3).
+							</p>
+							<div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-violet-700">
+								<div className="bg-white rounded border border-violet-200 p-2">
+									<div className="font-medium text-violet-800 mb-1 text-center">
+										Патч-корд / сплиттер
+									</div>
+									<div className="flex justify-center">
+										<InlineFormula latex="A_{\text{лин}} = A_{\text{компонента}} + 2 \cdot 0{,}3" />
+									</div>
+								</div>
+								<div className="bg-white rounded border border-violet-200 p-2">
+									<div className="font-medium text-violet-800 mb-1 text-center">
+										Оптическое волокно
+									</div>
+									<div className="flex justify-center">
+										<InlineFormula latex="A_{\text{лин}} = \alpha_{\max} \cdot L + 2 \cdot 0{,}3" />
+									</div>
+								</div>
+								<div className="bg-white rounded border border-violet-200 p-2 col-span-1 sm:col-span-1">
+									<div className="font-medium text-violet-800 mb-1 text-center">
+										Пример (катушка 5 км, 1310 нм)
+									</div>
+									<div className="flex justify-center">
+										<InlineFormula latex="0{,}36 \cdot 5 + 0{,}6 = 2{,}4\;\text{дБ}" />
+									</div>
+								</div>
+							</div>
+						</div>
+
 						<div className="bg-violet-50 border border-violet-200 rounded-lg p-4">
 							<div className="text-sm text-violet-800">
 								Вопрос об исправности появляется автоматически после того, как
@@ -197,6 +260,71 @@ export function IntroductionStage() {
 								компонент считается неизмеренным.
 							</div>
 						</div>
+					</div>
+				</div>
+			</div>
+
+			{/* Этап 4 */}
+			<div className="bg-white rounded-lg shadow-md overflow-hidden">
+				<div className="bg-orange-600 text-white px-6 py-3 flex items-center gap-3">
+					<div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0">
+						4
+					</div>
+					<h3 className="font-semibold text-base">Определение дефектов</h3>
+				</div>
+				<div className="p-6">
+					<p className="text-sm text-gray-600 mb-4">
+						На этом этапе вы диагностируете неисправные компоненты обнаруженные
+						на предыдущем этапе с помощью визуального локатора повреждений (VFL)
+						и видеомикроскопа (FIP). Для каждого компонента необходимо
+						последовательно выполнить все шаги диагностики.
+					</p>
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+						<StepCard
+							number="1"
+							title="Подготовка VFL"
+							description={
+								<>
+									Подключите волокно к порту VFL прибора перетаскиванием
+									коннектора на схеме. Откройте меню{' '}
+									<b>Источник / VFL / Видеомикроскоп</b>, выберите <b>VFL</b> и
+									активируйте излучение клавишей <b>F1</b>.
+								</>
+							}
+							accentColor="orange"
+						/>
+						<StepCard
+							number="2"
+							title="Обнаружение дефекта"
+							description="После включения VFL на схеме появится световой луч. Найдите точку, в которой свет вытекает из волокна или рассеивается — это дефект. Нажмите на неё, чтобы зафиксировать."
+							accentColor="orange"
+						/>
+						<StepCard
+							number="3"
+							title="Характеристика дефекта"
+							description="Ответьте на вопрос о характере повреждения по картине VFL: частичная утечка (изгиб), сильное рассеивание (нарушение стыка), полный обрыв или сигнал без искажений."
+							accentColor="orange"
+						/>
+						<StepCard
+							number="4"
+							title="Решение по компоненту"
+							description="Определите необходимое действие с компонентом: замена, очистка коннектора или ничего не предпринимать — в зависимости от характера найденного дефекта."
+							accentColor="orange"
+						/>
+					</div>
+
+					<div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-3">
+						<div className="font-semibold text-orange-800 text-sm mb-1">
+							Диагностика с FIP
+						</div>
+						<p className="text-xs text-orange-700 leading-relaxed">
+							Если дефект обнаружен на торце коннектора, то дополнительно
+							выполняется осмотр коннектора видеомикроскопом:{' '}
+							<b>подключите FIP-зонд</b> к прибору перетаскиванием кабеля,{' '}
+							<b>настройте резкость</b> изображения стрелками на клавиатуре
+							прибора, затем <b>определите тип дефекта</b> торца (загрязнение,
+							царапина, скол или отсутствие дефекта).
+						</p>
 					</div>
 				</div>
 			</div>
@@ -241,6 +369,14 @@ export function IntroductionStage() {
 										</span>
 										<span className="text-red-600 font-semibold text-right whitespace-nowrap">
 											−10 б.
+										</span>
+									</div>
+									<div className="px-3 py-2 grid grid-cols-[1fr_auto] gap-2 items-center">
+										<span className="text-gray-700">
+											Неверный ответ при определении дефекта
+										</span>
+										<span className="text-orange-500 font-semibold text-right whitespace-nowrap">
+											−5 б.
 										</span>
 									</div>
 									<div className="px-3 py-2 grid grid-cols-[1fr_auto] gap-2 items-center">
@@ -340,8 +476,8 @@ export function IntroductionStage() {
 							'Краткие теоретические сведения по теме измерения оптических потерь в волоконно-оптических линиях связи и принципам их диагностики',
 							'Фотография / скриншот выполненного теста-допуска с оценкой не ниже 4',
 							'Фотография / скриншот выполненного этапа подготовки работы',
-							'Фотографии / скриншоты хода выполнения работы',
-							'Фотография / скриншот с подтверждением выполненного измерения всех приведённых компонентов и оценкой не ниже 3',
+							'Фотография / скриншот с подтверждением выполненного измерения всех приведённых компонентов',
+							'Фотография / скриншот с подтверждением выполнения этапа "Определение дефектов"',
 							'Фотография / скриншот выполненного итогового теста с оценкой не ниже 3',
 							'Фотография / скриншот экрана с результатами по проделанной работе',
 							'Вывод по лабораторной работе'
@@ -380,7 +516,7 @@ interface StepCardProps {
 	number: string;
 	title: string;
 	description: React.ReactNode;
-	accentColor?: 'blue' | 'emerald' | 'violet';
+	accentColor?: 'blue' | 'emerald' | 'violet' | 'orange';
 }
 
 function StepCard({
@@ -392,7 +528,8 @@ function StepCard({
 	const numberColors: Record<string, string> = {
 		blue: 'bg-blue-100 text-blue-700',
 		emerald: 'bg-emerald-100 text-emerald-700',
-		violet: 'bg-violet-100 text-violet-700'
+		violet: 'bg-violet-100 text-violet-700',
+		orange: 'bg-orange-100 text-orange-700'
 	};
 
 	return (
@@ -408,4 +545,28 @@ function StepCard({
 			<div className="text-xs text-gray-600 leading-relaxed">{description}</div>
 		</div>
 	);
+}
+
+function InlineFormula({ latex }: { latex: string }) {
+	const ref = useRef<HTMLSpanElement>(null);
+	useEffect(() => {
+		if (!ref.current) return;
+		katex.render(latex, ref.current, {
+			throwOnError: false,
+			displayMode: false
+		});
+	}, [latex]);
+	return <span ref={ref} />;
+}
+
+function DisplayFormula({ latex }: { latex: string }) {
+	const ref = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		if (!ref.current) return;
+		katex.render(latex, ref.current, {
+			throwOnError: false,
+			displayMode: true
+		});
+	}, [latex]);
+	return <div ref={ref} />;
 }

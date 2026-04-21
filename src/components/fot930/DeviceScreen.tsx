@@ -3,6 +3,7 @@
  * Белый фон с синими акцентами в цвет корпуса прибора
  */
 
+import { isVideoMicroscopeImageSharp } from '../../lib/fot930/deviceReducer';
 import type { DeviceState } from '../../types/fot930';
 import {
 	DeviceFooter,
@@ -17,8 +18,8 @@ import {
 	ScreenOff,
 	ScreenSettings,
 	ScreenSourceVflMenu,
-	ScreenVideoMicroscope,
-	ScreenVfl
+	ScreenVfl,
+	ScreenVideoMicroscope
 } from './device-screen';
 
 interface DeviceScreenProps {
@@ -80,7 +81,12 @@ function renderScreen(state: DeviceState) {
 
 		case 'VIDEO_MICROSCOPE_SCREEN':
 			return (
-				<ScreenVideoMicroscope connected={state.videoMicroscopeConnected} />
+				<ScreenVideoMicroscope
+					connected={state.videoMicroscopeConnected}
+					brightnessLevel={state.videoMicroscopeBrightnessLevel}
+					contrastLevel={state.videoMicroscopeContrastLevel}
+					isSharp={isVideoMicroscopeImageSharp(state)}
+				/>
 			);
 
 		default:

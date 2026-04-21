@@ -10,7 +10,6 @@ import {
 	CH,
 	CONN_CENTER_Y,
 	CONN_INIT_Y,
-	CONNECTOR_COLOR,
 	CW,
 	FIBER_COLOR,
 	SNAP_DIST,
@@ -51,7 +50,12 @@ export function CableScene({
 	const displayX = isConnected ? VFL_SNAP_X : cablePos.x;
 	const displayY = isConnected ? CONN_INIT_Y : cablePos.y;
 	const fiberX = displayX + CW;
-	const arrowTipX = VFL_SNAP_X + CW + 3;
+
+	const cableDragHighlight = isConnected === false;
+	let cableCursor: 'default' | 'grab' | 'grabbing' = 'default';
+	if (cableDragHighlight) {
+		cableCursor = cableIsDragging ? 'grabbing' : 'grab';
+	}
 
 	const handleDown = (e: React.PointerEvent<SVGRectElement>) => {
 		if (isConnected || !svgRef.current) return;
@@ -95,28 +99,9 @@ export function CableScene({
 
 	return (
 		<>
-			{!isConnected && (
-				<>
-					<line
-						x1={displayX}
-						y1={CONN_CENTER_Y}
-						x2={arrowTipX + 9}
-						y2={CONN_CENTER_Y}
-						stroke="#3b82f6"
-						strokeWidth={2.5}
-						strokeDasharray="8 6"
-						opacity={0.35}
-					/>
-					<polygon
-						points={`${arrowTipX + 12},${CONN_CENTER_Y - 8} ${arrowTipX},${CONN_CENTER_Y} ${arrowTipX + 12},${CONN_CENTER_Y + 8}`}
-						fill="#3b82f6"
-						opacity={0.5}
-					/>
-				</>
-			)}
 			<line
 				x1={fiberX}
-				y1={CONN_CENTER_Y}
+				y1={displayY + CH / 2}
 				x2={CABLE_R_CONN.x}
 				y2={CONN_CENTER_Y}
 				stroke={FIBER_COLOR}
@@ -125,7 +110,7 @@ export function CableScene({
 			/>
 			<text
 				x={(fiberX + CABLE_R_CONN.x) / 2}
-				y={132}
+				y={128}
 				textAnchor="middle"
 				fontSize={17}
 				fill={FIBER_COLOR}
@@ -143,27 +128,39 @@ export function CableScene({
 				y={displayY}
 				width={CW}
 				height={CH}
-				rx={5}
-				fill={CONNECTOR_COLOR}
-				stroke={!isConnected ? '#3b82f6' : 'none'}
-				strokeWidth={!isConnected ? 3 : 0}
-				className={!isConnected ? 'drag-pulse' : undefined}
-				style={{
-					cursor: isConnected
-						? 'default'
-						: cableIsDragging
-							? 'grabbing'
-							: 'grab'
-				}}
+				rx={3}
+				fill="#1d4ed8"
+				stroke={cableDragHighlight ? '#3b82f6' : 'none'}
+				strokeWidth={cableDragHighlight ? 2.5 : 0}
+				className={cableDragHighlight ? 'drag-pulse' : undefined}
+				style={{ cursor: cableCursor }}
 				onPointerDown={handleDown}
 				onPointerMove={handleMove}
 				onPointerUp={handleUp}
 			/>
+			<rect
+				x={displayX}
+				y={displayY + 2}
+				width={4}
+				height={CH - 4}
+				rx={0}
+				fill="#1844c5"
+				style={{ pointerEvents: 'none' }}
+			/>
+			<rect
+				x={displayX + CW - 11}
+				y={displayY + 2}
+				width={3}
+				height={CH - 4}
+				rx={1}
+				fill="#2563eb"
+				style={{ pointerEvents: 'none' }}
+			/>
 			<text
 				x={displayX + CW / 2}
-				y={displayY + CH + 21}
+				y={displayY + CH + 18}
 				textAnchor="middle"
-				fontSize={17}
+				fontSize={14}
 				fill="#64748b"
 			>
 				SC/UPC
@@ -173,14 +170,32 @@ export function CableScene({
 				y={CABLE_R_CONN.y}
 				width={CW}
 				height={CH}
-				rx={5}
-				fill={CONNECTOR_COLOR}
+				rx={3}
+				fill="#1d4ed8"
+			/>
+			<rect
+				x={CABLE_R_CONN.x + CW - 4}
+				y={CABLE_R_CONN.y + 2}
+				width={4}
+				height={CH - 4}
+				rx={0}
+				fill="#1844c5"
+				style={{ pointerEvents: 'none' }}
+			/>
+			<rect
+				x={CABLE_R_CONN.x + 8}
+				y={CABLE_R_CONN.y + 2}
+				width={3}
+				height={CH - 4}
+				rx={1}
+				fill="#2563eb"
+				style={{ pointerEvents: 'none' }}
 			/>
 			<text
 				x={CABLE_R_CONN.x + CW / 2}
-				y={CABLE_R_CONN.y + CH + 21}
+				y={CABLE_R_CONN.y + CH + 18}
 				textAnchor="middle"
-				fontSize={17}
+				fontSize={14}
 				fill="#64748b"
 			>
 				SC/UPC

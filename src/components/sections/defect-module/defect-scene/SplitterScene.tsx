@@ -5,13 +5,14 @@ import {
 	CH,
 	CONN_CENTER_Y,
 	CONN_INIT_Y,
-	CONNECTOR_COLOR,
 	CW,
 	FIBER_COLOR,
 	SNAP_DIST,
 	SPL_BEAM_END_X,
 	SPL_BEAM_FORK_X,
 	SPL_BEAM_START_X,
+	SPL_DEFECT_OUTPUT_IDX,
+	SPL_FIP_EXAM_POS,
 	SPL_FORK,
 	SPL_INPUT_CONN,
 	SPL_OUT_NATURAL,
@@ -61,7 +62,13 @@ export function SplitterScene({
 
 	const getSplPos = (i: 0 | 1): { x: number; y: number } => {
 		if (splDragIdx === i) return splDragPos;
-		if (splEffIdx === i) return { x: VFL_SNAP_X, y: CONN_INIT_Y };
+		if (splEffIdx === i) {
+			// When FIP is active, the defect connector visually detaches from VFL port
+			if (fipActive && i === SPL_DEFECT_OUTPUT_IDX) {
+				return SPL_FIP_EXAM_POS;
+			}
+			return { x: VFL_SNAP_X, y: CONN_INIT_Y };
+		}
 		return { x: SPL_OUT_NATURAL[i].x, y: SPL_OUT_NATURAL[i].y };
 	};
 
@@ -78,8 +85,7 @@ export function SplitterScene({
 	};
 
 	const makeSplMove = (i: 0 | 1) => (e: React.PointerEvent<SVGRectElement>) => {
-		if (!splDragRef.current || splDragRef.current.i !== i || !svgRef.current)
-			return;
+		if (splDragRef.current?.i !== i || !svgRef.current) return;
 		const { x, y } = toSvgPoint(e, svgRef.current);
 		const p = {
 			x: splDragRef.current.cx + (x - splDragRef.current.px),
@@ -90,7 +96,7 @@ export function SplitterScene({
 	};
 
 	const makeSplUp = (i: 0 | 1) => () => {
-		if (!splDragRef.current || splDragRef.current.i !== i) return;
+		if (splDragRef.current?.i !== i) return;
 		splDragRef.current = null;
 		setSplDragIdx(null);
 		const pos = splCurrentRef.current;
@@ -107,6 +113,15 @@ export function SplitterScene({
 	const spl1 = getSplPos(1);
 	const spl0CanDrag = splEffIdx !== 0;
 	const spl1CanDrag = splEffIdx !== 1;
+
+	let spl0Cursor: 'default' | 'grab' | 'grabbing' = 'default';
+	if (spl0CanDrag) {
+		spl0Cursor = splDragIdx === 0 ? 'grabbing' : 'grab';
+	}
+	let spl1Cursor: 'default' | 'grab' | 'grabbing' = 'default';
+	if (spl1CanDrag) {
+		spl1Cursor = splDragIdx === 1 ? 'grabbing' : 'grab';
+	}
 
 	return (
 		<>
@@ -164,14 +179,32 @@ export function SplitterScene({
 				y={SPL_INPUT_CONN.y}
 				width={CW}
 				height={CH}
-				rx={5}
-				fill={CONNECTOR_COLOR}
+				rx={3}
+				fill="#15803d"
+			/>
+			<rect
+				x={SPL_INPUT_CONN.x + CW - 4}
+				y={SPL_INPUT_CONN.y + 2}
+				width={4}
+				height={CH - 4}
+				rx={0}
+				fill="#116830"
+				style={{ pointerEvents: 'none' }}
+			/>
+			<rect
+				x={SPL_INPUT_CONN.x + 8}
+				y={SPL_INPUT_CONN.y + 2}
+				width={3}
+				height={CH - 4}
+				rx={1}
+				fill="#16a34a"
+				style={{ pointerEvents: 'none' }}
 			/>
 			<text
 				x={SPL_INPUT_CONN.x + CW / 2}
-				y={SPL_INPUT_CONN.y + CH + 21}
+				y={SPL_INPUT_CONN.y + CH + 18}
 				textAnchor="middle"
-				fontSize={17}
+				fontSize={15}
 				fill="#64748b"
 			>
 				Вход
@@ -181,61 +214,91 @@ export function SplitterScene({
 				y={spl0.y}
 				width={CW}
 				height={CH}
-				rx={5}
-				fill={CONNECTOR_COLOR}
+				rx={3}
+				fill="#15803d"
 				stroke={spl0CanDrag ? '#3b82f6' : 'none'}
-				strokeWidth={spl0CanDrag ? 3 : 0}
+				strokeWidth={spl0CanDrag ? 2.5 : 0}
 				className={spl0CanDrag ? 'drag-pulse' : undefined}
-				style={{
-					cursor: spl0CanDrag
-						? splDragIdx === 0
-							? 'grabbing'
-							: 'grab'
-						: 'default'
-				}}
+				style={{ cursor: spl0Cursor }}
 				onPointerDown={makeSplDown(0)}
 				onPointerMove={makeSplMove(0)}
 				onPointerUp={makeSplUp(0)}
 			/>
-			<text
-				x={spl0.x + CW / 2}
-				y={spl0.y - 11}
-				textAnchor="middle"
-				fontSize={16}
-				fill="#64748b"
-			>
-				Выход 1
-			</text>
+			<rect
+				x={spl0.x}
+				y={spl0.y + 2}
+				width={4}
+				height={CH - 4}
+				rx={0}
+				fill="#116830"
+				style={{ pointerEvents: 'none' }}
+			/>
+			<rect
+				x={spl0.x + CW - 11}
+				y={spl0.y + 2}
+				width={3}
+				height={CH - 4}
+				rx={1}
+				fill="#16a34a"
+				style={{ pointerEvents: 'none' }}
+			/>
+			{splEffIdx !== 0 && (
+				<text
+					x={spl0.x + CW / 2}
+					y={spl0.y - 11}
+					textAnchor="middle"
+					fontSize={15}
+					fill="#64748b"
+					style={{ userSelect: 'none' }}
+				>
+					Выход 1
+				</text>
+			)}
 			<rect
 				x={spl1.x}
 				y={spl1.y}
 				width={CW}
 				height={CH}
-				rx={5}
-				fill={CONNECTOR_COLOR}
+				rx={3}
+				fill="#15803d"
 				stroke={spl1CanDrag ? '#3b82f6' : 'none'}
-				strokeWidth={spl1CanDrag ? 3 : 0}
+				strokeWidth={spl1CanDrag ? 2.5 : 0}
 				className={spl1CanDrag ? 'drag-pulse' : undefined}
-				style={{
-					cursor: spl1CanDrag
-						? splDragIdx === 1
-							? 'grabbing'
-							: 'grab'
-						: 'default'
-				}}
+				style={{ cursor: spl1Cursor }}
 				onPointerDown={makeSplDown(1)}
 				onPointerMove={makeSplMove(1)}
 				onPointerUp={makeSplUp(1)}
 			/>
-			<text
-				x={spl1.x + CW / 2}
-				y={spl1.y + CH + 21}
-				textAnchor="middle"
-				fontSize={16}
-				fill="#64748b"
-			>
-				Выход 2
-			</text>
+			<rect
+				x={spl1.x}
+				y={spl1.y + 2}
+				width={4}
+				height={CH - 4}
+				rx={0}
+				fill="#116830"
+				style={{ pointerEvents: 'none' }}
+			/>
+			<rect
+				x={spl1.x + CW - 11}
+				y={spl1.y + 2}
+				width={3}
+				height={CH - 4}
+				rx={1}
+				fill="#16a34a"
+				style={{ pointerEvents: 'none' }}
+			/>
+			{splEffIdx !== 1 && (
+				<text
+					x={spl1.x + CW / 2}
+					y={spl1.y + CH + 18}
+					textAnchor="middle"
+					fontSize={15}
+					fill="#64748b"
+					style={{ userSelect: 'none' }}
+				>
+					Выход 2
+				</text>
+			)}
 			{showBeam && splActiveHasDefect && (
 				<g className={beamBlink ? 'beam-blink' : undefined}>
 					<DefectPoint

@@ -80,54 +80,26 @@ interface DefectPointProps {
 	onClick: () => void;
 }
 
-// Light leaking from damaged fiber: spreads perpendicular to the fiber axis (vertically),
-// irregular shape — no perfect circles
+// Light leaking from damaged fiber: spreads perpendicular to the fiber axis (vertically)
 export function DefectPoint({ cx, cy, found, onClick }: DefectPointProps) {
 	return (
 		<g
 			onClick={found ? undefined : onClick}
 			style={{ cursor: found ? 'default' : 'pointer' }}
 		>
-			{/* Hit area: rectangle covering the vertical scatter zone */}
 			{!found && (
 				<rect
-					x={cx - 21}
-					y={cy - 33}
-					width={42}
-					height={66}
+					x={cx - 20}
+					y={cy - 22}
+					width={40}
+					height={44}
 					fill="transparent"
 				/>
 			)}
-			{/* Outermost diffuse halo — slightly off-axis, mimics irregular scatter */}
-			<ellipse
-				cx={cx - 2}
-				cy={cy - 2}
-				rx={14}
-				ry={30}
-				fill="#ef4444"
-				opacity={0.05}
-			/>
-			<ellipse
-				cx={cx + 3}
-				cy={cy + 3}
-				rx={12}
-				ry={26}
-				fill="#ff4500"
-				opacity={0.04}
-			/>
-			{/* Mid scatter — dominant vertical spread */}
-			<ellipse cx={cx} cy={cy} rx={8} ry={20} fill="#ef4444" opacity={0.1} />
-			<ellipse
-				cx={cx - 2}
-				cy={cy + 2}
-				rx={6}
-				ry={15}
-				fill="#ef4444"
-				opacity={0.13}
-			/>
-			{/* Bright inner zone — elongated along damage crack */}
-			<ellipse cx={cx} cy={cy} rx={4} ry={8} fill="#fca5a5" opacity={0.7} />
-			<ellipse cx={cx} cy={cy} rx={2} ry={3} fill="white" opacity={0.55} />
+			<circle cx={cx} cy={cy} r={20} fill="#ef4444" opacity={0.08} />
+			<circle cx={cx} cy={cy} r={12} fill="#ef4444" opacity={0.18} />
+			<circle cx={cx} cy={cy} r={6} fill="#ef4444" opacity={0.9} />
+			<circle cx={cx} cy={cy} r={2.5} fill="white" opacity={0.8} />
 		</g>
 	);
 }

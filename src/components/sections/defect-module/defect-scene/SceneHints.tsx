@@ -24,7 +24,7 @@ export function SceneHints({
 			{defectFound && (
 				<p className="text-center text-base font-medium text-green-600">
 					✓ Дефект обнаружен
-					{isCable ? ' на оптическом шнуре' : ' на выходе 2 сплиттера'}!
+					{/* {isCable ? ' на оптическом шнуре' : ' на выходе 2 сплиттера'}! */}
 				</p>
 			)}
 			{!defectFound && isCable && !isConnected && (
@@ -39,7 +39,7 @@ export function SceneHints({
 			)}
 			{!defectFound && showCableBeam && (
 				<p className="text-center text-base text-red-500 italic">
-					Луч VFL активен. Найдите и нажмите на точку дефекта.
+					Луч VFL активен. Определите место дефекта.
 				</p>
 			)}
 			{!defectFound && isSplitter && !isConnected && (
@@ -52,14 +52,14 @@ export function SceneHints({
 					✓ Выход подключён. Включите VFL на приборе.
 				</p>
 			)}
-			{!defectFound && showSplBeam && !splActiveHasDefect && (
+			{/* {!defectFound && showSplBeam && !splActiveHasDefect && (
 				<p className="text-center text-base text-amber-600 italic">
 					Луч без нарушений. Подключите другой выход для проверки.
 				</p>
-			)}
+			)} */}
 			{!defectFound && showSplBeam && splActiveHasDefect && (
 				<p className="text-center text-base text-red-500 italic">
-					Луч VFL активен. Найдите и нажмите на точку дефекта.
+					Луч VFL активен. Определите место дефекта.
 				</p>
 			)}
 		</>
