@@ -12,7 +12,8 @@ app.whenReady().then(() => {
 	const win = new BrowserWindow({
 		title: 'Main window',
 		width: 960,
-		height: 700,
+		height: 750,
+		icon: path.resolve(appPath, 'dist', 'images', 'fot-930.png'),
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.js')
 		}
@@ -29,7 +30,7 @@ app.whenReady().then(() => {
 		const indexPath = path.resolve(appPath, 'dist', 'index.html');
 		win.loadFile(indexPath);
 
-		win.autoHideMenuBar = true;
+		win.setMenu(null);
 	}
 });
 

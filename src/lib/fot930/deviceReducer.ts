@@ -265,6 +265,9 @@ function innerDeviceReducer(
 				videoMicroscopeContrastLevel: VM_CONTRAST_INIT
 			};
 
+		case 'DISABLE_VFL':
+			return { ...state, vflEnabled: false };
+
 		case 'SKIP_PREPARATION':
 			return {
 				...initialDeviceState,

@@ -14,6 +14,11 @@ import {
 	generateReferenceMeasurement,
 	validateConnectionScheme
 } from '../../lib/fot930/measurementEngine';
+import {
+	DEVICE_LOADING_DELAY_MS,
+	FIBER_MEASUREMENT_DELAY_MS,
+	REFERENCE_MEASUREMENT_DELAY_MS
+} from '../../lib/devFlags';
 import { publicUrl } from '../../lib/utils';
 import type {
 	ConnectionScheme,
@@ -58,7 +63,7 @@ export function Device({
 		if (state.screen === 'LOADING') {
 			const timer = setTimeout(() => {
 				dispatch({ type: 'COMPLETE_LOADING' });
-			}, 2000);
+			}, DEVICE_LOADING_DELAY_MS);
 			return () => clearTimeout(timer);
 		}
 	}, [state.screen]);
@@ -101,7 +106,7 @@ export function Device({
 				});
 			};
 
-			const timer = setTimeout(performReferenceMeasurement, 3000);
+			const timer = setTimeout(performReferenceMeasurement, REFERENCE_MEASUREMENT_DELAY_MS);
 			return () => clearTimeout(timer);
 		}
 	}, [state.screen, state.currentMeasurementType, state.preparation]);
@@ -162,7 +167,7 @@ export function Device({
 				});
 			};
 
-			const timer = setTimeout(performFiberMeasurement, 3000);
+			const timer = setTimeout(performFiberMeasurement, FIBER_MEASUREMENT_DELAY_MS);
 			return () => clearTimeout(timer);
 		}
 	}, [

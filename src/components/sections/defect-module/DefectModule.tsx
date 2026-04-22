@@ -15,6 +15,7 @@ interface DefectModuleProps {
 	onStateChange: (state: DefectModuleState) => void;
 	onPenalty?: (amount: number, reason: string) => void;
 	onSplitterOutputChange?: (idx: 0 | 1 | null) => void;
+	onVflDisable?: () => void;
 }
 
 export function DefectModule({
@@ -22,7 +23,8 @@ export function DefectModule({
 	state,
 	onStateChange,
 	onPenalty,
-	onSplitterOutputChange
+	onSplitterOutputChange,
+	onVflDisable
 }: DefectModuleProps) {
 	const [activeVflQuestion, setActiveVflQuestion] =
 		useState<ActiveVflQuestion | null>(null);
@@ -42,6 +44,7 @@ export function DefectModule({
 
 	const handleSelect = (id: string) => {
 		penalizedRef.current.clear();
+		onVflDisable?.();
 		onStateChange({
 			...state,
 			selectedComponentId: id,
@@ -64,6 +67,7 @@ export function DefectModule({
 
 	const handleResetConfirm = () => {
 		penalizedRef.current.clear();
+		onVflDisable?.();
 		onStateChange({
 			...state,
 			selectedComponentId: null,

@@ -32,7 +32,7 @@ export function ScreenFastestMeasuring({ state }: ScreenFastestMeasuringProps) {
 
 			<div className="text-xs text-gray-600 text-center space-y-1">
 				<div>Режим: {fastestSettings.portType}</div>
-				<div>Длины волн: {fastestSettings.lossWavelengths.join('nm, ')}nm</div>
+				<div>Длины волн: {fastestSettings.lossWavelengths.join('нм, ')}нм</div>
 			</div>
 
 			<div className="text-[10px] text-gray-500 mt-4">

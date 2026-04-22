@@ -278,7 +278,8 @@ export type DeviceAction =
 	| { type: 'SET_VIDEO_MICROSCOPE_CONNECTED'; payload: boolean }
 	| { type: 'PRESS_LEFT' }
 	| { type: 'PRESS_RIGHT' }
-	| { type: 'SKIP_PREPARATION' };
+	| { type: 'SKIP_PREPARATION' }
+	| { type: 'DISABLE_VFL' };
 
 // ============================================================
 // ЛАБОРАТОРНАЯ РАБОТА

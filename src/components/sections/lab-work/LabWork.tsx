@@ -11,6 +11,7 @@ import {
 	useRef,
 	useState
 } from 'react';
+import { SHOW_DEV_BUTTONS } from '../../../lib/devFlags';
 import {
 	initialDeviceState,
 	isVideoMicroscopeImageSharp
@@ -34,6 +35,7 @@ import { Device } from '../../fot930';
 import { useRegistration } from '../../registration-form';
 import type { DefectModuleState } from '../defect-module';
 import { DefectModule, initialDefectModuleState } from '../defect-module';
+import { FAULTY_COMPONENTS } from '../defect-module/constants';
 import {
 	ConnectionSchemeStage,
 	IntroductionStage,
@@ -93,7 +95,8 @@ const availableComponents: PassiveComponent[] = [
 		label: 'Сплиттер 1:2 SC/APC',
 		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_2,
 		connectorType: 'SC_APC',
-		fiberLength: 2
+		fiberLength: 2,
+		faultyPort: 2
 	},
 	{
 		id: 'splitter_1_4',
@@ -102,8 +105,7 @@ const availableComponents: PassiveComponent[] = [
 		label: 'Сплиттер 1:4 SC/APC',
 		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_4,
 		connectorType: 'SC_APC',
-		fiberLength: 2,
-		faultyPort: 2
+		fiberLength: 2
 	},
 	{
 		id: 'splitter_1_8',
@@ -241,6 +243,14 @@ export function LabWork() {
 		canProceedToNextMeasurement
 	} = useResultsTable({ onPenalty: handlePenalty });
 
+	const defectModuleCompleted = useMemo(
+		() =>
+			FAULTY_COMPONENTS.every((c) =>
+				defectModuleState.completedComponentIds.includes(c.id)
+			),
+		[defectModuleState.completedComponentIds]
+	);
+
 	// Все компоненты и сценарии завершены?
 	const allComponentsMeasured = useMemo(() => {
 		for (const component of availableComponents) {
@@ -272,9 +282,9 @@ export function LabWork() {
 		return Object.keys(resultsTableState.tables).length > 0;
 	}, [resultsTableState.tables]);
 
-	// Сохраняем результат лабораторной работы при завершении всех измерений
+	// Сохраняем результат лабораторной работы при завершении всех измерений и дефектовки
 	useEffect(() => {
-		if (!allComponentsMeasured) return;
+		if (!allComponentsMeasured || !defectModuleCompleted) return;
 		const digit = getGrade(score).digit;
 		const updatedStudent = {
 			...studentRef.current,
@@ -282,7 +292,7 @@ export function LabWork() {
 		};
 		setStudent(updatedStudent);
 		storage.saveStudent(updatedStudent);
-	}, [allComponentsMeasured, score, setStudent]);
+	}, [allComponentsMeasured, defectModuleCompleted, score, setStudent]);
 
 	// Обновляем correctSequence при смене компонента или сценария
 	useEffect(() => {
@@ -512,7 +522,7 @@ export function LabWork() {
 							</div>
 						</div>
 
-						{allComponentsMeasured && (
+						{allComponentsMeasured && defectModuleCompleted && (
 							<div
 								className={`px-4 py-2 rounded-lg text-center ${gradeBadgeStyle(score)}`}
 							>
@@ -559,8 +569,7 @@ export function LabWork() {
 						stage="DEFECT_MODULE"
 						label="Определение дефектов"
 						active={currentStage === 'DEFECT_MODULE'}
-						// TODO: Вернуть условие !allComponentsMeasured
-						disabled={false}
+						disabled={SHOW_DEV_BUTTONS ? false : !allComponentsMeasured}
 						title={
 							allComponentsMeasured
 								? undefined
@@ -568,9 +577,7 @@ export function LabWork() {
 						}
 						onClick={() => handleStageChange('DEFECT_MODULE')}
 					/>
-					{/* TODO: Вернуть условие с разработкой */}
-					{/* {import.meta.env.DEV && */}
-					{!deviceState.preparation.isReadyForMeasurements && (
+					{SHOW_DEV_BUTTONS && !deviceState.preparation.isReadyForMeasurements && (
 						<button
 							type="button"
 							className="ml-auto shrink-0 text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 cursor-pointer"
@@ -661,6 +668,9 @@ export function LabWork() {
 							onStateChange={setDefectModuleState}
 							onPenalty={handlePenalty}
 							onSplitterOutputChange={setDefectSplOutput}
+							onVflDisable={() =>
+								deviceDispatchRef.current?.({ type: 'DISABLE_VFL' })
+							}
 						/>
 					)}
 

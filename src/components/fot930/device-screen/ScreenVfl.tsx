@@ -127,11 +127,11 @@ export function ScreenVfl({ state }: ScreenVflProps) {
 					</span>
 					<div className="flex flex-col gap-0.5">
 						<div className="flex items-center gap-0.5">
-							<span className="text-xs font-bold text-gray-300">dBm</span>
+							<span className="text-xs font-bold text-gray-300">дБм</span>
 							<span className="text-xs text-gray-300">▼</span>
 						</div>
 						<div className="flex items-center gap-0.5 mt-5 -mb-10">
-							<span className="text-xs font-bold text-gray-300">1550 nm</span>
+							<span className="text-xs font-bold text-gray-300">1550 нм</span>
 							<span className="text-xs text-gray-300">▼</span>
 						</div>
 					</div>

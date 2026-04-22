@@ -7,6 +7,7 @@ import {
 	paragraphListClassNames,
 	subheadingClassNames
 } from './classnames';
+import { KatexFormula } from './KatexFormula';
 
 export function TheoryContent() {
 	return (
@@ -85,7 +86,12 @@ export function TheoryContent() {
 					для перевода из абсолютных единиц (мВт) в логарифмические (дБм):
 				</p>
 
-				<p className={paragraphClassNames}>P(дБм) = 10 × log10(P/1 мВт).</p>
+				<div className="flex justify-center py-2">
+					<KatexFormula
+						latex="P_{\text{дБм}} = 10 \cdot \log_{10}\!\left(\frac{P}{1\;\text{мВт}}\right)"
+						display
+					/>
+				</div>
 
 				<p className={paragraphClassNames}>
 					Отрицательные значения дБм указывают на мощность меньше 1 мВт.
@@ -113,7 +119,8 @@ export function TheoryContent() {
 				<ol className={orderedListClassNames}>
 					<li>
 						Собственных потерь в волокне: обусловлены рэлеевским рассеянием
-						(зависит от длины волны: ~1/λ⁴) и поглощением в материале стекла.
+						(зависит от длины волны:{' '}
+						<KatexFormula latex="{\sim}1/\lambda^4" />) и поглощением в материале стекла.
 					</li>
 					<li>
 						Потерь на соединениях: возникают в механических соединителях
@@ -133,7 +140,12 @@ export function TheoryContent() {
 				<p className={paragraphClassNames}>
 					Формула для расчета полных потерь в линии:
 				</p>
-				<p className={paragraphClassNames}>a(дБ) = 10 × log10(Pвх / Pвых)</p>
+				<div className="flex justify-center py-2">
+					<KatexFormula
+						latex="a_{\text{дБ}} = 10 \cdot \log_{10}\!\left(\frac{P_{\text{вх}}}{P_{\text{вых}}}\right)"
+						display
+					/>
+				</div>
 
 				<p className={paragraphClassNames}>
 					Оптический тестер обычно показывает мощность в dBm (децибелы
@@ -354,7 +366,8 @@ export function TheoryContent() {
 							<li>
 								На экране измерителя сразу отобразится отрицательное значение в
 								децибелах (например, -3.6 дБ). Это и есть потери в линии. Прибор
-								автоматически вычислил a = Pизм - Pref.
+								автоматически вычислил{' '}
+								<KatexFormula latex="a = P_{\text{изм}} - P_{\text{ref}}" />.
 							</li>
 						</ul>
 					</li>
@@ -687,7 +700,7 @@ export function TheoryContent() {
 				</p>
 
 				<h3 className={subheadingClassNames}>
-					Таблица 5. Дополнительные потери (рекомендуется учитывать)
+					Таблица 5. Дополнительные потери
 				</h3>
 				<table className="w-full mb-6 border-collapse text-sm table-fixed">
 					<colgroup>

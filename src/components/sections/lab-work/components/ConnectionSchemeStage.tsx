@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { SHOW_DEV_BUTTONS } from '../../../../lib/devFlags';
 import {
 	getSplitterOutputCount,
 	isSplitterType
@@ -124,7 +125,7 @@ export function ConnectionSchemeStage({
 					type: 'TESTER' as const,
 					id: 'tester',
 					label: 'Тестер FOT-930 (Блок А)',
-					icon: '/images/instruction/fot-930.png'
+					icon: '/images/fot-930.png'
 				},
 				getConnector(endConnectorType, 1),
 				...scenarioChain.flatMap((c, i) => [
@@ -144,7 +145,7 @@ export function ConnectionSchemeStage({
 					type: 'TESTER' as const,
 					id: 'tester_2',
 					label: 'Тестер FOT-930 (Блок Б)',
-					icon: '/images/instruction/fot-930.png'
+					icon: '/images/fot-930.png'
 				}
 			]
 		: [
@@ -152,7 +153,7 @@ export function ConnectionSchemeStage({
 					type: 'TESTER' as const,
 					id: 'tester',
 					label: 'Тестер FOT-930 (Блок А)',
-					icon: '/images/instruction/fot-930.png'
+					icon: '/images/fot-930.png'
 				},
 				getConnector(currentComponent.connectorType, 1),
 				getAdapter(currentComponent.connectorType, 1),
@@ -170,7 +171,7 @@ export function ConnectionSchemeStage({
 					type: 'TESTER' as const,
 					id: 'tester_2',
 					label: 'Тестер FOT-930 (Блок Б)',
-					icon: '/images/instruction/fot-930.png'
+					icon: '/images/fot-930.png'
 				}
 			];
 
@@ -208,8 +209,7 @@ export function ConnectionSchemeStage({
 				<h2 className="text-xl font-semibold">
 					Этап 3. Сборка схемы подключения
 				</h2>
-				{/* TODO: import.meta.env.DEV */}
-				{scheme.sequence.length < scheme.correctSequence.length && (
+				{SHOW_DEV_BUTTONS && scheme.sequence.length < scheme.correctSequence.length && (
 					<button
 						type="button"
 						className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 cursor-pointer"

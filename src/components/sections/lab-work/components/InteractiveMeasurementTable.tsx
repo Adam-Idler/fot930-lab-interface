@@ -4,6 +4,7 @@
  */
 
 import clsx from 'clsx';
+import { SHOW_DEV_BUTTONS } from '../../../../lib/devFlags';
 import type {
 	ComponentResultsTable,
 	Wavelength
@@ -113,8 +114,7 @@ export function InteractiveMeasurementTable({
 						{table.componentLabel}
 					</h3>
 
-					{/* TODO: import.meta.env.DEV */}
-					{hasAutoFillTarget && onAutoFill && (
+					{SHOW_DEV_BUTTONS && hasAutoFillTarget && onAutoFill && (
 						<button
 							type="button"
 							className="text-xs text-blue-200 hover:text-white underline underline-offset-2 cursor-pointer"
@@ -148,17 +148,17 @@ export function InteractiveMeasurementTable({
 								Изм. 1, дБ
 							</th>
 							<th className="px-4 py-3 text-center font-semibold border-b">
-								Изм. 2 дБ
+								Изм. 2, дБ
 							</th>
 							<th className="px-4 py-3 text-center font-semibold border-b">
-								Изм. 3 дБ
+								Изм. 3, дБ
 							</th>
 							<th className="px-4 py-3 text-center font-semibold border-b bg-blue-50">
-								Среднее дБ
+								Среднее, дБ
 							</th>
 							{requiresKilometricAttenuation && (
 								<th className="px-4 py-3 text-center font-semibold border-b bg-purple-50">
-									Км. затухание (дБ/км)
+									Км. затухание, дБ/км
 								</th>
 							)}
 						</tr>

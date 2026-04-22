@@ -196,7 +196,7 @@ export function ConnectionBuilder({
 										измерения FasTest и нажмите кнопку <strong>F2</strong> или{' '}
 										<strong>FasTest</strong> на клавиатуре прибора. После
 										получения результатов перейдите на вкладку{' '}
-										<strong>«Результаты»</strong>.
+										<strong>«Анализ результатов»</strong>.
 									</div>
 								</div>
 							) : (

@@ -8,6 +8,7 @@
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { useEffect, useRef, useState } from 'react';
+import { SHOW_DEV_BUTTONS } from '../../../../lib/devFlags';
 
 export interface WavelengthCorrectValue {
 	wavelength: number;
@@ -202,12 +203,11 @@ export function LossFormulaBlock({
 										✓
 									</span>
 								)}
-								{/* Ожидаемое значение — только в dev-режиме */}
-								{/* {import.meta.env.DEV && ( */}
-								<span className="text-xs text-gray-300 ml-1 select-none">
-									({cv.value.toFixed(2)} дБ)
-								</span>
-								{/* )} */}
+								{SHOW_DEV_BUTTONS && (
+									<span className="text-xs text-gray-300 ml-1 select-none">
+										({cv.value.toFixed(2)} дБ)
+									</span>
+								)}
 							</div>
 							{isError && (
 								<span className="text-sm text-red-600">

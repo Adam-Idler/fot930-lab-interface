@@ -377,7 +377,7 @@ export const questions: TestQuestion[] = [
 	{
 		id: 'm7',
 		type: 'multiple',
-		text: 'Какие факторы могут привести к ложному срабатыванию VFL?',
+		text: 'Какие факторы могут привести к срабатыванию VFL?',
 		answers: [
 			{ text: 'Загрязнение коннектора', isCorrect: true },
 			{ text: 'Макроизгиб волокна', isCorrect: true },

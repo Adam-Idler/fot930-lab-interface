@@ -282,8 +282,6 @@ export function ResultsStage({
 				</div>
 			) : (
 				<div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-					{/* TODO: Заменить на иконку */}
-					<div className="text-blue-600 text-4xl mb-3">📊</div>
 					<p className="text-blue-900 font-medium text-lg mb-2">
 						Нет выполненных измерений
 					</p>

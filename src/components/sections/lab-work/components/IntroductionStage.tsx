@@ -3,7 +3,6 @@ import 'katex/dist/katex.min.css';
 import type React from 'react';
 import { useEffect, useRef } from 'react';
 
-// TODO: Проверить эмодзи на Windows 7. По необходимости заменить иконками
 export function IntroductionStage() {
 	return (
 		<div className="flex flex-col gap-6">
@@ -277,7 +276,7 @@ export function IntroductionStage() {
 						На этом этапе вы диагностируете неисправные компоненты обнаруженные
 						на предыдущем этапе с помощью визуального локатора повреждений (VFL)
 						и видеомикроскопа (FIP). Для каждого компонента необходимо
-						последовательно выполнить все шаги диагностики.
+						последовательно выполнить все шаги диагностики. Данный этап доступен только после измерения потерь всех доступных компонентов на предыдущем этапе.
 					</p>
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
 						<StepCard
