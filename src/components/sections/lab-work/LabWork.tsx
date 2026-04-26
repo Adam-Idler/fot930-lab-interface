@@ -577,20 +577,21 @@ export function LabWork() {
 						}
 						onClick={() => handleStageChange('DEFECT_MODULE')}
 					/>
-					{SHOW_DEV_BUTTONS && !deviceState.preparation.isReadyForMeasurements && (
-						<button
-							type="button"
-							className="ml-auto shrink-0 text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 cursor-pointer"
-							onClick={() => {
-								if (deviceDispatchRef.current) {
-									deviceDispatchRef.current({ type: 'SKIP_PREPARATION' });
-								}
-								handleStageChange('CONNECTION_SCHEME');
-							}}
-						>
-							Пропустить подготовку
-						</button>
-					)}
+					{SHOW_DEV_BUTTONS &&
+						!deviceState.preparation.isReadyForMeasurements && (
+							<button
+								type="button"
+								className="ml-auto shrink-0 text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 cursor-pointer"
+								onClick={() => {
+									if (deviceDispatchRef.current) {
+										deviceDispatchRef.current({ type: 'SKIP_PREPARATION' });
+									}
+									handleStageChange('CONNECTION_SCHEME');
+								}}
+							>
+								Пропустить подготовку
+							</button>
+						)}
 				</div>
 			</div>
 

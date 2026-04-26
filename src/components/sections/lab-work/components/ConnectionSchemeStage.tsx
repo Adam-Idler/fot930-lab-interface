@@ -209,15 +209,16 @@ export function ConnectionSchemeStage({
 				<h2 className="text-xl font-semibold">
 					Этап 3. Сборка схемы подключения
 				</h2>
-				{SHOW_DEV_BUTTONS && scheme.sequence.length < scheme.correctSequence.length && (
-					<button
-						type="button"
-						className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 cursor-pointer"
-						onClick={handleAutoAssemble}
-					>
-						Пропустить сборку схемы
-					</button>
-				)}
+				{SHOW_DEV_BUTTONS &&
+					scheme.sequence.length < scheme.correctSequence.length && (
+						<button
+							type="button"
+							className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 cursor-pointer"
+							onClick={handleAutoAssemble}
+						>
+							Пропустить сборку схемы
+						</button>
+					)}
 			</div>
 
 			{/* Подсказка для сплиттера (одиночный режим) */}

@@ -8,7 +8,11 @@ interface KatexFormulaProps {
 	className?: string;
 }
 
-export function KatexFormula({ latex, display = false, className }: KatexFormulaProps) {
+export function KatexFormula({
+	latex,
+	display = false,
+	className
+}: KatexFormulaProps) {
 	const ref = useRef<HTMLSpanElement>(null);
 
 	useEffect(() => {

@@ -233,6 +233,10 @@ function getComponentLossUpperBound(
 		const lengthKm = component.fiberLength / 1000;
 		return upperPerKm * lengthKm;
 	}
+	if (component.type === 'OPTICAL_CABLE') {
+		// SC/APC max 0.25 дБ, SC/UPC max 0.30 дБ — генерация должна совпадать с формулой студента
+		return OPTICAL_CABLE_MAX_LOSS_BY_CONNECTOR[component.connectorType] ?? 0.3;
+	}
 	return (
 		COMPONENT_LOSS_UPPER_BOUND[component.type]?.[wavelength] ??
 		(COMPONENT_LOSS_DB[component.type]?.[wavelength] ?? 1.0) * 2
@@ -685,11 +689,12 @@ function generateFreshMeasurement(
 	const componentLoss = Math.min(baseLoss + variation, componentUpperBound);
 
 	// Небольшая асимметрия между направлениями (реальный шум измерений ≤ 0.05 dB)
+	// Зажимаем bToA так, чтобы среднее не превысило верхнюю границу + коннекторы
+	const maxTotal = componentUpperBound + connectorLoss;
 	const asymmetry = gaussianRandom() * 0.05;
 	const aToB = parseFloat((componentLoss + connectorLoss).toFixed(2));
-	const bToA = parseFloat(
-		(componentLoss + asymmetry + connectorLoss).toFixed(2)
-	);
+	const bToARaw = componentLoss + asymmetry + connectorLoss;
+	const bToA = parseFloat(Math.min(bToARaw, maxTotal).toFixed(2));
 	const average = (aToB + bToA) / 2;
 
 	return {
