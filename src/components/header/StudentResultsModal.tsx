@@ -101,7 +101,7 @@ export function StudentResultsModal({
 						grade={student.finalTestResult?.grade}
 						detail={
 							student.finalTestResult
-								? `${student.finalTestResult.correctAnswers} / 10 правильных`
+								? `${student.finalTestResult.correctAnswers} / 20 правильных`
 								: undefined
 						}
 					/>

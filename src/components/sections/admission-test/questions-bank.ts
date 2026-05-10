@@ -507,17 +507,6 @@ export const questions: TestQuestion[] = [
 		]
 	},
 	{
-		id: 'q43',
-		type: 'single',
-		text: 'Что означает возможность обмена текстовыми сообщениями?',
-		answers: [
-			{ text: 'Отправка SMS', isCorrect: false },
-			{ text: 'Коммуникация между двумя тестерами', isCorrect: true },
-			{ text: 'Полноценный чат', isCorrect: false },
-			{ text: 'Передача e-mail', isCorrect: false }
-		]
-	},
-	{
 		id: 'q45',
 		type: 'single',
 		text: 'Что показывает строка состояния?',

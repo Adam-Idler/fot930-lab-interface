@@ -93,19 +93,19 @@ export const questions: TestQuestion[] = [
 		id: 'n22',
 		type: 'text',
 		text: 'Рассчитайте потери: 0.35 дБ/км на длине 2 км.',
-		validator: (v) => /0\.?7/i.test(v)
+		validator: (v) => /0[.,]7/i.test(v)
 	},
 	{
 		id: 'n24',
 		type: 'text',
 		text: 'Рассчитайте потери: 0.22 дБ/км на длине 10 км.',
-		validator: (v) => /2\.?2/i.test(v)
+		validator: (v) => /2[.,]2/i.test(v)
 	},
 	{
 		id: 'n28',
 		type: 'text',
 		text: 'Рассчитайте потери: 0.4 дБ/км на длине 5 км.',
-		validator: (v) => /2(\.0)?/i.test(v)
+		validator: (v) => /2([.,]0)?/i.test(v)
 	},
 	{
 		id: 'n25',
@@ -289,7 +289,7 @@ export const questions: TestQuestion[] = [
 		id: 'nt2_4',
 		type: 'text',
 		text: 'Какая абсолютная мощность в мВт соответствует уровню -9 дБм?',
-		validator: (v) => /0,|.125/i.test(v) || /1\/8/i.test(v)
+		validator: (v) => /0[.,]125/i.test(v) || /1\/8/i.test(v)
 	},
 	{
 		id: 'ns10',
@@ -385,7 +385,6 @@ export const questions: TestQuestion[] = [
 			{ text: 'Неправильная длина волны', isCorrect: false }
 		]
 	},
-	// --- Новые вопросы ---
 	{
 		id: 'nf_s2',
 		type: 'single',
