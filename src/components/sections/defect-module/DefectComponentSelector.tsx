@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import { FAULTY_COMPONENTS } from './constants';
+import { publicUrl } from '../../../lib/utils';
 
 interface DefectComponentSelectorProps {
 	selectedId: string | null;
@@ -38,7 +39,7 @@ export function DefectComponentSelector({
 							</span>
 						)}
 						<img
-							src={component.icon}
+							src={publicUrl(component.icon)}
 							alt={component.label}
 							className="w-24 h-24 object-contain"
 						/>
