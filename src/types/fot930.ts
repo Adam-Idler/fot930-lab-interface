@@ -291,11 +291,7 @@ export type PassiveComponentType =
 	| 'FIBER_COIL' // Катушка ОВ
 	| 'ADAPTER' // Оптическая розетка (адаптер)
 	| 'SPLITTER_1_2' // Сплиттер 1:2
-	| 'SPLITTER_1_4' // Сплиттер 1:4
-	| 'SPLITTER_1_8' // Сплиттер 1:8
-	| 'SPLITTER_1_16' // Сплиттер 1:16
-	| 'SPLITTER_1_32' // Сплиттер 1:32
-	| 'SPLITTER_1_64'; // Сплиттер 1:64
+	| 'SPLITTER_1_4'; // Сплиттер 1:4
 
 /** Типы коннекторов */
 export type ConnectorType =

@@ -1,6 +1,6 @@
 import clsx from 'clsx';
-import { FAULTY_COMPONENTS } from './constants';
 import { publicUrl } from '../../../lib/utils';
+import { FAULTY_COMPONENTS } from './constants';
 
 interface DefectComponentSelectorProps {
 	selectedId: string | null;

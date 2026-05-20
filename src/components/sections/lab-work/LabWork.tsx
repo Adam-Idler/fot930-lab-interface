@@ -100,21 +100,12 @@ const availableComponents: PassiveComponent[] = [
 	},
 	{
 		id: 'splitter_1_4',
-		icon: '/images/scheme/splitter-1-4.png',
+		icon: '/images/scheme/splitter-1-4-upc.jpg',
 		type: 'SPLITTER_1_4',
-		label: 'Сплиттер 1:4 SC/APC',
+		label: 'Сплиттер 1:4 SC/UPC',
 		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_4,
-		connectorType: 'SC_APC',
-		fiberLength: 2
-	},
-	{
-		id: 'splitter_1_8',
-		icon: '/images/scheme/splitter-sc-upc-1-8.png',
-		type: 'SPLITTER_1_8',
-		label: 'Сплиттер 1:8 SC/UPC',
-		typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_8,
 		connectorType: 'SC_UPC',
-		fiberLength: 3
+		fiberLength: 2
 	}
 ];
 
@@ -133,11 +124,11 @@ const SCENARIO_MAGISTRAL: PassiveComponent = {
 };
 
 const SCENARIO_SPLITTER: PassiveComponent = {
-	id: 'scenario_splitter_1_8',
-	icon: '/images/scheme/splitter-sc-apc-1-8.png',
-	type: 'SPLITTER_1_8',
-	label: 'Сплиттер 1:8 SC/APC',
-	typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_8,
+	id: 'scenario_splitter_1_4',
+	icon: '/images/scheme/splitter-1-4.png',
+	type: 'SPLITTER_1_4',
+	label: 'Сплиттер 1:4 SC/APC',
+	typicalLoss: COMPONENT_LOSS_DB.SPLITTER_1_4,
 	connectorType: 'SC_APC',
 	fiberLength: 2
 };
@@ -166,7 +157,7 @@ const PROVIDER_SCENARIO: ComplexScenario = {
 	id: 'provider_scenario',
 	label: 'Комбинация элементов',
 	description:
-		'Магистральный кабель (10 км) → Сплиттер 1:8 → Внутридомовой кабель (50 м) → Абонентский шнур (5 м)',
+		'Магистральный кабель (10 км) → Сплиттер 1:4 → Внутридомовой кабель (50 м) → Абонентский шнур (5 м)',
 	chain: [
 		SCENARIO_MAGISTRAL,
 		SCENARIO_SPLITTER,

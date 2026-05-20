@@ -97,34 +97,6 @@ export const COMPONENT_LOSS_DB: Record<string, Record<Wavelength, number>> = {
 		1310: 7.2, // Таблица 4: 7.0–7.5 дБ
 		1550: 7.2, // Таблица 4: ~одинаково 1310–1550 нм
 		1625: 7.3
-	},
-	SPLITTER_1_8: {
-		850: 10.5,
-		1300: 10.7, // Таблица 4: 10.5–11.0 дБ
-		1310: 10.7, // Таблица 4: 10.5–11.0 дБ
-		1550: 10.7, // Таблица 4: ~одинаково 1310–1550 нм
-		1625: 10.8
-	},
-	SPLITTER_1_16: {
-		850: 14.0,
-		1300: 13.5, // Таблица 4: 13.0–14.0 дБ
-		1310: 13.5, // Таблица 4: 13.0–14.0 дБ
-		1550: 13.5, // Таблица 4: ~одинаково 1310–1550 нм
-		1625: 13.7
-	},
-	SPLITTER_1_32: {
-		850: 17.5,
-		1300: 17.0, // ~13.5 + 3.5 дБ (каждое удвоение ≈ +3.5 дБ)
-		1310: 17.0,
-		1550: 17.0,
-		1625: 17.2
-	},
-	SPLITTER_1_64: {
-		850: 21.0,
-		1300: 20.5, // ~17.0 + 3.5 дБ
-		1310: 20.5,
-		1550: 20.5,
-		1625: 20.7
 	}
 };
 
@@ -173,34 +145,6 @@ export const COMPONENT_LOSS_UPPER_BOUND: Record<
 		1310: 7.5,
 		1550: 7.5,
 		1625: 7.6
-	},
-	SPLITTER_1_8: {
-		850: 12.0,
-		1300: 11.0, // Таблица 4: 10.5–11.0 дБ
-		1310: 11.0,
-		1550: 11.0,
-		1625: 11.1
-	},
-	SPLITTER_1_16: {
-		850: 15.0,
-		1300: 14.0, // Таблица 4: 13.0–14.0 дБ
-		1310: 14.0,
-		1550: 14.0,
-		1625: 14.2
-	},
-	SPLITTER_1_32: {
-		850: 19.0,
-		1300: 17.5, // ~14.0 + 3.5 дБ
-		1310: 17.5,
-		1550: 17.5,
-		1625: 17.7
-	},
-	SPLITTER_1_64: {
-		850: 23.0,
-		1300: 21.0, // ~17.5 + 3.5 дБ
-		1310: 21.0,
-		1550: 21.0,
-		1625: 21.2
 	}
 };
 
@@ -241,6 +185,39 @@ function getComponentLossUpperBound(
 		COMPONENT_LOSS_UPPER_BOUND[component.type]?.[wavelength] ??
 		(COMPONENT_LOSS_DB[component.type]?.[wavelength] ?? 1.0) * 2
 	);
+}
+
+/**
+ * Верхняя граница суммарных потерь измерительной схемы для одного компонента
+ * (компонент + 2 соединителя). Используется как жёсткий потолок для всех значений
+ * (aToB, bToA, average), генерируемых для исправного компонента.
+ */
+function getSingleComponentMaxTotal(
+	component: PassiveComponent,
+	wavelength: Wavelength
+): number {
+	return (
+		getComponentLossUpperBound(component, wavelength) +
+		MEASUREMENT_CONFIG.CONNECTOR_LOSS * 2
+	);
+}
+
+/**
+ * Верхняя граница суммарных потерь цепочки компонентов (комплексная схема):
+ * сумма верхних границ компонентов + (N+1) соединителей. Используется как жёсткий
+ * потолок для значений aToB/bToA/average при исправной цепи.
+ */
+function getComplexChainMaxTotal(
+	chainComponents: PassiveComponent[],
+	wavelength: Wavelength
+): number {
+	let upperBoundTotal = 0;
+	for (const component of chainComponents) {
+		upperBoundTotal += getComponentLossUpperBound(component, wavelength);
+	}
+	upperBoundTotal +=
+		MEASUREMENT_CONFIG.CONNECTOR_LOSS * (chainComponents.length + 1);
+	return upperBoundTotal;
 }
 
 /**
@@ -422,7 +399,7 @@ function calculateComplexChainLoss(
 	splitterOutput: number
 ): { value: number; isExcessive: boolean } | { error: string } {
 	let totalLoss = 0;
-	let upperBoundTotal = 0;
+	const upperBoundTotal = getComplexChainMaxTotal(chainComponents, wavelength);
 
 	for (const component of chainComponents) {
 		const baseLoss = getComponentLoss(component, wavelength);
@@ -452,13 +429,11 @@ function calculateComplexChainLoss(
 		}
 
 		totalLoss += componentLoss;
-		upperBoundTotal += componentUpperBound;
 	}
 
 	// По одному соединению между каждой парой соседних компонентов + вход и выход
 	const connectorCount = chainComponents.length + 1;
 	totalLoss += MEASUREMENT_CONFIG.CONNECTOR_LOSS * connectorCount;
-	upperBoundTotal += MEASUREMENT_CONFIG.CONNECTOR_LOSS * connectorCount;
 
 	if (totalLoss > MEASUREMENT_CONFIG.MAX_MEASURABLE_LOSS) {
 		return { error: 'Loss exceeds measurement range' };
@@ -476,7 +451,7 @@ function calculateComplexChainLoss(
  *
  * Суммирует потери всех компонентов в цепи. Для сплиттера добавляет
  * детерминированное смещение по номеру выхода, имитируя физическую
- * неравномерность реального сплиттера (±0.5 dB для 1:8).
+ * неравномерность реального сплиттера (~±0.225 dB для 1:4).
  *
  * @param chainComponents - Компоненты цепи в порядке подключения
  * @param wavelengths - Длины волн для измерения
@@ -494,6 +469,11 @@ export function generateComplexFiberMeasurement(
 	const bidirectionalResults: BidirectionalMeasurementResult[] = [];
 
 	for (const wavelength of wavelengths) {
+		const upperBoundTotal = getComplexChainMaxTotal(
+			chainComponents,
+			wavelength
+		);
+
 		if (previousResult) {
 			const prevWavelengthResult = previousResult.wavelengths.find(
 				(w) => w.wavelength === wavelength
@@ -502,8 +482,14 @@ export function generateComplexFiberMeasurement(
 			if (prevWavelengthResult) {
 				// Повторное измерение того же выхода: минимальная вариация для стабильности
 				const minimalVariation = gaussianRandom() * 0.015;
-				const aToB = prevWavelengthResult.aToB + minimalVariation;
-				const bToA = prevWavelengthResult.bToA + minimalVariation;
+				let aToB = prevWavelengthResult.aToB + minimalVariation;
+				let bToA = prevWavelengthResult.bToA + minimalVariation;
+				// Жёсткий потолок для исправной цепи — никакая вариация не должна
+				// поднимать значения выше суммарной верхней границы из таблиц
+				if (!prevWavelengthResult.isExcessive) {
+					aToB = Math.min(aToB, upperBoundTotal);
+					bToA = Math.min(bToA, upperBoundTotal);
+				}
 				const average = (aToB + bToA) / 2;
 
 				bidirectionalResults.push({
@@ -527,13 +513,18 @@ export function generateComplexFiberMeasurement(
 
 		const aToB = lossResult.value;
 		const asymmetry = gaussianRandom() * 0.15;
-		const bToA = parseFloat((aToB + asymmetry).toFixed(2));
-		const average = parseFloat(((aToB + bToA) / 2).toFixed(2));
+		let bToA = aToB + asymmetry;
+		// Для исправной цепи асимметрия не должна выводить bToA за верхний предел
+		if (!lossResult.isExcessive) {
+			bToA = Math.min(bToA, upperBoundTotal);
+		}
+		const bToARounded = parseFloat(bToA.toFixed(2));
+		const average = parseFloat(((aToB + bToARounded) / 2).toFixed(2));
 
 		bidirectionalResults.push({
 			wavelength,
 			aToB,
-			bToA,
+			bToA: bToARounded,
 			average,
 			isExcessive: lossResult.isExcessive
 		});
@@ -605,8 +596,15 @@ export function generateFiberMeasurement(
 			if (prevWavelengthResult) {
 				// Добавляем очень маленькую вариацию (±0.01-0.02 dB)
 				const minimalVariation = gaussianRandom() * 0.015;
-				const aToB = prevWavelengthResult.aToB + minimalVariation;
-				const bToA = prevWavelengthResult.bToA + minimalVariation;
+				let aToB = prevWavelengthResult.aToB + minimalVariation;
+				let bToA = prevWavelengthResult.bToA + minimalVariation;
+				// Жёсткий потолок для исправного компонента: даже минимальная
+				// вариация не должна выводить значения за верхний предел из таблиц
+				if (!prevWavelengthResult.isExcessive) {
+					const maxTotal = getSingleComponentMaxTotal(component, wavelength);
+					aToB = Math.min(aToB, maxTotal);
+					bToA = Math.min(bToA, maxTotal);
+				}
 				const average = (aToB + bToA) / 2;
 
 				bidirectionalResults.push({
