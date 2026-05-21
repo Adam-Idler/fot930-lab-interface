@@ -2,7 +2,7 @@
 	"name": "fot930-lab-interface",
 	"private": true,
 	"author": "Rakov Pavel",
-	"version": "1.6.2",
+	"version": "1.6.3",
 	"type": "commonjs",
 	"main": "dist-electron/main.js",
 	"build": {

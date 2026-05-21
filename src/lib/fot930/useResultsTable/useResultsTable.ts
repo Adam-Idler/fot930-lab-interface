@@ -134,24 +134,36 @@ export function useResultsTable(options: UseResultsTableOptions = {}) {
 					? table.currentMeasurementNumber + 1
 					: table.currentMeasurementNumber;
 
-				// Проверяем, не добавлено ли уже это измерение (дедупликация)
+				// Дедупликация: пропускаем только если в целевой попытке во ВСЕХ строках
+				// уже стоят валидно введённые значения. Если же ячейка пустая или с
+				// ошибкой ввода — обновляем её фактическое значение из нового измерения,
+				// иначе студент окажется заперт между устаревшим actualValue и новым
+				// показанием прибора (которое слегка сдвигается из-за шума повторных
+				// измерений в generateFiberMeasurement).
 				const targetIndex = targetMeasurementNumber - 1;
-				const measurementAlreadyAdded = table.rows.every((row) => {
+				const measurementAlreadyValid = table.rows.every((row) => {
 					const entry = row.measurements[targetIndex];
-					return entry !== null;
+					return entry !== null && entry.status === 'valid';
 				});
 
-				if (measurementAlreadyAdded) {
+				if (measurementAlreadyValid) {
 					return prev;
 				}
 
-				// Обновляем строки таблицы с фактическими значениями
+				// Обновляем строки таблицы с фактическими значениями.
+				// Уже валидно заполненные ячейки сохраняем — повторное измерение не
+				// должно стирать корректный ввод студента.
 				const updatedRows = table.rows.map((row) => {
 					const wavelengthResult = result.wavelengths.find(
 						(wl) => wl.wavelength === row.wavelength
 					);
 
 					if (!wavelengthResult) {
+						return row;
+					}
+
+					const existingEntry = row.measurements[targetIndex];
+					if (existingEntry !== null && existingEntry.status === 'valid') {
 						return row;
 					}
 
@@ -163,7 +175,7 @@ export function useResultsTable(options: UseResultsTableOptions = {}) {
 					};
 
 					const updatedMeasurements = [...row.measurements];
-					updatedMeasurements[targetMeasurementNumber - 1] = measurementEntry;
+					updatedMeasurements[targetIndex] = measurementEntry;
 
 					return {
 						...row,
